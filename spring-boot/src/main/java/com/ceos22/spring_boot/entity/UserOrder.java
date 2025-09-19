@@ -20,7 +20,7 @@ public class UserOrder extends BaseEntity {
     private Long order_id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    private Member member;
+    private User user;
 
     @Column(name="total_price")
     private Integer totalPrice;

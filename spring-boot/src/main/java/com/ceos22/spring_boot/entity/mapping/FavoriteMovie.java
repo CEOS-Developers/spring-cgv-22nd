@@ -2,7 +2,7 @@ package com.ceos22.spring_boot.entity.mapping;
 
 import com.ceos22.spring_boot.common.BaseEntity;
 import com.ceos22.spring_boot.entity.Movie;
-import com.ceos22.spring_boot.entity.Member;
+import com.ceos22.spring_boot.entity.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -22,5 +22,5 @@ public class FavoriteMovie extends BaseEntity {
     private Movie movie;
 
     @ManyToOne
-    private Member member;
+    private User user;
 }

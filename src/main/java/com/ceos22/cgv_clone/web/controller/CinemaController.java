@@ -18,7 +18,7 @@ public class CinemaController {
 
     private final CinemaService cinemaService;
 
-    @GetMapping()
+    @GetMapping
     public ResponseEntity<List<CinemaResDto.CinemaDto>> getCinemas(){
         return cinemaService.getCinemas();
     }

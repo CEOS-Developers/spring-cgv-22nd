@@ -1,7 +1,8 @@
 # spring-cgv-22nd
 CEOS 22기 백엔드 스터디 - CGV 클론 코딩 프로젝트
 # ERD
-<img width="2290" height="1322" alt="CGV_clone (1)" src="https://github.com/user-attachments/assets/8099415b-1f46-4add-bdb7-7f44a3de0d20" />
+<img width="2290" height="1322" alt="CGV_clone (2)" src="https://github.com/user-attachments/assets/7df82739-cf89-4cf3-b633-6504e9e33e1e" />
+
 ERD는 다음과 같이 짜봤습니다
 
 가장 크게 고민했던 사항은 두 가지였습니다.

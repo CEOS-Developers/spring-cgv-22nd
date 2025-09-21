@@ -1,13 +1,13 @@
-package com.ceos22.cgv.domain.controller;
+package com.ceos22.cgv.module.cinema.controller;
 
 import com.ceos22.cgv.codes.SuccessCode;
-import com.ceos22.cgv.domain.dto.CinemaListResponse;
+import com.ceos22.cgv.module.cinema.dto.CinemaListResponse;
 
-import com.ceos22.cgv.domain.dto.CinemaResponse;
-import com.ceos22.cgv.domain.service.CinemaService;
+import com.ceos22.cgv.module.cinema.dto.CinemaResponse;
+import com.ceos22.cgv.module.cinema.service.CinemaService;
 import com.ceos22.cgv.response.ApiResponse;
+import com.ceos22.cgv.util.TheaterType;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,10 +20,11 @@ public class CinemaController {
 
     @GetMapping
     public ResponseEntity<ApiResponse<CinemaListResponse>> getCinemas(
-            @RequestParam(required = false) String region) {
+            @RequestParam(required = false) String region,
+            @RequestParam(required = false) TheaterType type) {
 
         ApiResponse<CinemaListResponse> response = ApiResponse.<CinemaListResponse>builder()
-                .response(cinemaService.findCinemas(region))
+                .response(cinemaService.findCinemas(region, type))
                 .statusCode(SuccessCode.GET_SUCCESS.getStatusCode())
                 .message(SuccessCode.GET_SUCCESS.getMessage())
                 .build();

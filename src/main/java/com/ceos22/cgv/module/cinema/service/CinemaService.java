@@ -1,9 +1,10 @@
-package com.ceos22.cgv.domain.service;
+package com.ceos22.cgv.module.cinema.service;
 
-import com.ceos22.cgv.domain.dto.CinemaListResponse;
-import com.ceos22.cgv.domain.dto.CinemaResponse;
-import com.ceos22.cgv.domain.repository.Cinema;
-import com.ceos22.cgv.domain.repository.CinemaRepository;
+import com.ceos22.cgv.module.cinema.dto.CinemaListResponse;
+import com.ceos22.cgv.module.cinema.dto.CinemaResponse;
+import com.ceos22.cgv.module.cinema.domain.Cinema;
+import com.ceos22.cgv.module.cinema.repository.CinemaRepository;
+import com.ceos22.cgv.util.TheaterType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -20,17 +21,8 @@ public class CinemaService {
     private final CinemaRepository cinemaRepository;
 
     @Transactional(readOnly = true)
-    public CinemaListResponse findCinemas(String region) {
-
-        List<Cinema> cinemas;
-
-        if (region == null || region.isEmpty()) {
-            cinemas = cinemaRepository.findAll();
-        } else {
-            cinemas = cinemaRepository.findByRegion(region);
-        }
-
-        return CinemaListResponse.fromEntities(cinemas);
+    public CinemaListResponse findCinemas(String region, TheaterType type) {
+        return CinemaListResponse.fromEntities(cinemaRepository.search(region, type));
     }
 
     @Transactional(readOnly = true)

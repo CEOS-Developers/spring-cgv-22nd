@@ -1,6 +1,6 @@
-package com.ceos22.cgv.domain.dto;
+package com.ceos22.cgv.module.cinema.dto;
 
-import com.ceos22.cgv.domain.repository.Cinema;
+import com.ceos22.cgv.module.cinema.domain.Cinema;
 
 import java.util.List;
 

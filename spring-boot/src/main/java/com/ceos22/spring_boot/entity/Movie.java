@@ -16,7 +16,7 @@ public class Movie extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long movie_id;
+    private Long movieId;
 
     private String title;
 

@@ -16,11 +16,12 @@ public class FavoriteTheater extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long ft_id;
+    private Long ftId;
 
     @ManyToOne
+    @JoinColumn(name = "theater_id", nullable = false)
     private Theater theater;
 
     @ManyToOne
-    private User user;
-}
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;}

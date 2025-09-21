@@ -16,12 +16,14 @@ public class OrderDetail extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long od_id;
+    private Long odId;
 
     @ManyToOne
+    @JoinColumn(name = "order_id", nullable = false) // FK 명시
     private UserOrder userOrder;
 
     @ManyToOne
+    @JoinColumn(name = "product_id", nullable = false) // FK 명시
     private Product product;
 
     private Integer quantity;

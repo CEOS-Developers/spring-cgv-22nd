@@ -1,5 +1,6 @@
 package com.ceos22.spring_boot.service;
 
+import com.ceos22.spring_boot.dto.TheaterDto;
 import com.ceos22.spring_boot.entity.Theater;
 import com.ceos22.spring_boot.repository.TheaterRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -14,14 +15,17 @@ public class TheaterService {
 
     private final TheaterRepository theaterRepository;
 
-    // 전체 조회
-    public List<Theater> getAllTheaters() {
-        return theaterRepository.findAll();
+    // 영화관 전체 조회
+    public List<TheaterDto> getAllTheaters() {
+        return theaterRepository.findAll().stream()
+                .map(TheaterDto::fromEntity)
+                .toList();
     }
 
-    // 단건 조회
-    public Theater getTheaterById(Long theaterId) {
-        return theaterRepository.findById(theaterId)
-                .orElseThrow(() -> new EntityNotFoundException("Theater not found with id: " + theaterId));
+    // 특정 영화관 조회
+    public TheaterDto getTheaterById(Long id) {
+        Theater theater = theaterRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 영화관입니다. ID=" + id));
+        return TheaterDto.fromEntity(theater);
     }
 }

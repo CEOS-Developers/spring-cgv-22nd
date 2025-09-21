@@ -39,13 +39,22 @@ public class ApiResponse<T> {
         return onSuccess(status, null, null);
     }
 
-    // 성공 - 데이터 포함
+    // 단건 응답
     public static <T> ResponseEntity<ApiResponse<T>> onSuccess(SuccessStatus status, T result) {
-        return onSuccess(status, null, result);
+        return ResponseEntity
+                .status(status.getHttpStatus())
+                .body(new ApiResponse<>(true, status.getCode(), status.getMessage(), null, result));
     }
 
-    // 성공 - 페이지네이션 포함
-    public static <T> ResponseEntity<ApiResponse<List<T>>> onSuccess(SuccessStatus status, Page<T> page) {
+    // 리스트 응답
+    public static <T> ResponseEntity<ApiResponse<List<T>>> onListSuccess(SuccessStatus status, List<T> result) {
+        return ResponseEntity
+                .status(status.getHttpStatus())
+                .body(new ApiResponse<>(true, status.getCode(), status.getMessage(), null, result));
+    }
+
+    // 페이지 응답
+    public static <T> ResponseEntity<ApiResponse<List<T>>> onPageSuccess(SuccessStatus status, Page<T> page) {
         PageInfo pageInfo = new PageInfo(
                 page.getNumber(),
                 page.getSize(),
@@ -53,7 +62,9 @@ public class ApiResponse<T> {
                 page.getTotalElements(),
                 page.getTotalPages()
         );
-        return onSuccess(status, pageInfo, page.getContent());
+        return ResponseEntity
+                .status(status.getHttpStatus())
+                .body(new ApiResponse<>(true, status.getCode(), status.getMessage(), pageInfo, page.getContent()));
     }
 
     // 실패 - 기본 응답

@@ -24,4 +24,13 @@ public class Schedule extends BaseEntity {
 
     private Integer possibleSeat;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "movie_id")
+    private Movie movie;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "theater_id")
+    private Theater theater;
+
+
 }

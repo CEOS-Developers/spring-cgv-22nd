@@ -1,8 +1,6 @@
 package com.ceos22.cgv_clone.web.service;
 
-import com.ceos22.cgv_clone.web.domain.Cinema;
 import com.ceos22.cgv_clone.web.domain.Movie;
-import com.ceos22.cgv_clone.web.dto.CinemaResDto;
 import com.ceos22.cgv_clone.web.dto.MovieResDto;
 import com.ceos22.cgv_clone.web.repository.MovieRepository;
 import lombok.RequiredArgsConstructor;
@@ -17,22 +15,22 @@ import java.util.stream.Collectors;
 public class MovieService {
     private final MovieRepository movieRepository;
 
-    public ResponseEntity<List<MovieResDto.MovieDto>> getMovies() {
+    public ResponseEntity<List<MovieResDto.MovieDetailDto>> getMovies() {
         List<Movie> movieList = movieRepository.findAll();
 
-        List<MovieResDto.MovieDto> dtoList = movieList.stream()
-                .map(MovieResDto.MovieDto::of)
+        List<MovieResDto.MovieDetailDto> dtoList = movieList.stream()
+                .map(MovieResDto.MovieDetailDto::of)
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(dtoList);
     }
 
-    public ResponseEntity<MovieResDto.MovieDto> getMovie(Long movieId) {
+    public ResponseEntity<MovieResDto.MovieDetailDto> getMovie(Long movieId) {
         Movie movie = movieRepository.findById(movieId)
                 .orElseThrow(()-> new IllegalArgumentException("Movie not found with id: " + movieId));
 
-        MovieResDto.MovieDto movieDto = MovieResDto.MovieDto.of(movie);
+        MovieResDto.MovieDetailDto movieDetailDto = MovieResDto.MovieDetailDto.of(movie);
 
-        return ResponseEntity.ok(movieDto);
+        return ResponseEntity.ok(movieDetailDto);
     }
 }

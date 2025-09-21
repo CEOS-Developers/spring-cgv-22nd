@@ -1,6 +1,7 @@
 package com.ceos22.cgv_clone.web.domain;
 
 import com.ceos22.cgv_clone.global.common.BaseEntity;
+import com.ceos22.cgv_clone.web.domain.enums.AgeRating;
 import com.ceos22.cgv_clone.web.domain.enums.Region;
 import jakarta.persistence.*;
 import lombok.*;
@@ -35,5 +36,7 @@ public class Movie extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     private Region region;
+
+    private AgeRating ageRating;
 
 }

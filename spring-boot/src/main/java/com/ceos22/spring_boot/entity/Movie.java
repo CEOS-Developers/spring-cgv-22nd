@@ -4,6 +4,7 @@ import com.ceos22.spring_boot.common.BaseEntity;
 import com.ceos22.spring_boot.common.enums.Rating;
 import com.ceos22.spring_boot.entity.mapping.Categorizing;
 import jakarta.persistence.*;
+import lombok.Getter;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
@@ -12,6 +13,7 @@ import java.util.Date;
 import java.util.List;
 
 @Entity
+@Getter
 public class Movie extends BaseEntity {
 
     @Id

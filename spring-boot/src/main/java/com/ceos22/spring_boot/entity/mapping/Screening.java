@@ -4,12 +4,15 @@ import com.ceos22.spring_boot.common.BaseEntity;
 import com.ceos22.spring_boot.entity.Movie;
 import com.ceos22.spring_boot.entity.Screen;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 
-@Data
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 public class Screening extends BaseEntity {
 

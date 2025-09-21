@@ -3,9 +3,11 @@ package com.ceos22.spring_boot.entity;
 import com.ceos22.spring_boot.common.BaseEntity;
 import com.ceos22.spring_boot.common.enums.TheaterType;
 import jakarta.persistence.*;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
+@Getter
 @NoArgsConstructor
 public class Screen extends BaseEntity {
 

@@ -32,4 +32,9 @@ public class Reservation extends BaseEntity {
     private Integer totalAmount; // 총 결제금액인데
 
     // todo: payment에서 amount 같은 경우 검증하도록 해야할듯
+
+    public void setStatus(PaymentStatus status) {
+        this.status = status;
+    }
+
 }

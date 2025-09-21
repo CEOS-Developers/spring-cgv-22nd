@@ -29,10 +29,10 @@ public class Theater {
     @Column(name = "type", nullable = false)
     private TheaterType type;
 
-    @Column(name = "row", nullable = false)
+    @Column(name = "num_row", nullable = false)
     private Integer row;
 
-    @Column(name = "column", nullable = false)
+    @Column(name = "num_column", nullable = false)
     private Integer column;
 
     @Column(name = "price", nullable = false)

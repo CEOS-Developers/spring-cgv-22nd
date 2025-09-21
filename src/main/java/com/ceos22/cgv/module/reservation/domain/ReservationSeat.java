@@ -26,9 +26,9 @@ public class ReservationSeat {
     @JoinColumn(name = "schedule_id", nullable = false)
     private Schedule schedule;
 
-    @Column(name = "row", nullable = false)
+    @Column(name = "seat_row", nullable = false)
     private Integer row;
 
-    @Column(name = "column", nullable = false)
+    @Column(name = "seat_column", nullable = false)
     private Integer column;
 }

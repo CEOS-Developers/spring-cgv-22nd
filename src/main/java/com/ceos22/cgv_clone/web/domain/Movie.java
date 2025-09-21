@@ -1,6 +1,7 @@
 package com.ceos22.cgv_clone.web.domain;
 
 import com.ceos22.cgv_clone.global.common.BaseEntity;
+import com.ceos22.cgv_clone.web.domain.enums.Region;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -23,11 +24,16 @@ public class Movie extends BaseEntity {
 
     private Integer runningTime;
 
+    @Column(length = 50)
     private String poster;
 
+    @Column(length = 10)
     private String genre;
 
     @Column(columnDefinition = "text")
     private String prolog;
+
+    @Enumerated(EnumType.STRING)
+    private Region region;
 
 }

@@ -18,6 +18,4 @@ public class Seat extends BaseEntity {
     private String name;
 
     private Integer price;
-
-    private boolean isAvailable;
 }

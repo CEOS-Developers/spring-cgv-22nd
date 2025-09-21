@@ -25,4 +25,7 @@ public class ReservatedSeat extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reservation_id")
     private Reservation reservation;
+
+    private boolean isAvailable;
+
 }

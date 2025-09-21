@@ -14,6 +14,7 @@ import java.time.LocalDate;
 public class User extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_id")
     private Long id;
 
     @Column(nullable = false,length = 20)
@@ -25,10 +26,12 @@ public class User extends BaseEntity {
     @Column(length = 50)
     private String password;
 
-    @Column(length = 50)
+    @Column(length = 50,name = "phone_number")
     private String phoneNumber;
 
+    @Column(name = "birth_date")
     private LocalDate birthDate;
 
+    @Column(name = "is_deleted")
     private boolean isDeleted;
 }

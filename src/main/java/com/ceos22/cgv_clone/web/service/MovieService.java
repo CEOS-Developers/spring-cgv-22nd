@@ -33,4 +33,5 @@ public class MovieService {
 
         return ResponseEntity.ok(movieDetailDto);
     }
+
 }

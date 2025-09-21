@@ -13,14 +13,17 @@ import lombok.*;
 public class Theater extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "theater_id")
     private Long id;
 
     @Column(length = 20)
     private String name;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "theater_type")
     private TheaterType theaterType;
 
+    @Column(name = "max_seats")
     private Integer maxSeats;
 
     @ManyToOne(fetch = FetchType.LAZY)

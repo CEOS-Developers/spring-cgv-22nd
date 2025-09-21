@@ -16,12 +16,13 @@ public class Schedule extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false,name = "start_time")
     private LocalDateTime startTime;
 
-    @Column(nullable = false)
+    @Column(nullable = false,name = "end_time")
     private LocalDateTime endTime;
 
+    @Column(name = "possible_seat")
     private Integer possibleSeat;
 
     @ManyToOne(fetch = FetchType.LAZY)

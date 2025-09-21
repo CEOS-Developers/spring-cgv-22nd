@@ -4,17 +4,19 @@ import com.ceos22.cgv_clone.global.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
+
 @Entity
 @Getter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class ReservatedSeat extends BaseEntity {
+public class ReservedSeat extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "reservation_seat")
     private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "seat_id")
     private Seat seat;
 
@@ -26,6 +28,7 @@ public class ReservatedSeat extends BaseEntity {
     @JoinColumn(name = "reservation_id")
     private Reservation reservation;
 
+    @Column(name = "is_available")
     private boolean isAvailable;
 
 }

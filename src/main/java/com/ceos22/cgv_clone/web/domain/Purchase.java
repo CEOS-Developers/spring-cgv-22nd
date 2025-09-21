@@ -12,6 +12,7 @@ import lombok.*;
 public class Purchase extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "purchase_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)

@@ -16,13 +16,16 @@ import java.time.LocalDate;
 public class Movie extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "movie_id")
     private Long id;
 
     @Column(nullable = false)
     private String title;
 
+    @Column(name = "release_date")
     private LocalDate releaseDate;
 
+    @Column(name = "running_time")
     private Integer runningTime;
 
     @Column(length = 50)
@@ -37,6 +40,7 @@ public class Movie extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private Region region;
 
+    @Column(name = "age_rating")
     private AgeRating ageRating;
 
 }

@@ -1,6 +1,7 @@
 package com.ceos22.cgv_clone.web.domain;
 
 import com.ceos22.cgv_clone.global.common.BaseEntity;
+import com.ceos22.cgv_clone.web.domain.enums.SeatType;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -12,10 +13,12 @@ import lombok.*;
 public class Seat extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "seat_id")
     private Long id;
 
     @Column(length = 5)
     private String name;
 
-    private Integer price;
+    @Column(name = "seat_type")
+    private SeatType seatType;
 }

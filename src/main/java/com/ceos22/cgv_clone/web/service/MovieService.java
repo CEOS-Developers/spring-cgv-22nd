@@ -15,23 +15,23 @@ import java.util.stream.Collectors;
 public class MovieService {
     private final MovieRepository movieRepository;
 
-    public ResponseEntity<List<MovieResDto.MovieDetailDto>> getMovies() {
+    public List<MovieResDto.MovieDetailDto> getMovies() {
         List<Movie> movieList = movieRepository.findAll();
 
         List<MovieResDto.MovieDetailDto> dtoList = movieList.stream()
                 .map(MovieResDto.MovieDetailDto::of)
                 .collect(Collectors.toList());
 
-        return ResponseEntity.ok(dtoList);
+        return dtoList;
     }
 
-    public ResponseEntity<MovieResDto.MovieDetailDto> getMovie(Long movieId) {
+    public MovieResDto.MovieDetailDto getMovie(Long movieId) {
         Movie movie = movieRepository.findById(movieId)
                 .orElseThrow(()-> new IllegalArgumentException("Movie not found with id: " + movieId));
 
         MovieResDto.MovieDetailDto movieDetailDto = MovieResDto.MovieDetailDto.of(movie);
 
-        return ResponseEntity.ok(movieDetailDto);
+        return movieDetailDto;
     }
 
 }

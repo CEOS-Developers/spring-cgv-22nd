@@ -21,4 +21,8 @@ public class Seat extends BaseEntity {
 
     @Column(name = "seat_type")
     private SeatType seatType;
+
+    @ManyToOne
+    @JoinColumn(name = "theater_id")
+    private Theater theater;
 }

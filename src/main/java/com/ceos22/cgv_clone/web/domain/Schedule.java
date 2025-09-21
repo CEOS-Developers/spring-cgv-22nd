@@ -22,9 +22,6 @@ public class Schedule extends BaseEntity {
     @Column(nullable = false,name = "end_time")
     private LocalDateTime endTime;
 
-    @Column(name = "possible_seat")
-    private Integer possibleSeat;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "movie_id")
     private Movie movie;

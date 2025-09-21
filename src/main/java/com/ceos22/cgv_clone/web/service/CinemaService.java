@@ -24,7 +24,7 @@ public class CinemaService {
     private final TheaterRepository theaterRepository;
     private final ScheduleRepository scheduleRepository;
 
-    public ResponseEntity<List<CinemaResDto.CinemaDto>> getCinemas(Region region) {
+    public List<CinemaResDto.CinemaDto> getCinemas(Region region) {
 
         List<Cinema> cinemaList = null;
 
@@ -38,10 +38,10 @@ public class CinemaService {
                 .map(CinemaResDto.CinemaDto::of)
                 .collect(Collectors.toList());
 
-        return ResponseEntity.ok(dtoList);
+        return dtoList;
     }
 
-    public ResponseEntity<CinemaResDto.CinemaDetailDto> getCinema(Long cinemaId) {
+    public CinemaResDto.CinemaDetailDto getCinema(Long cinemaId) {
 
         Cinema cinema = cinemaRepository.findById(cinemaId)
                 .orElseThrow(()-> new IllegalArgumentException("Cinema not found with id: " + cinemaId));
@@ -59,6 +59,6 @@ public class CinemaService {
                 .toList();
 
         CinemaResDto.CinemaDetailDto cinemaDetailDto = CinemaResDto.CinemaDetailDto.of(cinema,theaterDtos);
-        return ResponseEntity.ok(cinemaDetailDto);
+        return cinemaDetailDto;
     }
 }

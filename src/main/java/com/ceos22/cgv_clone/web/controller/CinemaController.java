@@ -19,11 +19,11 @@ public class CinemaController {
 
     @GetMapping
     public ResponseEntity<List<CinemaResDto.CinemaDto>> getCinemas(@RequestParam Region region) {
-        return cinemaService.getCinemas(region);
+        return ResponseEntity.ok(cinemaService.getCinemas(region));
     }
 
     @GetMapping("/{cinemaId}")
     public ResponseEntity<CinemaResDto.CinemaDetailDto> getCinema(@PathVariable(name = "cinemaId")Long cinemaId) {
-        return cinemaService.getCinema(cinemaId);
+        return ResponseEntity.ok(cinemaService.getCinema(cinemaId));
     }
 }

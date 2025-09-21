@@ -3,7 +3,6 @@ package com.ceos22.spring_boot.service;
 import com.ceos22.spring_boot.dto.TheaterDto;
 import com.ceos22.spring_boot.entity.Theater;
 import com.ceos22.spring_boot.repository.TheaterRepository;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

@@ -5,13 +5,14 @@ import com.ceos22.spring_boot.common.response.status.SuccessStatus;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
 
-
+@Getter
 @RequiredArgsConstructor
 @JsonPropertyOrder({"isSuccess", "code", "message", "pageInfo", "result"})
 public class ApiResponse<T> {

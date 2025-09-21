@@ -8,7 +8,7 @@ import lombok.Getter;
 @Getter
 @Builder
 public class TheaterDto {
-    private int theaterId;
+    private Long theaterId;
     private String theaterName;
     private Region region;
     private String address;

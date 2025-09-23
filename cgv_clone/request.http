@@ -1,0 +1,6 @@
+### 요청 저장
+GET http://localhost:8080/hello
+
+
+### 티켓 생성
+#POST http://localhost:8080/api/v1/ticket/create

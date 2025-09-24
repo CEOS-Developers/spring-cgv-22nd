@@ -11,13 +11,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("api/movies")
 @RequiredArgsConstructor
 public class MovieController {
 
     private final MovieService movieService;
 
-    @GetMapping
+    @GetMapping("api/movies")
     public ResponseEntity<ApiResponse<MovieListResponse>> getMovies(
             @RequestParam(required = false) MovieRequest movieRequest) {
 
@@ -30,7 +29,7 @@ public class MovieController {
         return ResponseEntity.ok().body(response);
     }
 
-    @GetMapping("/{movie_id}")
+    @GetMapping("api/movies/{movie_id}")
     public ResponseEntity<ApiResponse<MovieResponse>> getMovie(
             @PathVariable Long movieId) {
 

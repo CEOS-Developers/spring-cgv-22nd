@@ -7,7 +7,6 @@ import lombok.*;
 @Entity
 @Table(name = "cinema_like")
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

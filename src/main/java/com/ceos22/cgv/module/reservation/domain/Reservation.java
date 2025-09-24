@@ -14,7 +14,6 @@ import java.util.List;
 @Entity
 @Table(name = "reservation")
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

@@ -14,14 +14,14 @@ import java.util.List;
 public class ErrorResponse {
 
     private int statusCode;
-    private String divisionCode;
+    private String code;
     private String message;
 
     @Builder
-    protected ErrorResponse(final ErrorCode statusCode){
-        this.statusCode = statusCode.getStatusCode();
-        this.divisionCode = statusCode.getDivisionCode();
-        this.message = statusCode.getMessage();
+    protected ErrorResponse(final ErrorCode errorCode){
+        this.statusCode = errorCode.getStatusCode();
+        this.code = errorCode.getCode();
+        this.message = errorCode.getMessage();
     }
 
     public static ErrorResponse of(final ErrorCode code) {

@@ -13,7 +13,6 @@ import java.util.List;
 @Entity
 @Table(name = "`order`")
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -41,12 +40,4 @@ public class Order {
     @Column(name = "status", nullable = false)
     private OrderStatus status;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<OrderItem> items = new ArrayList<>();
-
-    // 양방향 일관성 유지
-    public void addItem(OrderItem item) {
-        items.add(item);
-        item.setOrder(this);
-    }
 }

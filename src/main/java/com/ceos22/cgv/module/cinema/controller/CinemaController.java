@@ -3,28 +3,27 @@ package com.ceos22.cgv.module.cinema.controller;
 import com.ceos22.cgv.codes.SuccessCode;
 import com.ceos22.cgv.module.cinema.dto.CinemaListResponse;
 
+import com.ceos22.cgv.module.cinema.dto.CinemaRequest;
 import com.ceos22.cgv.module.cinema.dto.CinemaResponse;
 import com.ceos22.cgv.module.cinema.service.CinemaService;
 import com.ceos22.cgv.response.ApiResponse;
-import com.ceos22.cgv.util.TheaterType;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("api/cinemas")
 @RequiredArgsConstructor
 public class CinemaController {
 
     private final CinemaService cinemaService;
 
-    @GetMapping
+    @GetMapping("api/cinemas")
     public ResponseEntity<ApiResponse<CinemaListResponse>> getCinemas(
-            @RequestParam(required = false) String region,
-            @RequestParam(required = false) TheaterType type) {
+            @Valid @ModelAttribute CinemaRequest request) {
 
         ApiResponse<CinemaListResponse> response = ApiResponse.<CinemaListResponse>builder()
-                .response(cinemaService.findCinemas(region, type))
+                .response(cinemaService.findCinemas(request))
                 .statusCode(SuccessCode.GET_SUCCESS.getStatusCode())
                 .message(SuccessCode.GET_SUCCESS.getMessage())
                 .build();
@@ -32,7 +31,7 @@ public class CinemaController {
         return ResponseEntity.ok().body(response);
     }
 
-    @GetMapping("/{cinemaId}")
+    @GetMapping("api/cinemas/{cinemaId}")
     public ResponseEntity<ApiResponse<CinemaResponse>> getCinema(
             @PathVariable Long cinemaId) {
 

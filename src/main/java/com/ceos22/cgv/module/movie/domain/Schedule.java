@@ -5,12 +5,12 @@ import com.ceos22.cgv.util.ScheduleCategory;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "schedule")
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -30,13 +30,13 @@ public class Schedule {
     private Theater theater;
 
     @Column(name = "date", nullable = false)
-    private LocalDateTime date;
+    private LocalDate date;
 
-    @Column(name = "start_time", nullable = false)
-    private LocalDateTime startTime;
+    @Column(name = "start_at", nullable = false)
+    private LocalDateTime startAt;
 
-    @Column(name = "end_time", nullable = false)
-    private LocalDateTime endTime;
+    @Column(name = "end_at", nullable = false)
+    private LocalDateTime endAt;
 
     @Column(name = "is_morning", nullable = false)
     private Boolean isMorning;

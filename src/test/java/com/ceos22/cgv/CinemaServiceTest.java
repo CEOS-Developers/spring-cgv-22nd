@@ -1,10 +1,12 @@
 package com.ceos22.cgv;
 
 import com.ceos22.cgv.module.cinema.dto.CinemaListResponse;
+import com.ceos22.cgv.module.cinema.dto.CinemaRequest;
 import com.ceos22.cgv.module.cinema.dto.CinemaResponse;
 import com.ceos22.cgv.module.cinema.domain.Cinema;
 import com.ceos22.cgv.module.cinema.repository.CinemaRepository;
 import com.ceos22.cgv.module.cinema.service.CinemaService;
+import com.ceos22.cgv.util.Region;
 import com.ceos22.cgv.util.TheaterType;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,18 +34,18 @@ public class CinemaServiceTest {
     // region == null 또는 빈문자열이면 findAll 호출
     @ParameterizedTest
     @NullAndEmptySource
-    void findCinemas_withoutRegion(String region, TheaterType type) {
+    void findCinemas_withoutRegion(Region region, TheaterType type) {
 
         // given
         var cinema = new Cinema();
+        CinemaRequest cinemaRequest = new CinemaRequest(region, type);
         when(cinemaRepository.findAll()).thenReturn(List.of(cinema));
 
         // when
-        CinemaListResponse result = cinemaService.findCinemas(region, type);
+        CinemaListResponse result = cinemaService.findCinemas(cinemaRequest);
 
         // then
         verify(cinemaRepository, times(1)).findAll();
-        verify(cinemaRepository, never()).findByRegion(anyString());
         assertThat(result).isNotNull();
     }
 
@@ -52,13 +54,14 @@ public class CinemaServiceTest {
     void findCinemas_withRegion() {
 
         // given
-        String region = "경기";
+        Region region = Region.GYEONGGI;
         TheaterType type = TheaterType.STANDARD;
+        CinemaRequest cinemaRequest = new CinemaRequest(region, type);
         var cinema = new Cinema();
         when(cinemaRepository.findByRegion(region)).thenReturn(List.of(cinema));
 
         // when
-        CinemaListResponse result = cinemaService.findCinemas(region, type);
+        CinemaListResponse result = cinemaService.findCinemas(cinemaRequest);
 
         // then
         verify(cinemaRepository, times(1)).findByRegion(region);

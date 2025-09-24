@@ -7,7 +7,6 @@ import lombok.*;
 @Entity
 @Table(name = "reservation_seat")
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

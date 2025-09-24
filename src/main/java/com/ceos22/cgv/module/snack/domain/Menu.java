@@ -7,7 +7,6 @@ import lombok.*;
 @Entity
 @Table(name = "menu")
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -23,9 +22,6 @@ public class Menu {
 
     @Column(name = "price", nullable = false)
     private Integer price;
-
-    @Column(name = "stock", nullable = false)
-    private Integer stock;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "category", nullable = false)

@@ -11,6 +11,7 @@ import com.ceos22.cgv.module.reservation.repository.ReservationSeatRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Comparator;
@@ -24,20 +25,22 @@ import java.util.stream.IntStream;
 public class MovieService {
 
     private final MovieRepository movieRepository;
-    private final TheaterRepository theaterRepository;
     private final ScheduleRepository scheduleRepository;
     private final ReservationSeatRepository reservationSeatRepository;
 
+    @Transactional(readOnly = true)
     public MovieListResponse findMovies(MovieRequest request) {
         return MovieListResponse.fromEntities(movieRepository.findAll());
     }
 
+    @Transactional(readOnly = true)
     public MovieListResponse findMovieTitleList(String query) {
         List<Movie> movies = movieRepository.findByQuery(query);
         return MovieListResponse.fromSummaryEntities(movies);
 
     }
 
+    @Transactional(readOnly = true)
     public MovieResponse findMovieById(Long movieId) {
         var movie = movieRepository.findById(movieId)
                 .orElseThrow(() -> new ResponseStatusException(
@@ -45,6 +48,7 @@ public class MovieService {
         return MovieResponse.from(movie);
     }
 
+    @Transactional(readOnly = true)
     public MovieScheduleListResponse findMovieSchedule(ScheduleRequest request) {
 
 

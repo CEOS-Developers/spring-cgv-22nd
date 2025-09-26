@@ -30,6 +30,17 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * 이미 존재하는 nickname으로 회원가입을 시도하는 경우
+     */
+    // 지금 코드처럼 IllegalArgumentException을 던질 경우
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException exception) {
+        log.error("handleIllegalArgumentException", exception);
+        final ErrorResponse response = ErrorResponse.of(ErrorCode.DUPLICATE_NICKNAME_ERROR);
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    /**
      * parameter 매핑 과정에서의 오류가 있는 경우
      */
     @ExceptionHandler(org.springframework.validation.BindException.class)

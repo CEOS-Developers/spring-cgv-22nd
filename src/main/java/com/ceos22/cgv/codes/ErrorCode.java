@@ -14,6 +14,9 @@ public enum ErrorCode {
     // @RequestBody 데이터 미 존재
     REQUEST_BODY_MISSING_ERROR(400, "400", "Required request body is missing"),
 
+    // 중복 닉네임 존재
+    DUPLICATE_NICKNAME_ERROR(400, "400", "Nickname already exist"),
+
     // 유효하지 않은 타입
     INVALID_TYPE_VALUE(400, "400", " Invalid Type Value"),
 

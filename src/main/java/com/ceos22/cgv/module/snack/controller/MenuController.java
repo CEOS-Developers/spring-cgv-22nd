@@ -8,6 +8,7 @@ import com.ceos22.cgv.response.ApiResponse;
 import com.ceos22.cgv.util.MenuCategory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,7 +19,7 @@ public class MenuController {
 
     private final MenuService menuService;
 
-    @RequestMapping("/api/menu")
+    @GetMapping("/api/menu")
     public ResponseEntity<ApiResponse<MenuListResponse>> getMenu(
             @RequestParam(required = false) MenuCategory category) {
 

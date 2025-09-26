@@ -2,6 +2,7 @@ package com.ceos22.cgv.config.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -34,8 +35,16 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/signup/**","/api/login/**","/api/movies/**", "/api/cinemas/**", "/api/menu/**").permitAll()
-                        .anyRequest().authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/reservations").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/reservations/*/cancel").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/movies/*/cancel").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/order").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/order/*").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/movies/*/like").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/movies/*/unlike").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/cinemas/*/like").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/cinemas/*/unlike").authenticated()
+                        .anyRequest().permitAll()
                 )
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint(authenticationEntryPoint)

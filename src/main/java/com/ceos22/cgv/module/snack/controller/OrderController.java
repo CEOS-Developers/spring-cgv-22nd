@@ -1,13 +1,11 @@
 package com.ceos22.cgv.module.snack.controller;
 
 import com.ceos22.cgv.codes.SuccessCode;
-import com.ceos22.cgv.module.snack.dto.MenuListResponse;
 import com.ceos22.cgv.module.snack.dto.OrderRequest;
 import com.ceos22.cgv.module.snack.dto.OrderResponse;
 import com.ceos22.cgv.module.snack.service.OrderService;
 import com.ceos22.cgv.module.user.dto.CustomUserDetails;
 import com.ceos22.cgv.response.ApiResponse;
-import com.ceos22.cgv.util.MenuCategory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;

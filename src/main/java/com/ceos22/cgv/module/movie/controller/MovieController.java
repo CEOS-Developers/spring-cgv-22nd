@@ -3,6 +3,9 @@ package com.ceos22.cgv.module.movie.controller;
 import com.ceos22.cgv.codes.SuccessCode;
 import com.ceos22.cgv.module.movie.dto.*;
 import com.ceos22.cgv.module.movie.service.MovieService;
+import com.ceos22.cgv.module.reservation.dto.ReservationResponse;
+import com.ceos22.cgv.module.reservation.dto.SeatAvailabilityResponse;
+import com.ceos22.cgv.module.reservation.service.ReservationService;
 import com.ceos22.cgv.module.user.dto.CustomUserDetails;
 import com.ceos22.cgv.response.ApiResponse;
 import jakarta.validation.Valid;
@@ -19,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 public class MovieController {
 
     private final MovieService movieService;
+    private final ReservationService reservationService;
 
     @GetMapping("api/movies")
     public ResponseEntity<ApiResponse<MovieListResponse>> getMovieTitles(
@@ -55,6 +59,20 @@ public class MovieController {
                 .response(movieService.findMovieSchedule(request))
                 .statusCode(SuccessCode.GET_SUCCESS.getStatusCode())
                 .message(SuccessCode.GET_SUCCESS.getMessage())
+                .build();
+
+        return ResponseEntity.ok().body(response);
+    }
+
+    // 좌석 예약 상태 반환
+    @GetMapping("api/movies/schedule/{scheduleId}/availability")
+    public ResponseEntity<ApiResponse<SeatAvailabilityResponse>> availability(
+            @PathVariable Long scheduleId) {
+        
+        ApiResponse<SeatAvailabilityResponse> response = ApiResponse.<SeatAvailabilityResponse>builder()
+                .response(reservationService.availability(scheduleId))
+                .statusCode(SuccessCode.INSERT_SUCCESS.getStatusCode())
+                .message(SuccessCode.INSERT_SUCCESS.getMessage())
                 .build();
 
         return ResponseEntity.ok().body(response);

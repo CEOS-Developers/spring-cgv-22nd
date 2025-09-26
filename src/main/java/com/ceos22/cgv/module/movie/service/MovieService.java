@@ -41,6 +41,7 @@ public class MovieService {
 
     @Transactional(readOnly = true)
     public MovieListResponse findMovieTitleList(String query) {
+        if (query == null || query.isEmpty())  query = "";
         List<Movie> movies = movieRepository.findByQuery(query);
         return MovieListResponse.fromSummaryEntities(movies);
 

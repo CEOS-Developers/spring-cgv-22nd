@@ -27,10 +27,12 @@ public class MovieResponseDto {
         }
     }
 
-    @Builder
+    @Getter
+    @AllArgsConstructor
     public static class MovieDetailDto {
         private Long id;
         private String title;
+        private String ageRating;
         private LocalDate releaseDate;
         private Integer runningTime;
         private String poster;
@@ -38,15 +40,15 @@ public class MovieResponseDto {
         private String prolog;
 
         public static MovieDetailDto of(Movie movie){
-            return MovieDetailDto.builder()
-                    .id(movie.getId())
-                    .title(movie.getTitle())
-                    .releaseDate(movie.getReleaseDate())
-                    .runningTime(movie.getRunningTime())
-                    .poster(movie.getPoster())
-                    .genre(movie.getGenre())
-                    .prolog(movie.getProlog())
-                    .build();
+            return new MovieDetailDto(
+                    movie.getId(),
+                    movie.getTitle(),
+                    movie.getAgeRating().name(),
+                    movie.getReleaseDate(),
+                    movie.getRunningTime(),
+                    movie.getPoster(),
+                    movie.getGenre(),
+                    movie.getProlog());
         }
     }
 }

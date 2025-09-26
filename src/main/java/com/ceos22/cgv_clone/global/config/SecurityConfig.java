@@ -36,12 +36,14 @@ public class SecurityConfig {
                 .addFilterBefore(jwtExceptionFilter, JwtAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                "/auth/**",
+                                "/movies",
+                                "/products",
+                                "/cinemas",
                                 "/users/sign-up",
                                 "/users/sign-in",
                                 "/swagger-ui/**"
                         ).permitAll()
-                        .requestMatchers("/users").authenticated()
+                        .requestMatchers("/users","/reservations").authenticated()
                         .anyRequest().permitAll()
                 );
 

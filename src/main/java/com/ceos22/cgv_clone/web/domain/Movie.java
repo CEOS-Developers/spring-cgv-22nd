@@ -37,9 +37,6 @@ public class Movie extends BaseEntity {
     @Column(columnDefinition = "text")
     private String prolog;
 
-    @Enumerated(EnumType.STRING)
-    private Region region;
-
     @Column(name = "age_rating")
     private AgeRating ageRating;
 

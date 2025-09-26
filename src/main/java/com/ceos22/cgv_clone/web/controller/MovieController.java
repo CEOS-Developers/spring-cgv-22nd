@@ -2,6 +2,7 @@ package com.ceos22.cgv_clone.web.controller;
 
 import com.ceos22.cgv_clone.global.apiPayload.ApiResponse;
 import com.ceos22.cgv_clone.global.security.CustomUserDetails;
+import com.ceos22.cgv_clone.web.dto.MovieRequestDto;
 import com.ceos22.cgv_clone.web.dto.MovieResponseDto;
 import com.ceos22.cgv_clone.web.service.MovieService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -34,6 +35,12 @@ public class MovieController {
     public ApiResponse<String> preferMovie(@PathVariable(name = "movieId")Long movieId, @AuthenticationPrincipal CustomUserDetails userDetails){
         movieService.preferMovie(movieId,userDetails.getUser());
         return ApiResponse.onSuccess("해당 영화를 찜하셨습니다.");
+    }
+
+    @PostMapping("/movies")
+    @Operation(summary = "영화 생성 API")
+    public ApiResponse<MovieResponseDto.MovieDetailDto> createMovie(@RequestBody MovieRequestDto movieRequestDto){
+        return ApiResponse.onSuccess(movieService.createMovie(movieRequestDto));
     }
 
 

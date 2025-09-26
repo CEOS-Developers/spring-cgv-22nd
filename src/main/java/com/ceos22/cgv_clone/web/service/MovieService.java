@@ -5,9 +5,11 @@ import com.ceos22.cgv_clone.global.apiPayload.exception.GeneralException;
 import com.ceos22.cgv_clone.web.domain.Movie;
 import com.ceos22.cgv_clone.web.domain.MoviePrefer;
 import com.ceos22.cgv_clone.web.domain.User;
+import com.ceos22.cgv_clone.web.dto.MovieRequestDto;
 import com.ceos22.cgv_clone.web.dto.MovieResponseDto;
 import com.ceos22.cgv_clone.web.repository.MoviePreferRepository;
 import com.ceos22.cgv_clone.web.repository.MovieRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -51,5 +53,29 @@ public class MovieService {
                 .build();
         moviePreferRepository.save(moviePrefer);
 
+    }
+
+    @Transactional
+    public MovieResponseDto.MovieDetailDto createMovie(MovieRequestDto movieRequestDto) {
+
+        boolean exists = movieRepository.existsByTitleAndReleaseDate(
+                movieRequestDto.getTitle(), movieRequestDto.getReleaseDate());
+        if (exists) {
+            throw new GeneralException(ErrorStatus.ALREADY_EXISTS_MOVIE);
+        }
+
+        Movie movie = Movie.builder()
+                .title(movieRequestDto.getTitle())
+                .releaseDate(movieRequestDto.getReleaseDate())
+                .runningTime(movieRequestDto.getRunningTime())
+                .poster(movieRequestDto.getPoster())
+                .genre(movieRequestDto.getGenre())
+                .prolog(movieRequestDto.getProlog())
+                .ageRating(movieRequestDto.getAgeRating())
+                .build();
+
+        movieRepository.save(movie);
+
+        return MovieResponseDto.MovieDetailDto.of(movie);
     }
 }

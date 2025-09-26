@@ -21,6 +21,7 @@ public enum ErrorStatus{
     RESERVATION_NOT_FOUND(HttpStatus.NOT_FOUND, "RESERVATION404", "해당 예약 정보를 찾을 수 없습니다."),
     MOVIE_NOT_FOUND(HttpStatus.NOT_FOUND,"MOVIE404","해당 영화를 찾을 수 없습니다."),
     CINEMA_NOT_FOUND(HttpStatus.NOT_FOUND,"CINEMA404", "해당 영화관을 찾을 수 없습니다."),
+    PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND,"PRODUCT404","해당 상품을 찾을 수 없습니다."),
 
 
     //User관련 응답
@@ -35,9 +36,13 @@ public enum ErrorStatus{
 
     //영화 관련 응답
     ALREADY_PREFERED_MOVIE(HttpStatus.BAD_REQUEST, "MOVIE4001", "이미 찜한 영화입니다."),
+    ALREADY_EXISTS_MOVIE(HttpStatus.BAD_REQUEST,"MOVIE4002","이미 등록된 영화입니다."),
 
     //영화관 관련 응답
     ALREADY_PREFERED_CINEMA(HttpStatus.BAD_REQUEST, "CINEMA4001", "이미 찜한 영화관입니다."),
+
+    //구매 관련 응답
+    INVALID_QUANTITY(HttpStatus.BAD_REQUEST,"PURCHASE4001","상품 구매 수량은 최소 1개 이상이어야 합니다."),
     ;
 
 

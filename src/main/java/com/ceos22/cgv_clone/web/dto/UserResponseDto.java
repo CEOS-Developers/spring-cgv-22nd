@@ -27,6 +27,18 @@ public class UserResponseDto {
         }
     }
 
+    @Getter
+    @AllArgsConstructor
+    public static class LoginTokenResponseDTO {
+        private Long userId;
+        private String userName;
+        private String accessToken;
+
+        public static LoginTokenResponseDTO of(User user, String accessToken) {
+            return new LoginTokenResponseDTO(user.getId(), user.getName(), accessToken);
+        }
+    }
+
 
 
 

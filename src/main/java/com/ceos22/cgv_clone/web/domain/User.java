@@ -31,7 +31,6 @@ public class User extends BaseEntity {
     @Column(nullable = false, unique = true,length = 50)
     private String email;
 
-    @Column(length = 50)
     private String password;
 
     @Column(length = 50,name = "phone_number")

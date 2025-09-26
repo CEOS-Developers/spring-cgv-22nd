@@ -11,8 +11,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import io.jsonwebtoken.io.Decoders;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -29,6 +29,7 @@ public class TokenProvider implements InitializingBean {
     @Value("${jwt.secret}")
     private String secretKey;
     private Key key;
+
     private final UserDetailsService userDetailsService;
 
     @Value("${jwt.token.access-expiration-time}")
@@ -47,7 +48,7 @@ public class TokenProvider implements InitializingBean {
 
         Date now = new Date();
         return Jwts.builder()
-                .setSubject(authentication.getName())
+                .setSubject(String.valueOf(id))
                 .claim("auth",authorities)
                 .setIssuedAt(now)
                 .setExpiration(new Date(now.getTime() + accessExpirationTime))

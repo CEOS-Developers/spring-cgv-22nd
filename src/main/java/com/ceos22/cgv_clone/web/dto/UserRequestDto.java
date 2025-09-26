@@ -1,13 +1,13 @@
 package com.ceos22.cgv_clone.web.dto;
 
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
+
+import java.time.LocalDate;
 
 public class UserRequestDto {
 
     @Getter
-    @AllArgsConstructor
     public static class UserSignUpDto{
         private String email;
         private String nickName;
@@ -15,5 +15,13 @@ public class UserRequestDto {
         private String password;
         private String confirmPassword;
         private String phoneNumber;
+        private LocalDate birth;
+    }
+
+    @Getter
+    public static class UserSignInDto {
+        private String email;
+        private String nickName;
+        private String password;
     }
 }

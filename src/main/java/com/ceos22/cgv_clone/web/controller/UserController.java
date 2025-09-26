@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class UserController {
 
-    private UserService userService;
+    private final UserService userService;
 
     @PostMapping("/users/sign-up")
     @Operation(summary = "회원가입 API", description = "회원가입을 하는 API입니다.")
@@ -23,7 +23,12 @@ public class UserController {
         return ApiResponse.onSuccess(responseDto);
     }
 
-
+    @PostMapping("/users/sign-in")
+    @Operation(summary = "로그인 API")
+    public ApiResponse<UserResponseDto.LoginTokenResponseDTO> signIn (@RequestBody UserRequestDto.UserSignInDto requestDto) {
+        UserResponseDto.LoginTokenResponseDTO responseDto = userService.signIn(requestDto);
+        return ApiResponse.onSuccess(responseDto);
+    }
 
 
 }

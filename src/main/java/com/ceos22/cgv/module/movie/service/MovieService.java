@@ -2,12 +2,16 @@ package com.ceos22.cgv.module.movie.service;
 
 import com.ceos22.cgv.module.cinema.repository.TheaterRepository;
 import com.ceos22.cgv.module.movie.domain.Movie;
+import com.ceos22.cgv.module.movie.domain.MovieLike;
 import com.ceos22.cgv.module.movie.domain.Schedule;
 import com.ceos22.cgv.module.movie.dto.*;
+import com.ceos22.cgv.module.movie.repository.MovieLikeRepository;
 import com.ceos22.cgv.module.movie.repository.MovieRepository;
 import com.ceos22.cgv.module.movie.repository.ScheduleRepository;
 import com.ceos22.cgv.module.reservation.domain.ReservationSeat;
 import com.ceos22.cgv.module.reservation.repository.ReservationSeatRepository;
+import com.ceos22.cgv.module.user.domain.User;
+import com.ceos22.cgv.module.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -27,6 +31,8 @@ public class MovieService {
     private final MovieRepository movieRepository;
     private final ScheduleRepository scheduleRepository;
     private final ReservationSeatRepository reservationSeatRepository;
+    private final MovieLikeRepository movieLikeRepository;
+    private final UserRepository userRepository;
 
     @Transactional(readOnly = true)
     public MovieListResponse findMovies(MovieRequest request) {
@@ -71,7 +77,7 @@ public class MovieService {
                     return ScheduleResponse.from(s, available, totalSeat);
                 })
                 .toList();
-        
+
         // 영화 별로 상영 일정 그룹화
         Map<Movie, List<ScheduleResponse>> groupedMovieSchedule =
                 IntStream.range(0, schedules.size())
@@ -85,4 +91,33 @@ public class MovieService {
         return MovieScheduleListResponse.fromGrouped(groupedMovieSchedule);
     }
 
+    @Transactional
+    public MovieLikeResponse like(Long movieId, Long userId) {
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "해당 유저가 존재하지 않습니다."));
+
+        Movie movie = movieRepository.findById(movieId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "해당 영화가 존재하지 않습니다."));
+
+
+        if (!movieLikeRepository.existsByUser_IdAndMovie_Id(userId, movieId)) {
+            MovieLike like = MovieLike.builder()
+                    .user(user)
+                    .movie(movie)
+                    .build();
+            movieLikeRepository.save(like);
+        }
+
+        return MovieLikeResponse.of(movie, user, true);
+    }
+
+    @Transactional
+    public MovieLikeResponse unlike(Long movieId, Long userId) {
+
+        movieLikeRepository.findByUser_IdAndMovie_Id(userId, movieId)
+                .ifPresent(movieLikeRepository::delete);
+
+        return new MovieLikeResponse(movieId, userId, false);
+    }
 }

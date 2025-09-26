@@ -18,6 +18,9 @@ public class User extends BaseEntity {
     @Column(name = "user_id")
     private Long id;
 
+    @Enumerated(EnumType.STRING)
+    private UserRole role;
+
     @UuidGenerator
     @Column(nullable = false)
     private String uuid;

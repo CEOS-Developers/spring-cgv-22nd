@@ -19,6 +19,8 @@ public enum ErrorStatus{
     SCHEDULE_NOT_FOUND(HttpStatus.NOT_FOUND, "SCHEDULE404", "해당 상영 스케줄이 존재하지 않습니다."),
     SEAT_NOT_FOUND(HttpStatus.NOT_FOUND, "SEAT404", "존재하지 않는 좌석이 포함되어 있습니다."),
     RESERVATION_NOT_FOUND(HttpStatus.NOT_FOUND, "RESERVATION404", "해당 예약 정보를 찾을 수 없습니다."),
+    MOVIE_NOT_FOUND(HttpStatus.NOT_FOUND,"MOVIE404","해당 영화를 찾을 수 없습니다."),
+    CINEMA_NOT_FOUND(HttpStatus.NOT_FOUND,"CINEMA404", "해당 영화관을 찾을 수 없습니다."),
 
 
     //User관련 응답
@@ -30,6 +32,12 @@ public enum ErrorStatus{
     //예약관련 응답
     SCHEDULE_INACTIVE(HttpStatus.BAD_REQUEST, "RESERVATION4001", "상영 스케줄이 활성 상태가 아닙니다."),
     SEAT_ALREADY_RESERVED(HttpStatus.BAD_REQUEST, "RESERVATION4002", "이미 예약된 좌석이 포함되어 있습니다."),
+
+    //영화 관련 응답
+    ALREADY_PREFERED_MOVIE(HttpStatus.BAD_REQUEST, "MOVIE4001", "이미 찜한 영화입니다."),
+
+    //영화관 관련 응답
+    ALREADY_PREFERED_CINEMA(HttpStatus.BAD_REQUEST, "CINEMA4001", "이미 찜한 영화관입니다."),
     ;
 
 

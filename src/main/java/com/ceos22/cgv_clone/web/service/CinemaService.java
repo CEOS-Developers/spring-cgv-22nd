@@ -1,12 +1,13 @@
 package com.ceos22.cgv_clone.web.service;
 
-import com.ceos22.cgv_clone.web.domain.Cinema;
-import com.ceos22.cgv_clone.web.domain.Schedule;
-import com.ceos22.cgv_clone.web.domain.Theater;
+import com.ceos22.cgv_clone.global.apiPayload.code.ErrorStatus;
+import com.ceos22.cgv_clone.global.apiPayload.exception.GeneralException;
+import com.ceos22.cgv_clone.web.domain.*;
 import com.ceos22.cgv_clone.web.domain.enums.Region;
 import com.ceos22.cgv_clone.web.dto.CinemaResponseDto;
 import com.ceos22.cgv_clone.web.dto.ScheduleResponseDto;
 import com.ceos22.cgv_clone.web.dto.TheaterResponseDto;
+import com.ceos22.cgv_clone.web.repository.CinemaPreferRepository;
 import com.ceos22.cgv_clone.web.repository.CinemaRepository;
 import com.ceos22.cgv_clone.web.repository.ScheduleRepository;
 import com.ceos22.cgv_clone.web.repository.TheaterRepository;
@@ -23,6 +24,7 @@ public class CinemaService {
     private final CinemaRepository cinemaRepository;
     private final TheaterRepository theaterRepository;
     private final ScheduleRepository scheduleRepository;
+    private final CinemaPreferRepository cinemaPreferRepository;
 
     @Transactional(readOnly = true)
     public List<CinemaResponseDto.CinemaDto> getCinemas(Region region) {
@@ -61,5 +63,20 @@ public class CinemaService {
 
         CinemaResponseDto.CinemaDetailDto cinemaDetailDto = CinemaResponseDto.CinemaDetailDto.of(cinema,theaterDtos);
         return cinemaDetailDto;
+    }
+
+    public void preferCinema(Long cinemaId, User user) {
+        Cinema cinema = cinemaRepository.findById(cinemaId)
+                .orElseThrow(()-> new GeneralException(ErrorStatus.CINEMA_NOT_FOUND));
+
+        if (cinemaPreferRepository.existsByUserAndCinema(user,cinema)){
+            throw new GeneralException(ErrorStatus.ALREADY_PREFERED_CINEMA);
+        }
+        CinemaPrefer cinemaPrefer = CinemaPrefer.builder()
+                .cinema(cinema)
+                .user(user)
+                .build();
+
+        cinemaPreferRepository.save(cinemaPrefer);
     }
 }

@@ -1,8 +1,9 @@
 package com.ceos22.cgv_clone.global.apiPayload.exception;
 
 import com.ceos22.cgv_clone.global.apiPayload.ApiResponse;
-import com.ceos22.cgv_clone.global.apiPayload.code.ErrorCode;
-import com.ceos22.cgv_clone.global.apiPayload.code.ErrorResponse;
+import com.ceos22.cgv_clone.global.apiPayload.code.ErrorReasonDto;
+import com.ceos22.cgv_clone.global.apiPayload.code.ErrorStatus;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -14,67 +15,105 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Optional;
 
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
-    /** 검증 오류 (ConstraintViolation) 처리 */
-    @ExceptionHandler(ConstraintViolationException.class)
-    public ResponseEntity<Object> handleConstraintViolation(ConstraintViolationException ex,
-                                                            WebRequest request) {
-        String errorMessage = ex.getConstraintViolations().stream()
-                .map(cv -> cv.getMessage())
+    @ExceptionHandler
+    public ResponseEntity<Object> validation(ConstraintViolationException e, WebRequest request) {
+        String errorMessage = e.getConstraintViolations().stream()
+                .map(constraintViolation -> constraintViolation.getMessage())
                 .findFirst()
-                .orElse("Validation error");
+                .orElseThrow(() -> new RuntimeException("ConstraintViolationException 추출 도중 에러 발생"));
 
-        ErrorCode errorCode;
-        try {
-            errorCode = ErrorCode.valueOf(errorMessage);
-        } catch (IllegalArgumentException iae) {
-            errorCode = ErrorCode.BAD_REQUEST_ERROR;
-        }
-
-        ErrorResponse errorResponse = ErrorResponse.of(errorCode);
-        ApiResponse<Object> body = ApiResponse.onFailure(errorCode.getStatus(), errorCode.getMessage(), null);
-
-        return handleExceptionInternal(ex, body, HttpHeaders.EMPTY, HttpStatus.valueOf(errorCode.getStatus()), request);
+        return handleExceptionInternalConstraint(e, ErrorStatus.valueOf(errorMessage), HttpHeaders.EMPTY,request);
     }
 
-    /** @Valid 바인딩 오류 처리 */
     @Override
-    protected ResponseEntity<Object> handleMethodArgumentNotValid(
-            MethodArgumentNotValidException ex,
-            HttpHeaders headers,
-            HttpStatusCode status,
-            WebRequest request) {
-        log.error("handleMethodArgumentNotValidException", ex);
-        BindingResult bindingResult = ex.getBindingResult();
-        StringBuilder stringBuilder = new StringBuilder();
-        for (FieldError fieldError : bindingResult.getFieldErrors()) {
-            stringBuilder.append(fieldError.getField()).append(":");
-            stringBuilder.append(fieldError.getDefaultMessage());
-            stringBuilder.append(", ");
-        }
-        ErrorCode errorCode = ErrorCode.NOT_VALID_ERROR;
+    public ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException e, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
 
-        ErrorResponse errRes = ErrorResponse.of(errorCode, String.valueOf(stringBuilder));
+        Map<String, String> errors = new LinkedHashMap<>();
 
-        ApiResponse<Object> body = ApiResponse.onFailure(errorCode.getStatus(), errorCode.getMessage(), errRes);
+        e.getBindingResult().getFieldErrors().stream()
+                .forEach(fieldError -> {
+                    String fieldName = fieldError.getField();
+                    String errorMessage = Optional.ofNullable(fieldError.getDefaultMessage()).orElse("");
+                    errors.merge(fieldName, errorMessage, (existingErrorMessage, newErrorMessage) -> existingErrorMessage + ", " + newErrorMessage);
+                });
 
-        return handleExceptionInternal(ex, body, headers, HttpStatus.valueOf(errorCode.getStatus()), request);
+        return handleExceptionInternalArgs(e,HttpHeaders.EMPTY,ErrorStatus.valueOf("_BAD_REQUEST"),request,errors);
     }
 
-    /** 기타 예외 처리 (catch-all) */
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<Object> handleAllExceptions(Exception ex, WebRequest request) {
-        log.error("Unhandled exception caught: ", ex);
+    @ExceptionHandler
+    public ResponseEntity<Object> exception(Exception e, WebRequest request) {
+        e.printStackTrace();
 
-        ErrorCode errorCode = ErrorCode.INTERNAL_SERVER_ERROR;
-        ApiResponse<Object> body = ApiResponse.onFailure(errorCode.getStatus(), errorCode.getMessage(), ex.getMessage());
+        return handleExceptionInternalFalse(e, ErrorStatus._INTERNAL_SERVER_ERROR, HttpHeaders.EMPTY, ErrorStatus._INTERNAL_SERVER_ERROR.getHttpStatus(),request, e.getMessage());
+    }
 
-        return handleExceptionInternal(ex, body, HttpHeaders.EMPTY, HttpStatus.valueOf(errorCode.getStatus()), request);
+    @ExceptionHandler(value = GeneralException.class)
+    public ResponseEntity onThrowException(GeneralException generalException, HttpServletRequest request) {
+        ErrorReasonDto errorReasonHttpStatus = generalException.getErrorReasonHttpStatus();
+        return handleExceptionInternal(generalException,errorReasonHttpStatus,null,request);
+    }
+
+    private ResponseEntity<Object> handleExceptionInternal(Exception e, ErrorReasonDto reason,
+                                                           HttpHeaders headers, HttpServletRequest request) {
+
+        ApiResponse<Object> body = ApiResponse.onFailure(reason.getCode(),reason.getMessage(),null);
+//        e.printStackTrace();
+
+        WebRequest webRequest = new ServletWebRequest(request);
+        return super.handleExceptionInternal(
+                e,
+                body,
+                headers,
+                reason.getHttpStatus(),
+                webRequest
+        );
+    }
+
+    private ResponseEntity<Object> handleExceptionInternalFalse(Exception e, ErrorStatus errorCommonStatus,
+                                                                HttpHeaders headers, HttpStatus status, WebRequest request, String errorPoint) {
+        ApiResponse<Object> body = ApiResponse.onFailure(errorCommonStatus.getCode(),errorCommonStatus.getMessage(),errorPoint);
+        return super.handleExceptionInternal(
+                e,
+                body,
+                headers,
+                status,
+                request
+        );
+    }
+
+    private ResponseEntity<Object> handleExceptionInternalArgs(Exception e, HttpHeaders headers, ErrorStatus errorCommonStatus,
+                                                               WebRequest request, Map<String, String> errorArgs) {
+        ApiResponse<Object> body = ApiResponse.onFailure(errorCommonStatus.getCode(),errorCommonStatus.getMessage(),errorArgs);
+        return super.handleExceptionInternal(
+                e,
+                body,
+                headers,
+                errorCommonStatus.getHttpStatus(),
+                request
+        );
+    }
+
+    private ResponseEntity<Object> handleExceptionInternalConstraint(Exception e, ErrorStatus errorCommonStatus,
+                                                                     HttpHeaders headers, WebRequest request) {
+        ApiResponse<Object> body = ApiResponse.onFailure(errorCommonStatus.getCode(), errorCommonStatus.getMessage(), null);
+        return super.handleExceptionInternal(
+                e,
+                body,
+                headers,
+                errorCommonStatus.getHttpStatus(),
+                request
+        );
     }
 }

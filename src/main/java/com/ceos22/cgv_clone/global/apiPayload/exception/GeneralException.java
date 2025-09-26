@@ -1,21 +1,25 @@
 package com.ceos22.cgv_clone.global.apiPayload.exception;
 
-import com.ceos22.cgv_clone.global.apiPayload.code.ErrorCode;
-import com.ceos22.cgv_clone.global.apiPayload.code.ReasonDto;
+import com.ceos22.cgv_clone.global.apiPayload.code.ErrorReasonDto;
+import com.ceos22.cgv_clone.global.apiPayload.code.ErrorStatus;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
+@AllArgsConstructor
 public class GeneralException extends RuntimeException {
 
-    private final ErrorCode errorCode;
+    private ErrorStatus errorStatus;
 
-    public GeneralException(ErrorCode errorCode) {
-        super(errorCode.getMessage());
-        this.errorCode = errorCode;
+    public GeneralException() {
+        super();
     }
 
-    public ReasonDto getErrorCode() {
-        return this.errorCode.getReason();
+    public ErrorReasonDto getErrorReason(){
+        return this.errorStatus.getReason();
     }
 
+    public  ErrorReasonDto getErrorReasonHttpStatus(){
+        return this.errorStatus.getReasonHttpStatus();
+    }
 }

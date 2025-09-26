@@ -83,8 +83,8 @@ public class MovieController {
 
         ApiResponse<MovieLikeResponse> response = ApiResponse.<MovieLikeResponse>builder()
                 .response(movieService.unlike(movieId, user.getUserId()))
-                .statusCode(SuccessCode.INSERT_SUCCESS.getStatusCode())
-                .message(SuccessCode.INSERT_SUCCESS.getMessage())
+                .statusCode(SuccessCode.DELETE_SUCCESS.getStatusCode())
+                .message(SuccessCode.DELETE_SUCCESS.getMessage())
                 .build();
 
         return ResponseEntity.ok().body(response);

@@ -79,4 +79,12 @@ public class ReservationService {
                 .build();
 
     }
+
+    public void cancelReservation(Long reservationId) {
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(()-> new IllegalArgumentException("Reservation not found"));
+
+        reservation.cancelReservation();
+        reservationRepository.save(reservation);
+    }
 }

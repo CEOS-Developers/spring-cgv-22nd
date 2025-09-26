@@ -18,9 +18,6 @@ public class Product extends BaseEntity {
     @Column(length = 15)
     private String name;
 
-    private Integer stock;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "cinema_id")
-    private Cinema cinema;
+    @Column(nullable = false)
+    private Integer price;
 }

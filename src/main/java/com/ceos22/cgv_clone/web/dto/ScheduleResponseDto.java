@@ -6,7 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-public class ScheduleResDto {
+public class ScheduleResponseDto {
 
     @Getter
     @Builder
@@ -16,14 +16,14 @@ public class ScheduleResDto {
         private Long scheduleId;
         private String startTime;
         private String endTime;
-        private MovieResDto.MovieDto movie;
+        private MovieResponseDto.MovieDto movie;
 
         public static ScheduleDto of(Schedule schedule) {
             return new ScheduleDto(
                     schedule.getId(),
                     schedule.getStartTime().toString(),
                     schedule.getEndTime().toString(),
-                    MovieResDto.MovieDto.of(schedule.getMovie())
+                    MovieResponseDto.MovieDto.of(schedule.getMovie())
             );
         }
     }

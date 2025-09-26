@@ -15,13 +15,21 @@ public enum ErrorStatus{
     _FORBIDDEN(HttpStatus.FORBIDDEN, "COMMON403", "금지된 요청입니다."),
 
     //Not Found
-    NOT_FOUND_USER(HttpStatus.NOT_FOUND, "USER404", "해당 유저를 찾을 수 없습니다."),
+    USER_NOT_FOUND(HttpStatus.NOT_FOUND, "USER404", "해당 유저를 찾을 수 없습니다."),
+    SCHEDULE_NOT_FOUND(HttpStatus.NOT_FOUND, "SCHEDULE404", "해당 상영 스케줄이 존재하지 않습니다."),
+    SEAT_NOT_FOUND(HttpStatus.NOT_FOUND, "SEAT404", "존재하지 않는 좌석이 포함되어 있습니다."),
+    RESERVATION_NOT_FOUND(HttpStatus.NOT_FOUND, "RESERVATION404", "해당 예약 정보를 찾을 수 없습니다."),
+
 
     //User관련 응답
     ALREADY_EXISTS_EMAIL(HttpStatus.BAD_REQUEST,"USER4001","이미 존재하는 이메일 입니다."),
     INVALID_PASSWORD(HttpStatus.BAD_REQUEST,"USER4002","잘못된 비밀번호 입니다."),
     PASSWORD_MISMATCH(HttpStatus.BAD_REQUEST,"USER4003","비밀번호와 확인 비밀번호가 일치하지 않습니다."),
     EMAIL_NOT_FOUND(HttpStatus.BAD_REQUEST,"USER4004","이메일이 존재하지 않습니다."),
+
+    //예약관련 응답
+    SCHEDULE_INACTIVE(HttpStatus.BAD_REQUEST, "RESERVATION4001", "상영 스케줄이 활성 상태가 아닙니다."),
+    SEAT_ALREADY_RESERVED(HttpStatus.BAD_REQUEST, "RESERVATION4002", "이미 예약된 좌석이 포함되어 있습니다."),
     ;
 
 

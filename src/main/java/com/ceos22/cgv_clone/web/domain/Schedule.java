@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 public class Schedule extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "schedule_id")
     private Long id;
 
     @Column(nullable = false,name = "start_time")
@@ -30,5 +31,9 @@ public class Schedule extends BaseEntity {
     @JoinColumn(name = "theater_id")
     private Theater theater;
 
+    public boolean isActive() {
+        LocalDateTime now = LocalDateTime.now();
+        return now.isAfter(startTime);
+    }
 
 }

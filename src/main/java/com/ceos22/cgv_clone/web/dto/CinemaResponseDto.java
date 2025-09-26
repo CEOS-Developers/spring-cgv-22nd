@@ -6,7 +6,7 @@ import lombok.Getter;
 
 import java.util.List;
 
-public class CinemaResDto {
+public class CinemaResponseDto {
 
     @Getter
     @AllArgsConstructor
@@ -30,9 +30,9 @@ public class CinemaResDto {
         private Long cinemaId;
         private String cinemaName;
         private String cinemaAddress;
-        private List<TheaterResDto.TheaterDto> theaterList;
+        private List<TheaterResponseDto.TheaterDto> theaterList;
 
-        public static CinemaDetailDto of(Cinema cinema, List<TheaterResDto.TheaterDto> theaters){
+        public static CinemaDetailDto of(Cinema cinema, List<TheaterResponseDto.TheaterDto> theaters){
             return new CinemaDetailDto(
                     cinema.getId(),
                     cinema.getName(),

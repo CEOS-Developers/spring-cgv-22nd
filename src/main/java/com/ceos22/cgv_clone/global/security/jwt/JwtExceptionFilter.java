@@ -25,13 +25,14 @@ public class JwtExceptionFilter extends OncePerRequestFilter {
         try {
             filterChain.doFilter(request, response);
         } catch (GeneralException e) {
-            setErrorResponse(response, e.getErrorCode().getCode(), e.getMessage());
+            setErrorResponse(response,e.getErrorReasonHttpStatus().getHttpStatus().value(),e.getErrorReasonHttpStatus().getCode(),e.getErrorReasonHttpStatus().getMessage());
         }
     }
 
-    private void setErrorResponse(HttpServletResponse response, String code, String message) throws IOException {
+    private void setErrorResponse(HttpServletResponse response, int status,String code, String message) throws IOException {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
+        response.setStatus(status);
 
         String json = objectMapper.writeValueAsString(Map.of(
                 "isSuccess", false,

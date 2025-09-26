@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
-public class TheaterResDto {
+public class TheaterResponseDto {
 
     @Getter
     @Builder
@@ -20,14 +20,15 @@ public class TheaterResDto {
         private TheaterType theaterType;
         private String name;
         private int maxSeats;
-        private List<ScheduleResDto.ScheduleDto> schedules;
+        private List<ScheduleResponseDto.ScheduleDto> schedules;
 
-        public static TheaterDto of(Theater theater, List<ScheduleResDto.ScheduleDto> schedules) {
+        public static TheaterDto of(Theater theater, List<ScheduleResponseDto.ScheduleDto> schedules) {
+            int maxSeats = theater.getTotalCol() * theater.getTotalRow();
             return new TheaterDto(
                     theater.getId(),
                     theater.getTheaterType(),
                     theater.getName(),
-                    theater.getMaxSeats(),
+                    maxSeats,
                     schedules
             );
         }

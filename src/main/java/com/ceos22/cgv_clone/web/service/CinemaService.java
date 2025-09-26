@@ -4,15 +4,15 @@ import com.ceos22.cgv_clone.web.domain.Cinema;
 import com.ceos22.cgv_clone.web.domain.Schedule;
 import com.ceos22.cgv_clone.web.domain.Theater;
 import com.ceos22.cgv_clone.web.domain.enums.Region;
-import com.ceos22.cgv_clone.web.dto.CinemaResDto;
-import com.ceos22.cgv_clone.web.dto.ScheduleResDto;
-import com.ceos22.cgv_clone.web.dto.TheaterResDto;
+import com.ceos22.cgv_clone.web.dto.CinemaResponseDto;
+import com.ceos22.cgv_clone.web.dto.ScheduleResponseDto;
+import com.ceos22.cgv_clone.web.dto.TheaterResponseDto;
 import com.ceos22.cgv_clone.web.repository.CinemaRepository;
 import com.ceos22.cgv_clone.web.repository.ScheduleRepository;
 import com.ceos22.cgv_clone.web.repository.TheaterRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -24,7 +24,8 @@ public class CinemaService {
     private final TheaterRepository theaterRepository;
     private final ScheduleRepository scheduleRepository;
 
-    public List<CinemaResDto.CinemaDto> getCinemas(Region region) {
+    @Transactional(readOnly = true)
+    public List<CinemaResponseDto.CinemaDto> getCinemas(Region region) {
 
         List<Cinema> cinemaList = null;
 
@@ -34,31 +35,31 @@ public class CinemaService {
             cinemaList = cinemaRepository.findByRegion(region);
         }
 
-        List<CinemaResDto.CinemaDto> dtoList = cinemaList.stream()
-                .map(CinemaResDto.CinemaDto::of)
+        List<CinemaResponseDto.CinemaDto> dtoList = cinemaList.stream()
+                .map(CinemaResponseDto.CinemaDto::of)
                 .collect(Collectors.toList());
 
         return dtoList;
     }
 
-    public CinemaResDto.CinemaDetailDto getCinema(Long cinemaId) {
+    public CinemaResponseDto.CinemaDetailDto getCinema(Long cinemaId) {
 
         Cinema cinema = cinemaRepository.findById(cinemaId)
                 .orElseThrow(()-> new IllegalArgumentException("Cinema not found with id: " + cinemaId));
 
         List<Theater> theaterList = theaterRepository.findByCinemaId(cinemaId);
 
-        List<TheaterResDto.TheaterDto> theaterDtos = theaterList.stream()
+        List<TheaterResponseDto.TheaterDto> theaterDtos = theaterList.stream()
                 .map(thater-> {
                     List<Schedule> schedules = scheduleRepository.findByTheaterId(thater.getId());
-                    List<ScheduleResDto.ScheduleDto> scheduleDtos = schedules.stream()
-                            .map(ScheduleResDto.ScheduleDto::of)
+                    List<ScheduleResponseDto.ScheduleDto> scheduleDtos = schedules.stream()
+                            .map(ScheduleResponseDto.ScheduleDto::of)
                             .toList();
-                    return TheaterResDto.TheaterDto.of(thater,scheduleDtos);
+                    return TheaterResponseDto.TheaterDto.of(thater,scheduleDtos);
                 })
                 .toList();
 
-        CinemaResDto.CinemaDetailDto cinemaDetailDto = CinemaResDto.CinemaDetailDto.of(cinema,theaterDtos);
+        CinemaResponseDto.CinemaDetailDto cinemaDetailDto = CinemaResponseDto.CinemaDetailDto.of(cinema,theaterDtos);
         return cinemaDetailDto;
     }
 }

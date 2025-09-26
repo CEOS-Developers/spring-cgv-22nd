@@ -1,13 +1,12 @@
 package com.ceos22.cgv_clone.web.dto;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
 
-public class ReservationReqDto {
+public class ReservationRequestDto {
 
     @Getter
     @AllArgsConstructor

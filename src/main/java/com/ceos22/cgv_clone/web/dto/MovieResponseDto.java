@@ -7,7 +7,7 @@ import lombok.Getter;
 
 import java.time.LocalDate;
 
-public class MovieResDto {
+public class MovieResponseDto {
 
     @Getter
     @AllArgsConstructor

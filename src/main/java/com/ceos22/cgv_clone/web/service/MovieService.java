@@ -26,12 +26,9 @@ public class MovieService {
     }
 
     public MovieResDto.MovieDetailDto getMovie(Long movieId) {
-        Movie movie = movieRepository.findById(movieId)
-                .orElseThrow(()-> new IllegalArgumentException("Movie not found with id: " + movieId));
-
-        MovieResDto.MovieDetailDto movieDetailDto = MovieResDto.MovieDetailDto.of(movie);
-
-        return movieDetailDto;
+        return movieRepository.findById(movieId)
+                .map(MovieResDto.MovieDetailDto::of)
+                .orElseThrow(()-> new IllegalArgumentException("Movie not found"));
     }
 
 }

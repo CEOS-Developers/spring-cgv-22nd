@@ -48,7 +48,7 @@ public class TokenProvider implements InitializingBean {
 
         Date now = new Date();
         return Jwts.builder()
-                .setSubject(String.valueOf(id))
+                .setSubject(id.toString())
                 .claim("auth",authorities)
                 .setIssuedAt(now)
                 .setExpiration(new Date(now.getTime() + accessExpirationTime))

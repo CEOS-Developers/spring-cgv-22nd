@@ -1,6 +1,7 @@
 package com.ceos22.cgv_clone.web.domain;
 
 import com.ceos22.cgv_clone.global.common.BaseEntity;
+import com.ceos22.cgv_clone.web.domain.enums.UserRole;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.UuidGenerator;

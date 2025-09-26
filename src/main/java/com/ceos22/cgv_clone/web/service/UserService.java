@@ -2,8 +2,10 @@ package com.ceos22.cgv_clone.web.service;
 
 import com.ceos22.cgv_clone.global.apiPayload.code.ErrorStatus;
 import com.ceos22.cgv_clone.global.apiPayload.exception.GeneralException;
+import com.ceos22.cgv_clone.global.security.CustomUserDetails;
 import com.ceos22.cgv_clone.global.security.TokenProvider;
 import com.ceos22.cgv_clone.web.domain.User;
+import com.ceos22.cgv_clone.web.domain.enums.UserRole;
 import com.ceos22.cgv_clone.web.dto.UserRequestDto;
 import com.ceos22.cgv_clone.web.dto.UserResponseDto;
 import com.ceos22.cgv_clone.web.repository.UserRepository;
@@ -42,6 +44,7 @@ public class UserService {
                 .name(requestDto.getName())
                 .birthDate(requestDto.getBirth())
                 .password(passwordEncoder.encode(requestDto.getPassword()))
+                .role(UserRole.GENERAL)
                 .build();
 
         userRepository.save(user);
@@ -59,7 +62,8 @@ public class UserService {
             throw new GeneralException(ErrorStatus.INVALID_PASSWORD);
         }
 
-        UserDetails userDetails = userDetailsService.loadUserByUsername(user.getEmail());
+        CustomUserDetails userDetails = new CustomUserDetails(user);
+
         Authentication authentication = new UsernamePasswordAuthenticationToken(
                 userDetails,
                 null,

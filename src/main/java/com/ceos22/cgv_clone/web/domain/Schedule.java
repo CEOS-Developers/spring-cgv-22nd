@@ -31,9 +31,9 @@ public class Schedule extends BaseEntity {
     @JoinColumn(name = "theater_id")
     private Theater theater;
 
-    public boolean isActive() {
+    public boolean notStarted() {
         LocalDateTime now = LocalDateTime.now();
-        return now.isAfter(startTime);
+        return now.isBefore(startTime);
     }
 
 }

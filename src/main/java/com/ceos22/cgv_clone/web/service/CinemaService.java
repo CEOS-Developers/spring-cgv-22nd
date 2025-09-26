@@ -52,17 +52,18 @@ public class CinemaService {
         List<Theater> theaterList = theaterRepository.findByCinemaId(cinemaId);
 
         List<TheaterResponseDto.TheaterDto> theaterDtos = theaterList.stream()
-                .map(thater-> {
-                    List<Schedule> schedules = scheduleRepository.findByTheaterId(thater.getId());
-                    List<ScheduleResponseDto.ScheduleDto> scheduleDtos = schedules.stream()
+                .map(theater-> {
+                    List<ScheduleResponseDto.ScheduleDto> scheduleDtos = scheduleRepository
+                            .findByTheaterId(theater.getId()).stream()
+                            .filter(Schedule::notStarted)
                             .map(ScheduleResponseDto.ScheduleDto::of)
-                            .toList();
-                    return TheaterResponseDto.TheaterDto.of(thater,scheduleDtos);
-                })
-                .toList();
+                            .collect(Collectors.toList());
 
-        CinemaResponseDto.CinemaDetailDto cinemaDetailDto = CinemaResponseDto.CinemaDetailDto.of(cinema,theaterDtos);
-        return cinemaDetailDto;
+                    return TheaterResponseDto.TheaterDto.of(theater, scheduleDtos);
+                })
+                .collect(Collectors.toList());
+
+        return CinemaResponseDto.CinemaDetailDto.of(cinema,theaterDtos);
     }
 
     public void preferCinema(Long cinemaId, User user) {

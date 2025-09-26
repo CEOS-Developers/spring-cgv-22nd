@@ -32,8 +32,8 @@ public class ReservationService {
         Schedule schedule = scheduleRepository.findById(requestdto.getScheduleId())
                 .orElseThrow(()-> new GeneralException(ErrorStatus.SCHEDULE_NOT_FOUND));
 
-        //스케줄이 상영중인지 확인
-        if (!schedule.isActive()){
+        //스케줄이 상영 전인지 확인
+        if (!schedule.notStarted()){
             throw new GeneralException(ErrorStatus.SCHEDULE_INACTIVE);
         }
 

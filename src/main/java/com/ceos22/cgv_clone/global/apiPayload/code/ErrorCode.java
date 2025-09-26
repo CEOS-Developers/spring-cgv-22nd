@@ -77,4 +77,12 @@ public enum ErrorCode{
         this.message = message;
     }
 
+    public ReasonDto getReason() {
+        return ReasonDto.builder()
+                .isSuccess(false)
+                .code(divisionCode)
+                .message(message)
+                .build();
+    }
+
 }

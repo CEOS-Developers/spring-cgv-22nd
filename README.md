@@ -145,3 +145,111 @@
   ➡️ **N:M** (user ↔ movie)
 
 ---
+
+# 인증(Authentication) 방법 정리
+
+## 1. 세션(Session) & 쿠키(Cookie) 인증
+
+### 인증 흐름
+1. 사용자가 로그인 요청을 보냅니다.
+2. 서버는 사용자 정보를 확인한 뒤 **세션 ID**를 생성하고 세션 저장소에 기록합니다.
+3. 서버는 Session ID를 쿠키에 담아 클라이언트로 전달합니다.
+4. 클라이언트는 이후 요청마다 쿠키(Session ID)를 포함시킵니다.
+5. 서버는 세션 저장소와 대조해 사용자를 확인하고 데이터를 반환합니다.
+
+### 장점
+- 실제 정보는 서버에 저장, 쿠키는 **세션 키(출입증)** 역할만 함 → 보안성 상대적으로 우수
+- 매번 회원 정보를 확인하지 않아도 되므로 인증 속도가 빠름
+
+### 단점
+- 쿠키 탈취 시 **세션 하이재킹 공격** 발생 가능 → HTTPS + 세션 만료 시간 설정 필요
+- 세션 저장을 위해 **서버 자원(메모리/DB 등)** 필요
+
+---
+
+## 2. JWT 기반 인증 (Access Token)
+
+### 구조
+- **Header**: 토큰 타입(JWT), 알고리즘(HS256 등)
+- **Payload**: 사용자 ID, 권한, 만료시간 등 Claims
+- **Signature**: 위·변조 방지용 서명 (Header + Payload + Secret Key 기반)
+
+### 인증 흐름
+1. 사용자가 로그인 요청을 보냅니다.
+2. 서버는 사용자 정보를 확인 후 JWT(Access Token)를 생성합니다.
+3. 클라이언트는 Access Token을 전달받아 저장합니다.
+4. 이후 요청마다 `Authorization: Bearer <token>` 헤더에 토큰을 담아 전송합니다.
+5. 서버는 토큰의 유효성(서명, 만료시간)을 확인 후 데이터를 반환합니다.
+
+### 장점
+- 서버 저장소가 불필요하고 **무상태(stateless)** 구조에 적합합니다.
+- 다른 서비스와의 연동이 용이합니다.
+
+### 단점
+- 만료 전까지 강제 무효화 어렵습니다. (탈취 시 위험)
+- Payload는 누구나 디코딩 가능하여 민감 정보 저장이 불가능합니다.
+- 토큰 크기가 커서 요청 많을 시 트래픽 비용 증가합니다.
+
+---
+
+## 3. Access Token + Refresh Token 인증
+
+### 개념
+- **Access Token**: 짧은 유효기간(예: 1시간), API 요청시 인증/인가에 사용
+- **Refresh Token**: 긴 유효기간(예: 2주), Access Token이 만료되었을 때 재발급 용도로 사용
+
+### 인증 흐름
+1. 로그인 성공 시 서버는 Access Token과 Refresh Token을 발급합니다.
+2. 클라이언트는 Access Token을 요청에 포함하여 보냅니다.
+3. Access Token이 만료되면 Refresh Token을 이용해 새로운 Access Token을 발급받습니다.
+4. Refresh Token까지 만료되면 재로그인이 필요합니다.
+
+### 장점
+- Access Token을 짧게 가져가므로 탈취당해도 보안에 취약한 시간을 줄일 수 있습니다.
+- 사용자는 자주 로그인할 필요가 없어 편리합니다.
+
+### 단점
+- 구현 복잡도가 올라갑니다.
+- Access Token의 유효기간이 매우 짧은 경우 서버 부하 증가가 예상되며 매 API 호출마다 accessToken을 이용한 인증 부하가 발생합니다.
+
+---
+
+## 4. OAuth 2.0 인증
+
+### 개념
+- 외부 서비스(Google, Facebook 등) 계정을 사용해 인증을 위임받는 프로토콜
+- 현재 표준은 **OAuth 2.0**입니다.
+
+### 주요 참여자
+- **Resource Owner**: 사용자
+- **Client**: 우리의 애플리케이션
+- **Authorization Server**: 인증/토큰 발급 서버
+- **Resource Server**: 보호된 자원을 가진 서버
+
+### 인증 흐름
+1. 사용자가 Client에 로그인 요청
+2. Client는 사용자를 Authorization Server(구글/페북 로그인 페이지 등)로 리디렉트
+3. 사용자가 로그인 후 **Authorization Code**를 Client로 전달
+4. Client는 Authorization Server에 Authorization Code를 전송해 **Access/Refresh Token** 발급
+5. Client는 Access Token으로 Resource Server에 요청
+6. 토큰 만료 시 Refresh Token으로 갱신
+
+### 장점
+- 소셜 로그인, 외부 계정 연동에 많이 활용되어 범용성이 높은 방법입니다.
+- 표준화된 방식으로 다양한 서비스에서 실제로 활용하는 인증 방법입니다.
+
+### 단점
+- 설정이 복잡(redirect URI, client ID/secret 필요)하여 초기 구현 비용이 높습니다.
+- 토큰 보관 및 만료 처리에 주의 필요합니다.
+
+---
+
+## 5. SNS 로그인 (Facebook, Google 등)
+
+### 인증 흐름
+1. 사용자가 서버에 로그인 요청
+2. 서버는 SNS 로그인 URL을 클라이언트로 전달
+3. 사용자가 해당 URL을 통해 로그인 → 인증 코드 반환
+4. 서버는 Authorization Server에 코드 검증 요청 후 Access/Refresh Token + 사용자 정보 발급
+5. 서버는 사용자 정보를 DB에 저장(신규면 회원가입, 기존이면 로그인)
+6. 이후 인증은 세션/쿠키 또는 JWT 방식으로 관리  

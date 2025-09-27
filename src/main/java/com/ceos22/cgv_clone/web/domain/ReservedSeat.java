@@ -13,7 +13,7 @@ import lombok.*;
 public class ReservedSeat extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "reservation_seat_id")
+    @Column(name = "reserved_seat_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)

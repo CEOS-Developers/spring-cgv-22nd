@@ -14,3 +14,53 @@ ERD는 다음과 같이 짜봤습니다
 2. 매점테이블의 존재
 
 원래는 매점 테이블을 만들었었으나, 생각해보니 영화관에 매점은 무조건 하나씩이고, 메뉴까지 다 같아 굳이 만들 필요가 없다는 걸 깨달았습니다. 따라서 이후 테이블을 삭제하고 영화관과 상품테이블을 일대다로 매핑했습니다.
+
+---
+
+### ERD 최종본
+<img width="498" height="695" alt="Image" src="https://github.com/user-attachments/assets/92ab58bb-65ec-483a-9c9f-4710ac86ae28" />
+
+
+# 내용정리
+
+### JWT 인증 방법
+JWT란, JSON Web Token의 약자로, 인증에 필요한 정보들을 토큰에 담아 암호화하여 인증에 사용하는 인터넷 표준 인증 방식이다.
+.을 기준으로 HEADER, SIGNATURE, PAYLOAD로 구분되며 관련 정보들은 각각에 담긴 채 암호화되어있다.
+
+즉 이는 일종의 확인서로, 우리가 한 사이트에 로그인을 해서 인증이 이루어지면, 서버는 이에 대한 확인서(jwt)를 우리에게 제공한다.
+이후 우리는 서버에 요청을 할 때마다 서버에게 jwt를 함께 보여주면서 권한을 확인받는다.
+
+JWT를 그대로 사용할 경우, 토큰 탈취의 위험성이 있어 주로 Access Token, Refresh Token 으로 나누어서 인증을 하는 방식으로
+주로 사용된다.
+
+✅Access Token : 클라이언트가 갖고있는 실제로 유저의 정보가 담긴 토큰으로, 클라이언트에서 요청이 오면 서버에서 해당 토큰에 있는 정보를 활용하여 사용자 정보에 맞게 응답을 진행한다. 탈취 위험을 줄이기 위해, 짧은 수명을 유지한다.
+
+✅Refresh Token : 새로운 Access Token을 발급해주기 위해 사용하는 토큰으로 짧은 수명을 가지는 Access Token에게 새로운 토큰을 발급해주기 위해 사용된다.
+
+<img width="682" height="420" alt="Image" src="https://github.com/user-attachments/assets/bb556967-3179-41ec-97bb-121147a3eb68" />
+JWT 인증방식은 사진과 같다.
+
+### Cookie 인증 방식
+- Key, Value 쌍으로 이루어진 문자열로, 클라이언트가 웹사이트를 방문할 경우, 그 사이트가 사용하고 있는 서버를 통해
+클라이언트의 브라우저에 설치되는 작은 데이터 조각이다.
+- 다만 요청 시 쿠키의 값을 그대로 보내기때문에, 보안에 취약하다는 단점이 있다.
+
+<img width="676" height="202" alt="Image" src="https://github.com/user-attachments/assets/d58e75d4-0eb2-4089-88f8-ee93a42f45df" />
+쿠키 인증 방식이다.
+
+### Session 인증 방식
+- cookie의 보안적인 이슈 해결을 위한것으로, 세션은 민감한 인증 정보를 브라우저가 아닌, 서버측에서 저장하고 관리한다.
+- 그러나 이 또한 세션ID를 탈취하여, 클라이언트로 위장할 수 있다는 단점이 존재한다.
+
+<img width="694" height="203" alt="Image" src="https://github.com/user-attachments/assets/d97e0bff-5113-4860-b445-7e01080c6ef4" />
+세션 인증 방식이다.
+
+### Oauth 인증 방식
+우선 Oauth란? 인터넷 사용자들이 다른 웹사이트 상의 자신의 정보에 대해 접근 권한을 부여할 수 있는 공통적인 수단으로서 사영되는
+접근 위임을 위한 개방형 표준이다
+
+-> 즉, 이를 이용한 인증 방식은, 한 어플리케이션을 이용할 때 사용자가 해당 어플리케이션이 아닌 외부 어플리케이션 (ex KAKAO, GOOGLE ...)의 Open API에서 로그인을 하여
+해당 어플리케이션이 인증 과정을 처리해주는 인증 방식이다.
+
+<img width="639" height="430" alt="Image" src="https://github.com/user-attachments/assets/ea5e67ab-743f-4562-b372-5017c330d634" />
+Oauth 인증 방식이다.

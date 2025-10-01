@@ -38,8 +38,8 @@ public class Order {
     private final List<OrderFood> orderFoods = new ArrayList<>();
 
     //==연관관계 메서드==//
-    public void changeMember(Member Member) {
-        this.member = Member;
+    public void changeMember(Member member) {
+        this.member = member;
     }
 
     public void changeCinema(Cinema cinema) {

@@ -457,3 +457,526 @@ public interface CinemaRepository extends JpaRepository<Cinema, Long> {
   - 데이터를 SELECT하는 SQL 쿼리 자동 생성
 - Region
   - Cinema 엔티티에 있는 region 필드를 검색 조건(WHERE)으로 사용
+
+
+---
+
+## 인증과 인가
+
+### 인증 (Authentication)
+
+
+: “누구인지 증명” → 로그인
+
+### 인가 (Authorization)
+
+
+: “접근 권한 확인하고 허가”
+
+### 회사 비유
+
+1. **인증 (Authentication) = 사원증 검사**
+  - 출입 게이트에서 사원증을 태그
+2. **인가 (Authorization) = 부서 접근 권한**
+  - 5F 인사팀 / 7F 개발팀 / 10F 임원실
+
+# 로그인 인증 방식
+
+## 세션 기반 인증 (Stateful)
+
+서버가 사용자의 로그인 상태 정보(세션)를 저장하고 관리하는 방식입니다.
+
+- **동작 방식**
+  1. 사용자가 로그인에 성공하면 서버는 **세션 저장소**에 사용자 정보를 저장하고, 그 저장소에 접근할 수 있는 특별한 **세션 ID**를 생성합니다.
+  2. 서버는 이 세션 ID를 **쿠키**에 담아 사용자 브라우저에 보냅니다.
+  3. 사용자는 이후 모든 요청에 이 세션 ID가 담긴 쿠키를 함께 보냅니다.
+  4. 서버는 쿠키 속 세션 ID를 받아 세션 저장소와 대조하여 사용자를 식별합니다.
+- **특징**: 서버에 사용자의 상태(State)가 저장되기 때문에 **Stateful**하다고 부릅니다.
+
+## JWT 기반 인증 (Stateless)
+
+서버가 사용자의 로그인 상태를 저장하지 않고, 요청에 포함된 토큰만으로 사용자를 식별하는 방식입니다. **JWT(JSON Web Token) 인증**이 가장 대표적인 예입니다.
+
+- **동작 방식**
+  1. 사용자가 로그인에 성공하면 서버는 사용자 정보와 권한, 만료 시간 등을 담은 암호화된 토큰(JWT)을 생성하여 사용자에게 전달합니다.
+  2. 사용자는 이후 모든 요청의 헤더(Header)에 이 토큰을 담아 보냅니다.
+  3. 서버는 토큰의 서명을 검증하여 데이터의 위변조 여부를 확인하고, 토큰 내부의 정보(Payload)를 통해 사용자를 식별합니다. 서버에 별도로 저장된 정보가 필요 없습니다.
+- **특징**: 서버가 상태를 저장하지 않으므로 **Stateless**하다고 부릅니다. 확장성이 뛰어나고 모바일 앱 등 다양한 클라이언트 환경에 적용하기 좋습니다.
+
+### 요약
+| 구분 | **세션 기반 인증** | **토큰 기반 인증 (JWT)** |
+| --- | --- | --- |
+| **상태 저장** | 서버에 저장 (Stateful) | 서버에 저장 안 함 (Stateless) |
+| **인증 정보** | 세션 ID (서버 저장소의 열쇠) | 토큰 자체 (필요 정보가 모두 담김) |
+| **전달 매체** | 주로 쿠키 | 주로 HTTP 헤더 (Authorization) |
+| **확장성** | 다소 불리 (서버 간 세션 공유 필요) | 유리 (토큰만 검증하면 됨) |
+
+
+### Access Token (접근 토큰)
+
+- **역할**: **실제 API 요청 권한을 증명**하는 단기 출입증입니다.
+- **특징**:
+  - **짧은 유효기간**: 보안을 위해 유효기간이 짧습니다. (예: 30분, 1시간)
+  - **정보 포함**: 사용자 ID, 권한 등 필요한 정보를 담고 있습니다.
+  - **탈취 위험**: 만약 이 토큰이 탈취되더라도, 유효기간이 짧아 피해를 최소화할 수 있습니다.
+- **사용**: 사용자는 API를 요청할 때마다 이 Access Token을 헤더에 담아 보냅니다.
+
+### Refresh Token (재발급 토큰)
+
+- **역할**: **새로운 Access Token을 발급받기 위해** 사용하는 장기 출입증입니다.
+- **특징**:
+  - **긴 유효기간**: Access Token보다 훨씬 긴 유효기간을 가집니다. (예: 7일, 30일)
+  - **보안된 저장**: 탈취되면 위험하므로, 서버의 안전한 DB나 클라이언트의 보안 스토리지에 저장됩니다.
+  - **사용 최소화**: 실제 API 요청에는 사용되지 않고, 오직 Access Token이 만료되었을 때 **새 Access Token을 발급받는 용도**로만 사용됩니다.
+
+### **동작 방식**
+
+1. **최초 로그인**: 사용자가 로그인하면, 서버는 **Access Token**과 **Refresh Token**을 **모두** 발급합니다.
+2. **API 요청**: 사용자는 **Access Token**을 사용하여 API를 요청합니다.
+3. **Access Token 만료**: 시간이 지나 Access Token이 만료되면, API 요청이 거부됩니다.
+4. **토큰 재발급**: 사용자는 가지고 있던 **Refresh Token**을 서버의 재발급 API로 보냅니다.
+5. **재발급 성공**: 서버는 Refresh Token이 유효한지 확인하고, 새로운 **Access Token**을 발급해 줍니다. 사용자는 다시 로그인할 필요 없이 API 요청을 계속할 수 있습니다.
+
+---
+
+## 구현
+
+### 의존성 추가
+
+```java
+	// Spring Security 0.12.16
+	implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
+	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.6'
+	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.6'
+```
+
+### SecurityConfig
+
+```java
+@Configuration
+@EnableWebSecurity
+public class SecurityConfig {
+
+  @Bean
+  public BCryptPasswordEncoder passwordEncoder() {
+    return new BCryptPasswordEncoder();
+  }
+
+  @Bean
+  public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+
+    //csrf disable
+    http
+            .csrf((auth) -> auth.disable());
+
+    //Form 로그인 방식 disable
+    http
+            .formLogin((auth) -> auth.disable());
+
+    //http basic 인증 방식 disable
+    http
+            .httpBasic((auth) -> auth.disable());
+
+    http
+            .authorizeHttpRequests(auth -> auth
+                    .requestMatchers("/", "/api/auth/signup", "/api/auth/login").permitAll()
+                    .requestMatchers("/admin/**").hasRole("ROLE_ADMIN")
+                    .anyRequest().authenticated()
+            );
+
+    //세션 설정
+    http
+            .sessionManagement((session) -> session
+                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+
+    return http.build();
+  }
+}
+
+```
+- `@EnableWebSecurity`
+  - **SpringSecurityFilterChain 등록**: 웹 요청을 가로채 보안 처리를 담당하는 `springSecurityFilterChain`이라는 이름의 서블릿 필터(Servlet Filter)를 스프링 컨테이너에 등록
+    - 서블릿 필터(Servlet Filter): 클라이언트의 요청(Request)이 서블릿(Servlet)에 도달하기 전과, 서블릿의 응답(Response)이 클라이언트에게 전달되기 전에 거치는 필터
+    - 로그인 체크, 권한 검사, 요청/응답에 대한 로그 기록, Input/Output 데이터 가공, 인코딩 처리
+  - 모든 요청에 대해 인증(Authentication) 요구
+  - 폼 기반 로그인(Form-based Login) 및 HTTP Basic 인증 활성화
+  - 세션 관리, CSRF(Cross-Site Request Forgery) 방어, 헤더 보안 설정 등
+- **SpringSecurityFilterChain**
+  - HTTP 요청 → 서블릿 컨테이너(WAS) → DelegatingFilterProxy →  **Security Filter Chain** (필터1 →  필터2 →  ...) →  DispatcherServlet →  컨트롤러
+ <img width="1700" height="1014" alt="image" src="https://github.com/user-attachments/assets/5bb9c098-2314-4087-a304-38a36756c56b" />
+
+
+- **DelegatingFilterProxy**
+  - 서블릿 컨테이너가 관리하는 **DelegatingFilterProxy** 와 스프링 컨테이너가 관리하는 **Security Filter Chain** 연결
+
+
+  - 동작 원리
+    1. DelegatingFilterProxy 가 Servlet Container 로 넘어온 사용자의 요청을 받음
+    2. DelegatingFilterProxy 는 SpringSecurityFilterChain 이름으로 생성된 Bean 을 ApplicationContext 에서 찾음
+    3. Bean 을 찾으면 SpringSecurityFilterChain 으로 요청을 위임
+
+  ### 기본 필터의 종류와 실행 순서
+
+  스프링 시큐리티는 기본적으로 10개 이상의 필터를 체인에 등록
+
+  1. `SecurityContextHolderFilter`
+    - 모든 요청의 시작과 끝에서 `SecurityContext`를 생성하고 정리함
+    - `SecurityContextHolder`에 대한 접근을 설정하는 매우 기본적인 필터
+  2. `LogoutFilter`
+    - 설정된 로그아웃 URL(기본값: `/logout`)로 오는 요청을 감시하고, 해당 요청이 오면 사용자를 로그아웃 처리함
+  3. `CsrfFilter`
+    - CSRF 토큰을 검증하여 세션 기반의 위조 공격을 방어. (JWT 방식에서는 보통 비활성화)
+  4. `UsernamePasswordAuthenticationFilter`
+    - 설정된 로그인 URL(기본값: `/login`)로 오는 아이디/비밀번호 요청을 처리하여 사용자를 인증
+  5. `BasicAuthenticationFilter`
+    - HTTP Basic 인증 헤더가 있는지 확인하고, 있다면 인증을 처리
+  6. `ExceptionTranslationFilter`
+    - 필터 체인에서 발생하는 `AuthenticationException`(인증 실패)이나 `AccessDeniedException`(인가 실패)을 감지하고 처리 예를 들어, 인증되지 않은 사용자라면 로그인 페이지로 보내거나 401 오류를 반환
+  7. `AuthorizationFilter`
+    - `SecurityConfig`에 설정된 `authorizeHttpRequests` 규칙(`hasRole`, `permitAll` 등)을 기반으로, 사용자가 해당 요청에 접근할 권한이 있는지 최종적으로 확인(인가)
+
+- `BCryptPasswordEncoder`
+  - Spring Security가 제공하는 BCrypt 해싱 알고리즘을 Bean으로 등록
+
+- `csrf.disable()`: 세션 기반 공격인 CSRF 공격 방어 기능을 disable.
+- `formLogin.disable()`: 폼(Form) 기반의 로그인 페이지 관련 기능 disable.
+- `httpBasic.disable()`: HTTP Basic 인증 방식 disable.
+
+- `.requestMatchers("/", "/api/auth/signup", "/api/auth/login").permitAll()`
+  - `"/", "/api/auth/signup", "/api/auth/login"` 경로로 들어오는 요청은 누구나 접근할 수 있도록 허용함. (인증 불필요)
+  - 회원가입/로그인은 인증 전 상태에서 접근해야 함
+
+- `.sessionCreationPolicy(SessionCreationPolicy.STATELESS)`
+  - 서버가 세션을 생성하거나 사용하지 않도록 설정 (Stateless 방식)
+  
+
+### JWTUtil - JWT 발급 및 검증 클래스
+
+```java
+@Component
+public class JWTUtil {
+
+    private SecretKey secretKey;
+
+    public JWTUtil(@Value("${spring.jwt.secret}") String secret) {
+        this.secretKey = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), Jwts.SIG.HS256.key().build().getAlgorithm());
+    }
+
+    public String getUsername(String token) {
+
+        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("username", String.class);
+    }
+
+    public String getRole(String token) {
+
+        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("role", String.class);
+    }
+
+    public Boolean isExpired(String token) {
+
+        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().getExpiration().before(new Date());
+    }
+
+    public String createJwt(String username, String role, Long expiredMs) {
+
+        return Jwts.builder()
+                .claim("username", username)
+                .claim("role", role)
+                .issuedAt(new Date(System.currentTimeMillis()))
+                .expiration(new Date(System.currentTimeMillis() + expiredMs))
+                .signWith(secretKey)
+                .compact();
+    }
+
+}
+```
+
+
+- JWT 발급과 검증
+  - 로그인 시
+    - 로그인 성공 → JWT 발급
+  - 접근 시
+    - JWT 검증
+- JWT를 암호화하고 서명하는 데 사용할 SecretKey를 생성하고 초기화
+  - JWT 서명에 사용할 알고리즘을 HS256(HMAC SHA-256)으로 지정
+  - secret 문자열은 application.yml 파일에 저장
+- `Jwts.parser().verifyWith(secretKey).build()`
+  - secretKey로 이 토큰의 서명이 유효한지 먼저 검증
+  - 유효하다면 토큰에서 필요한 정보 추출
+- `createJwt(String username, String role, Long expiredMs)`
+  - username, role, 발행시간, 만료시간 정보를 payload에 담음
+  - secretKey를 이용해 서명
+  - header.payload.signature 형태의 압축된 JWT 문자열을 생성
+
+
+### CustomUserDetails - UserDetails 구현체
+
+```java
+public class CustomUserDetails implements UserDetails {
+
+    private User user;
+
+    public CustomUserDetails(User user){
+        this.user = user;
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+
+        Collection<GrantedAuthority> collection = new ArrayList<>();
+
+        collection.add(new GrantedAuthority() {
+            @Override
+            public String getAuthority() {
+
+                return user.getRole().name();
+            }
+        });
+
+        return collection;
+    }
+
+    @Override
+    public String getPassword() {
+        return user.getPassword();
+    }
+
+    @Override
+    public String getUsername() {
+        return user.getUsername();
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
+}
+```
+
+- `User` 엔티티 객체를 스프링 시큐리티가 이해할 수 있는 `UserDetails` 타입으로 변환해주는 역할
+- 스프링 시큐리티는 인증 과정에서 `UserDetails` 객체의 정보를 사용하여 비밀번호를 비교하고 권한을 확인함
+- `public Collection<? extends GrantedAuthority> getAuthorities()`
+  - 해당 유저가 가지고 있는 권한 목록을 반환
+- `getPassword()`, `getUsername()`, `isAccountNonExpired()`
+  - 인증 정보 제공
+  - 계정 상태 정보 제공
+  - UserDetails 인터페이스의 메서드 필수적으로  overriding 해야함
+
+### CustomUserDetailsService - UserDetailsService 구현체
+
+```java
+@Service
+@RequiredArgsConstructor
+public class CustomUserDetailsService implements UserDetailsService {
+
+    private final UserRepository userRepository;
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+
+        User userData = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("해당 유저를 찾을 수 없습니다: " + username));
+
+        return new CustomUserDetails(userData);
+    }
+}
+```
+
+- 스프링 시큐리티가 사용자 인증을 할 때 필요한 유저 정보를 DB에서 조회하는 클래스
+- `loadUserByUsername(String username)`
+  - 스프링 시큐리티가 로그인을 시도하는 유저의 `username` 을 이 메서드로 전달
+  - DB에서 유저 조회
+  - `User` 엔티티 객체를 이전에 만들었던 `CustomUserDetails` 객체로 변환해서 반환
+
+### LoginFilter - UsernamePasswordAuthenticationFilter 구현체
+
+```java
+public class LoginFilter extends UsernamePasswordAuthenticationFilter {
+
+    private final AuthenticationManager authenticationManager;
+    private final JWTUtil jwtUtil;
+
+    public LoginFilter(AuthenticationManager authenticationManager, JWTUtil jwtUtil) {
+        this.authenticationManager = authenticationManager;
+        this.jwtUtil = jwtUtil;
+        // 로그인 요청 URL
+        setFilterProcessesUrl("/api/auth/login");
+    }
+
+    // 로그인 요청 시 호출되어 인증을 시도하는 메서드
+    @Override
+    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
+        try {
+            // JSON을 LoginRequestDto 객체로 변환
+            ObjectMapper objectMapper = new ObjectMapper();
+            LoginRequestDto loginRequestDto = objectMapper.readValue(request.getInputStream(), LoginRequestDto.class);
+
+            String username = loginRequestDto.getUsername();
+            String password = loginRequestDto.getPassword();
+
+            // 스프링 시큐리티에서 사용할 인증 토큰(UsernamePasswordAuthenticationToken) 생성
+            UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(username, password, null);
+
+            // AuthenticationManager에게 인증을 위임
+            return authenticationManager.authenticate(authToken);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    // 인증 성공 시 호출되는 메서드
+    @Override
+    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException, ServletException {
+        // CustomUserDetails를 추출
+        CustomUserDetails customUserDetails = (CustomUserDetails) authResult.getPrincipal();
+
+        // 사용자 이름과 역할을 추출
+        String username = customUserDetails.getUsername();
+        Collection<? extends GrantedAuthority> authorities = authResult.getAuthorities();
+        Iterator<? extends GrantedAuthority> iterator = authorities.iterator();
+        GrantedAuthority auth = iterator.next();
+        String role = auth.getAuthority();
+
+        long expireMs = 60 * 60 * 1000L; // 1시간
+        String token = jwtUtil.createJwt(username, role, expireMs);
+
+        response.addHeader("Authorization", "Bearer " + token); // Authorization: Bearer [토큰값]
+        response.setStatus(HttpServletResponse.SC_OK); // 200 OK
+    }
+
+    // 인증 실패 시 호출되는 메서드
+    @Override
+    protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+    }
+}
+```
+
+- 사용자의 로그인 요청(`POST /login`)을 직접 처리하여 인증을 수행하고, 성공 시 JWT를 발급
+- Form Login Filter를 disable 시켰기 때문에 `UsernamePasswordAuthenticationFilter` 커스텀 구현 필요
+- 필터 등록
+
+### SecurityConfig
+
+```java
+    http
+            .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration)), UsernamePasswordAuthenticationFilter.class);
+
+```
+
+### JWTFilter
+
+```java
+package com.ceos22.springcgv.config.jwt;
+
+import com.ceos22.springcgv.config.CustomUserDetails;
+import com.ceos22.springcgv.domain.User;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+import java.io.IOException;
+
+public class JWTFilter extends OncePerRequestFilter {
+
+    private final JWTUtil jwtUtil;
+
+    public JWTFilter(JWTUtil jwtUtil) {
+        this.jwtUtil = jwtUtil;
+    }
+
+    @Override
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+
+        //request에서 Authorization 헤더를 찾음
+        String authorization= request.getHeader("Authorization");
+
+        //Authorization 헤더 검증
+        if (authorization == null || !authorization.startsWith("Bearer ")) {
+
+            System.out.println("token null");
+            filterChain.doFilter(request, response);
+
+            //조건이 해당되면 메소드 종료
+            return;
+        }
+
+        //Bearer 부분 제거 후 순수 토큰만 획득
+        String token = authorization.split(" ")[1];
+
+        //토큰 소멸 시간 검증
+        if (jwtUtil.isExpired(token)) {
+
+            System.out.println("token expired");
+            filterChain.doFilter(request, response);
+
+            return;
+        }
+
+        //토큰에서 username과 role 획득
+        String username = jwtUtil.getUsername(token);
+        String role = jwtUtil.getRole(token);
+
+        //user를 생성하여 값 set
+        User user = User.builder()
+                .username(username)
+                .password(null) // 임시 비밀번호
+                .role(User.Role.valueOf(role))
+                .build();
+
+        //UserDetails에 회원 정보 객체 담기
+        CustomUserDetails customUserDetails = new CustomUserDetails(user);
+
+        //스프링 시큐리티 인증 토큰 생성
+        Authentication authToken = new UsernamePasswordAuthenticationToken(customUserDetails, null, customUserDetails.getAuthorities());
+        //세션에 사용자 등록
+        SecurityContextHolder.getContext().setAuthentication(authToken);
+
+        filterChain.doFilter(request, response);
+
+    }
+}
+
+```
+
+- 클라이언트가 로그인 이후에 보내는 모든 요청을 가로채서, 요청에 포함된 JWT가 유효한지 검증하는 클래스
+- 요청의 `Authorization` 헤더를 확인
+  - 헤더가 없거나, Bearer  로 시작하지 않으면 `doFilter(request, response)` 로 다음 체인으로 넘기고 메서드 종료
+- 토큰 만료 여부 확인
+- 토큰이 검증되면(JWTUtil), 토큰의 payload에 저장된 `username`과 `role` 정보를 꺼냄
+- 임시 User 및 UserDetails 생성
+  - 토큰에서 꺼낸 정보를 바탕으로 `UserDetails` 객체(`customUserDetails`) 생성
+- `CustomUserDetails`를 사용하여 `Authentication` 객체 생성
+- 이 객체를 `SecurityContextHolder`에 저장
+  - `SecurityContextHolder` 에 저장된  `Authentication` 객체는 애플리케이션의 어디서든 현재 로그인한 사용자의 정보를 쉽게 꺼내 쓸 수 있음
+
+### SecurityConfig
+
+```java
+        http
+                .addFilterBefore(new JWTFilter(jwtUtil), LoginFilter.class);
+```
+
+- LoginFilter 앞에 JWTFilter 등록
+
+

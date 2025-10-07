@@ -19,7 +19,7 @@ import lombok.NoArgsConstructor;
 @Table(name="token")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Token extends BaseEntity {
+public class RefreshToken extends BaseEntity {
 
 	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id", nullable = false)
@@ -32,8 +32,21 @@ public class Token extends BaseEntity {
 	private LocalDateTime expiryDate;
 
 	@Builder(access = PRIVATE)
-	private Token(User user, String refreshToken, LocalDateTime expiryDate) {
+	private RefreshToken(User user, String refreshToken, LocalDateTime expiryDate) {
 		this.user = user;
+		this.refreshToken = refreshToken;
+		this.expiryDate = expiryDate;
+	}
+
+	public static RefreshToken of (User user, String refreshToken, LocalDateTime expiryDate) {
+		return RefreshToken.builder()
+			.user(user)
+			.refreshToken(refreshToken)
+			.expiryDate(expiryDate)
+			.build();
+	}
+
+	public void updateRefreshToken(String refreshToken, LocalDateTime expiryDate) {
 		this.refreshToken = refreshToken;
 		this.expiryDate = expiryDate;
 	}

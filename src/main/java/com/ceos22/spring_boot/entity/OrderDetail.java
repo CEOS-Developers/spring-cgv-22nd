@@ -36,4 +36,12 @@ public class OrderDetail extends BaseEntity {
 		this.snackInventory = snackInventory;
 		this.quantity = quantity;
 	}
+
+	public static OrderDetail create(SnackOrder order, SnackInventory inventory, int quantity) {
+		OrderDetail detail = new OrderDetail();
+		detail.snackOrder = order;
+		detail.snackInventory = inventory;
+		detail.quantity = quantity;
+		return detail;
+	}
 }

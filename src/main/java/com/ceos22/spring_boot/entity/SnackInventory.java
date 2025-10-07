@@ -2,6 +2,9 @@ package com.ceos22.spring_boot.entity;
 
 import static lombok.AccessLevel.*;
 
+import com.ceos22.spring_boot.domain.snack.exception.SnackErrorCode;
+import com.ceos22.spring_boot.global.exception.GlobalException;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -35,5 +38,12 @@ public class SnackInventory extends BaseEntity {
 		this.snackMenu = snackMenu;
 		this.theater = theater;
 		this.quantity = quantity;
+	}
+
+	public void reduceQuantity(int count) {
+		if (this.quantity < count) {
+			throw new GlobalException(SnackErrorCode.OUT_OF_STOCK);
+		}
+		this.quantity -= count;
 	}
 }

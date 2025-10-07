@@ -1,0 +1,5 @@
+jwt:
+  cookie:
+    domain:
+    secure: true
+    same-site: None

@@ -10,7 +10,10 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum MovieErrorCode implements ResultCode {
-	MOVIE_NOT_FOUND(HttpStatus.NOT_FOUND, 2000, "영화를 찾을 수 없습니다.")
+	MOVIE_NOT_FOUND(HttpStatus.NOT_FOUND, 2000, "영화를 찾을 수 없습니다."),
+	BOOKMARK_NOT_FOUND(HttpStatus.NOT_FOUND, 6000, "즐겨찾기를 찾을 수 없습니다."),
+	DUPLICATED_BOOKMARK(HttpStatus.BAD_REQUEST, 6001, "이미 존재하는 즐겨찾기입니다."),
+	;
 	;
 
 	private final HttpStatus status;

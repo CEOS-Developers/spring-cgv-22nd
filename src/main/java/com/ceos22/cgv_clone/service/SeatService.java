@@ -1,7 +1,9 @@
 package com.ceos22.cgv_clone.service;
 
-import com.ceos22.cgv_clone.domain.*;
-import com.ceos22.cgv_clone.dto.ticket.*;
+import com.ceos22.cgv_clone.domain.reservation.ReservationStatus;
+import com.ceos22.cgv_clone.domain.theater.Screen;
+import com.ceos22.cgv_clone.domain.theater.Showtime;
+import com.ceos22.cgv_clone.dto.response.SeatResponseDto;
 import com.ceos22.cgv_clone.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,38 +18,24 @@ public class SeatService {
 
     private final ReservationSeatRepository reservationSeatRepository;
     private final ShowtimeRepository showtimeRepository;
-    private final SeatRepository seatRepository;
 
-    public ShowtimeSeatResponseDto getSeatsByShowtime(Long showtimeId) {
+    // 특정 상영 시간표의 예약 좌석 조회
+    public SeatResponseDto getSeatsByShowtime(Long showtimeId){
+
+        // 상영시간표 예외 처리
         Showtime showtime = showtimeRepository.findById(showtimeId)
-                .orElseThrow(() -> new IllegalArgumentException("상영시간표 없음"));
+                .orElseThrow(()->new IllegalArgumentException("상영시간표 없음"));
 
-        Screen screen = showtime.getScreen();
-        List<Seat> seats = seatRepository.findByScreenId(screen.getId());
+        int totalRow = showtime.getScreen().getTotalRow();
+        int totalCol = showtime.getScreen().getTotalCol();
 
-        // 예약된 seatId 가져오기
-        Set<Long> reservedSeatIds = reservationSeatRepository
-                .findByShowtimeIdAndStatus(showtimeId, ReservationStatus.RESERVED)
+        List <String> reservedSeats = reservationSeatRepository
+                .findByShowtime_IdAndStatus(showtimeId, ReservationStatus.RESERVED)
                 .stream()
-                .map(rs -> rs.getSeat().getId())
-                .collect(Collectors.toSet());
-
-        // 전체 좌석 리스트에 상태 반영
-        List<SeatStatusDto> seatStatusList = seats.stream()
-                .map(seat -> SeatStatusDto.builder()
-                        .seatId(seat.getId())
-                        .row(seat.getSeat_row())
-                        .col(seat.getSeat_col())
-                        .status(reservedSeatIds.contains(seat.getId()) ? "RESERVED" : "AVAILABLE")
-                        .build())
+                .map(rs -> rs.getSeatRow() + rs.getSeatCol())
                 .toList();
 
-        return ShowtimeSeatResponseDto.builder()
-                .showtimeId(showtimeId)
-                .screenName(screen.getName())
-                .totalSeats(screen.getTotalSeats())
-                .seats(seatStatusList)
-                .build();
+        return SeatResponseDto.from(showtime, totalRow, totalCol, reservedSeats);
     }
 }
 

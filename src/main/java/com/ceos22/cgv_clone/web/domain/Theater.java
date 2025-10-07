@@ -23,8 +23,11 @@ public class Theater extends BaseEntity {
     @Column(name = "theater_type")
     private TheaterType theaterType;
 
-    @Column(name = "max_seats")
-    private Integer maxSeats;
+    @Column(name = "total_row", nullable = false)
+    private Integer totalRow;
+
+    @Column(name = "total_col", nullable = false)
+    private Integer totalCol;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cinema_id")

@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
-public class ReservationResDto {
+public class ReservationResponseDto {
 
     @Builder
     @AllArgsConstructor

@@ -1,29 +1,36 @@
 package com.ceos22.cgv_clone.web.controller;
 
+import com.ceos22.cgv_clone.global.apiPayload.ApiResponse;
+import com.ceos22.cgv_clone.global.security.CustomUserDetails;
 import com.ceos22.cgv_clone.web.domain.enums.Region;
-import com.ceos22.cgv_clone.web.domain.enums.TheaterType;
-import com.ceos22.cgv_clone.web.dto.CinemaResDto;
+import com.ceos22.cgv_clone.web.dto.CinemaResponseDto;
 import com.ceos22.cgv_clone.web.service.CinemaService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/cinemas")
 public class CinemaController {
 
     private final CinemaService cinemaService;
 
-    @GetMapping
-    public ResponseEntity<List<CinemaResDto.CinemaDto>> getCinemas(@RequestParam Region region) {
-        return ResponseEntity.ok(cinemaService.getCinemas(region));
+    @GetMapping("/cinemas")
+    public ApiResponse<List<CinemaResponseDto.CinemaDto>> getCinemas(@RequestParam Region region) {
+        return ApiResponse.onSuccess(cinemaService.getCinemas(region));
     }
 
-    @GetMapping("/{cinemaId}")
-    public ResponseEntity<CinemaResDto.CinemaDetailDto> getCinema(@PathVariable(name = "cinemaId")Long cinemaId) {
-        return ResponseEntity.ok(cinemaService.getCinema(cinemaId));
+    @GetMapping("/cinemas/{cinemaId}")
+    public ApiResponse<CinemaResponseDto.CinemaDetailDto> getCinema(@PathVariable(name = "cinemaId")Long cinemaId) {
+        return ApiResponse.onSuccess(cinemaService.getCinema(cinemaId));
+    }
+
+    @PostMapping("/cinemas/{cinemaId}/prefer")
+    public ApiResponse<String> preferCinema(@PathVariable Long cinemaId, @AuthenticationPrincipal CustomUserDetails userDetails) {
+        cinemaService.preferCinema(cinemaId,userDetails.getUser());
+        return ApiResponse.onSuccess("해당 영화관을 찜하셨습니다.");
     }
 }

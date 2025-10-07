@@ -5,9 +5,16 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "reservation_seat")
+@Table(
+        name = "reservation_seat",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uk_schedule_row_column",
+                        columnNames = {"schedule_id", "seat_row", "seat_column"}
+                )
+        }
+)
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

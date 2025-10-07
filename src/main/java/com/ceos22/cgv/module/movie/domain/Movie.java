@@ -5,12 +5,12 @@ import com.ceos22.cgv.util.Rating;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "movie")
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -24,6 +24,9 @@ public class Movie {
     @Column(name = "title", nullable = false, length = 100)
     private String title;
 
+    @Column(name = "director", nullable = false, length = 100)
+    private String director;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "genre", nullable = false)
     private Genre genre;
@@ -36,6 +39,12 @@ public class Movie {
     private Rating rating;
 
     @Column(name = "release_date", nullable = false)
-    private LocalDateTime releaseDate;
+    private LocalDate releaseDate;
+
+    @Column(name = "description", nullable = false)
+    private String description;
+
+    @Column(name = "total_audience", nullable = false)
+    private Integer totalAudience;
 
 }

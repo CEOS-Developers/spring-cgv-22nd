@@ -5,6 +5,7 @@ import com.ceos22.cgv.module.user.domain.User;
 import com.ceos22.cgv.util.ReservationStatus;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -14,7 +15,6 @@ import java.util.List;
 @Entity
 @Table(name = "reservation")
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -32,6 +32,7 @@ public class Reservation {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @CreationTimestamp
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
@@ -40,5 +41,10 @@ public class Reservation {
     private ReservationStatus status;
 
     @OneToMany(mappedBy = "reservation", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private List<ReservationSeat> reservationSeats = new ArrayList<>();
+
+    public void cancel(){
+        this.status = ReservationStatus.CANCELLED;
+    }
 }

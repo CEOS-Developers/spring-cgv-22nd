@@ -2,11 +2,11 @@ package com.ceos22.cgv.module.snack.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.aspectj.weaver.ast.Or;
 
 @Entity
 @Table(name = "order_item")
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -30,4 +30,5 @@ public class OrderItem {
     // 주문 시점 가격
     @Column(name = "unit_price", nullable = false)
     private Integer unitPrice;
+
 }

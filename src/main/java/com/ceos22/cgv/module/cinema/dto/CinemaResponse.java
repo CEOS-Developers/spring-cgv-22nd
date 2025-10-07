@@ -1,8 +1,9 @@
 package com.ceos22.cgv.module.cinema.dto;
 
 import com.ceos22.cgv.module.cinema.domain.Cinema;
+import com.ceos22.cgv.util.Region;
 
-public record CinemaResponse(Long id, String name, String region, String location, String description) {
+public record CinemaResponse(Long id, String name, Region region, String location, String description) {
     public static CinemaResponse from(Cinema c) {
         return new CinemaResponse(c.getId(), c.getName(), c.getRegion(), c.getLocation(), c.getDescription());
     }

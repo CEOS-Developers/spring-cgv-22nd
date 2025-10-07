@@ -1,13 +1,14 @@
 package com.ceos22.cgv.module.user.domain;
 
+import com.ceos22.cgv.util.Region;
 import com.ceos22.cgv.util.UserGrade;
+import com.ceos22.cgv.util.UserRole;
 import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
 @Table(name = "user")
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -36,4 +37,8 @@ public class User {
 
     @Column(name = "phone", length = 50)
     private String phone;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", nullable = false)
+    private UserRole role;
 }

@@ -5,6 +5,7 @@ import com.ceos22.cgv.module.user.domain.User;
 import com.ceos22.cgv.util.OrderStatus;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -13,7 +14,6 @@ import java.util.List;
 @Entity
 @Table(name = "`order`")
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -34,6 +34,7 @@ public class Order {
     @Column(name = "total_price", nullable = false)
     private Integer totalPrice;
 
+    @CreationTimestamp
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
@@ -44,9 +45,8 @@ public class Order {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> items = new ArrayList<>();
 
-    // 양방향 일관성 유지
-    public void addItem(OrderItem item) {
-        items.add(item);
-        item.setOrder(this);
+    public void changeTotalPrice(Integer newTotalPrice) {
+        this.totalPrice = newTotalPrice;
     }
+
 }

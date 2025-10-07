@@ -11,23 +11,43 @@ import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
+
+import java.net.BindException;
 
 @Slf4j
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    private final HttpStatus HTTP_STATUS_OK = HttpStatus.OK;
-
     /**
      *  Parameter 값이 유효하지 않은 경우
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    protected ResponseEntity<ErrorResponse> handleMethodArgumentNotValidExceiption(MissingRequestHeaderException exception){
+    protected ResponseEntity<ErrorResponse> handleMethodArgumentNotValidExceiption(MethodArgumentNotValidException exception){
         log.error("handleMethodArgumentNotValidException", exception);
         final ErrorResponse response = ErrorResponse.of(ErrorCode.NOT_VALID_ERROR);
-        return new ResponseEntity<>(response, HTTP_STATUS_OK);
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    /**
+     * 이미 존재하는 nickname으로 회원가입을 시도하는 경우
+     */
+    // 지금 코드처럼 IllegalArgumentException을 던질 경우
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException exception) {
+        log.error("handleIllegalArgumentException", exception);
+        final ErrorResponse response = ErrorResponse.of(ErrorCode.DUPLICATE_NICKNAME_ERROR);
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    /**
+     * parameter 매핑 과정에서의 오류가 있는 경우
+     */
+    @ExceptionHandler(org.springframework.validation.BindException.class)
+    public ResponseEntity<ErrorResponse> handleBindExceiption(BindException exception) {
+        log.error("handleBindExceiption", exception);
+        final ErrorResponse response = ErrorResponse.of(ErrorCode.NOT_VALID_ERROR);
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
     /**
@@ -57,7 +77,7 @@ public class GlobalExceptionHandler {
     protected ResponseEntity<ErrorResponse> handleNoResourceFoundException(NoResourceFoundException exception) {
         log.error("handleNoHandlerFoundExceptionException", exception);
         final ErrorResponse response = ErrorResponse.of(ErrorCode.NO_RESOURCE_FOUND_ERROR);
-        return new ResponseEntity<>(response, HTTP_STATUS_OK);
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
 
@@ -68,7 +88,7 @@ public class GlobalExceptionHandler {
     protected final ResponseEntity<ErrorResponse> handleAllExceptions(Exception exeption) {
         log.error("Exception", exeption);
         final ErrorResponse response = ErrorResponse.of(ErrorCode.INTERNAL_SERVER_ERROR);
-        return new ResponseEntity<>(response, HTTP_STATUS_OK);
+        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
 }

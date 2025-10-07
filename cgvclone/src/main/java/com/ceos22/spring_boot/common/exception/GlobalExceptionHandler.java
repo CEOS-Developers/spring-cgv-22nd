@@ -52,4 +52,11 @@ public class GlobalExceptionHandler {
         return ApiResponse.onFailure(ErrorStatus._BAD_REQUEST);
     }
 
+    @ExceptionHandler(AuthFailureException.class)
+    public ResponseEntity<ApiResponse<Void>> handleAuthFailure(AuthFailureException e) {
+        log.warn("Authentication failed: {}", e.getMessage());
+        return ApiResponse.onFailure(e.getErrorStatus(), e.getMessage());
+    }
+
+
 }

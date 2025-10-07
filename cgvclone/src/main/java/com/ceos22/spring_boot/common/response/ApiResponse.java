@@ -89,4 +89,16 @@ public class ApiResponse<T> {
                 .body(new ApiResponse<>(false, error.getCode(), message, null, result));
     }
 
+    public static <T> ApiResponse<T> ofFailure(ErrorStatus error, String message, T result) {
+        return new ApiResponse<>(false, error.getCode(), message, null, result);
+    }
+
+    public static <T> ApiResponse<T> ofFailure(ErrorStatus error, String message) {
+        return new ApiResponse<>(false, error.getCode(), message, null, null);
+    }
+
+    public static <T> ApiResponse<T> ofFailure(ErrorStatus error) {
+        return new ApiResponse<>(false, error.getCode(), error.getMessage(), null, null);
+    }
+
 }

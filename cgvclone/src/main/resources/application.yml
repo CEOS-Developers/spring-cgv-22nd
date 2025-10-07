@@ -18,7 +18,6 @@ logging:
     org.hibernate.SQL: debug
     org.hibernate.type.descriptor.sql.BasicBinder: trace
 
-
 springdoc:
   api-docs:
     enabled: true
@@ -26,3 +25,14 @@ springdoc:
     enabled: true
     path: /swagger-ui.html
   override-with-generic-response: false # ApiResponse<T> 안깨지게
+
+jwt:
+  secret: ${JWT_SECRET}
+  access-token-validity-in-seconds: 1800
+
+security:
+  password:
+    pbkdf2:
+      iterations: 120000
+      key-length: 256
+      salt-bytes: 16

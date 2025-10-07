@@ -22,4 +22,13 @@ public class CinemaLike {
 
     @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "cinema_id", nullable = false)
     private Cinema cinema;
+
+    public static CinemaLike create(Member member, Cinema cinema) {
+        CinemaLike cinemaLike = new CinemaLike();
+
+        cinemaLike.member = member;
+        cinemaLike.cinema = cinema;
+
+        return cinemaLike;
+    }
 }

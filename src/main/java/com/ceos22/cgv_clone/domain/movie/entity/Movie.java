@@ -5,7 +5,7 @@ import com.ceos22.cgv_clone.domain.common.enums.Rating;
 import jakarta.persistence.*;
 import lombok.Getter;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Entity
 @Getter
@@ -20,10 +20,10 @@ public class Movie {
     private String title;
 
     @Column(name = "release_date", nullable = false)
-    private LocalDateTime releaseDate;
+    private LocalDate releaseDate;
 
-    @Column(nullable = false, length = 20)
-    private String runtime;
+    @Column(nullable = false)
+    private Integer runtime;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
@@ -34,6 +34,6 @@ public class Movie {
     private Rating rating;
 
     @Column(name = "poster_url", columnDefinition = "TEXT", nullable = false)
-    private String url;
+    private String posterUrl;
 
 }

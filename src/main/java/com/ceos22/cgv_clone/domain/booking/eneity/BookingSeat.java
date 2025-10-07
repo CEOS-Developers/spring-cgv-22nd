@@ -1,15 +1,18 @@
 package com.ceos22.cgv_clone.domain.booking.eneity;
 
-import com.ceos22.cgv_clone.domain.screening.Screening;
+import com.ceos22.cgv_clone.domain.screening.entity.Screening;
 import com.ceos22.cgv_clone.domain.theater.entity.Seat;
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(
         uniqueConstraints = @UniqueConstraint(name = "uk_screening_seat", columnNames = {"screening_id", "seat_id"})
 )
 @Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class BookingSeat {
 
     @Id
@@ -25,4 +28,13 @@ public class BookingSeat {
 
     @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "screening_id", nullable = false)
     private Screening screening;
+
+    private BookingSeat(Booking booking, Screening screening, Seat seat) {
+        this.booking = booking;
+        this.screening = screening;
+        this.seat = seat;
+    }
+    public static BookingSeat of(Booking booking, Screening screening, Seat seat) {
+        return new BookingSeat(booking, screening, seat);
+    }
 }

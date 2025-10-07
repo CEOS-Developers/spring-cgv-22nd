@@ -3,14 +3,18 @@ package com.ceos22.cgv_clone.domain.booking.eneity;
 import com.ceos22.cgv_clone.domain.common.enums.BookingStatus;
 import com.ceos22.cgv_clone.domain.common.enums.PaymentType;
 import com.ceos22.cgv_clone.domain.member.entity.Member;
-import com.ceos22.cgv_clone.domain.screening.Screening;
+import com.ceos22.cgv_clone.domain.screening.entity.Screening;
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Booking {
 
     @Id
@@ -30,8 +34,14 @@ public class Booking {
     @Column(name = "booking_at", nullable = false)
     private LocalDateTime bookingAt;
 
-    @Column(name = "moviegoer_num")
-    private Integer moviegoerNum;
+    @Column(name = "adult_count", nullable = false)
+    private int adultCount;
+
+    @Column(name = "teen_count", nullable = false)
+    private int teenCount;
+
+    @Column(name = "total_people", nullable = false)
+    private int totalPeople;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "payment_type")
@@ -46,4 +56,30 @@ public class Booking {
 
     @Column(name = "canceled_at")
     private LocalDateTime canceledAt;
+
+    private Booking(Member member, Screening screening, LocalDateTime bookingAt,
+                    PaymentType paymentType, int adultCount, int teenCount,
+                    int totalPeople, int totalPrice) {
+        this.member = member;
+        this.screening = screening;
+        this.bookingAt = bookingAt;
+        this.paymentType = paymentType;
+        this.status = BookingStatus.BOOKED;
+        this.adultCount = adultCount;
+        this.teenCount = teenCount;
+        this.totalPeople = totalPeople;
+        this.totalPrice = totalPrice;
+    }
+
+    public static Booking create(Member member, Screening screening, PaymentType paymentType,
+                                 int adultCount, int teenCount, int totalPrice) {
+        int people = adultCount + teenCount;
+        return new Booking(member, screening, LocalDateTime.now(), paymentType,
+                adultCount, teenCount, people, totalPrice);
+    }
+
+    public void cancel() {
+        this.status = BookingStatus.CANCELED;
+        this.canceledAt = LocalDateTime.now();
+    }
 }

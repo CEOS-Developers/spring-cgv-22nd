@@ -21,5 +21,14 @@ public class MovieLike {
 
     @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "movie_id", nullable = false)
     private Movie movie;
+
+    public static MovieLike create(Member member, Movie movie) {
+        MovieLike movieLike = new MovieLike();
+
+        movieLike.member = member;
+        movieLike.movie = movie;
+
+        return movieLike;
+    }
 }
 

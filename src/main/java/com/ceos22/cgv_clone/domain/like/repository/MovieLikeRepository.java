@@ -7,11 +7,7 @@ import java.util.Optional;
 
 public interface MovieLikeRepository extends JpaRepository<MovieLike, Long> {
 
-    boolean existsByMemberIdAndMovieId(Long memberId, Long movieId);
-
     Optional<MovieLike> findByMemberIdAndMovieId(Long memberId, Long movieId);
 
     long countByMovieId(Long movieId);
-
-    void deleteByMemberIdAndMovieId(Long memberId, Long movieId);
 }

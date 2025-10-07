@@ -22,7 +22,7 @@ public record MovieDetailResponse(
             return new ActorSimpleInfo(actor.getActorId(), actor.getName(), actor.getProfileImageUrl());
         }
     }
-    public record DirectorSimpleInfo(Long actorId, String name, String profileImageUrl) {
+    public record DirectorSimpleInfo(Long directorId, String name, String profileImageUrl) {
         public static DirectorSimpleInfo from(Director director) {
             return new DirectorSimpleInfo(director.getDirectorId(), director.getName(), director.getProfileImageUrl());
         }

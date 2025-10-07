@@ -31,5 +31,6 @@ public class Wish {
     private Theater theater;
 
     @Column(nullable = false)
+    @Enumerated
     private WishType type; // 'MOVIE' 또는 'THEATER'
 }

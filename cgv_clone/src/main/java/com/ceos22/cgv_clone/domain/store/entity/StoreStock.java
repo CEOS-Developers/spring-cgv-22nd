@@ -1,15 +1,14 @@
 package com.ceos22.cgv_clone.domain.store.entity;
 
-import com.ceos22.cgv_clone.domain.product.entity.Product;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Getter
+@Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@IdClass(StoreStockId.class) // 복합키로 사용할 ID 클래스 지정
+@AllArgsConstructor
+@IdClass(StoreStockId.class)
 public class StoreStock {
 
     @Id
@@ -23,5 +22,37 @@ public class StoreStock {
     private Product product;
 
     @Column(nullable = false)
-    private Integer stock;
+    @Builder.Default
+    private Integer stock = 0;
+
+    public void increaseStock(int quantity) {
+        if (quantity <= 0) {
+            throw new IllegalArgumentException("재고 증가량은 0보다 커야 합니다.");
+        }
+        this.stock += quantity;
+    }
+
+    public void decreaseStock(int quantity) {
+        if (quantity <= 0) {
+            throw new IllegalArgumentException("재고 감소량은 0보다 커야 합니다.");
+        }
+        if (this.stock < quantity) {
+            throw new IllegalStateException(
+                    String.format("재고가 부족합니다. 현재 재고: %d, 요청량: %d", this.stock, quantity)
+            );
+        }
+        this.stock -= quantity;
+    }
+
+    public boolean isSoldOut() {
+        return this.stock <= 0;
+    }
+
+    public static StoreStock of(Store store, Product product, int initialStock) {
+        return StoreStock.builder()
+                .store(store)
+                .product(product)
+                .stock(initialStock)
+                .build();
+    }
 }

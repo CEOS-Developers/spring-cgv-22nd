@@ -3,6 +3,7 @@ package com.ceos22.cgv_clone.domain.theater.controller;
 import com.ceos22.cgv_clone.common.error.SuccessCode;
 import com.ceos22.cgv_clone.common.response.ApiResponse;
 import com.ceos22.cgv_clone.domain.theater.dto.response.TheaterResponse;
+import com.ceos22.cgv_clone.domain.theater.entity.Region;
 import com.ceos22.cgv_clone.domain.theater.service.TheaterService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -19,9 +20,9 @@ public class TheaterController {
 
     @GetMapping
     public ResponseEntity<ApiResponse<List<TheaterResponse>>> getTheaters(
-            @RequestParam(required = false) Long regionId
+            @RequestParam Region region
     ) {
-        List<TheaterResponse> theaters = theaterService.findAllTheaters(regionId);
+        List<TheaterResponse> theaters = theaterService.findTheatersByRegion(region);
         return ApiResponse.success(SuccessCode.GET_SUCCESS, theaters);
     }
 

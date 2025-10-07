@@ -1,14 +1,14 @@
 package com.ceos22.cgv_clone.domain.order.entity;
 
-import com.ceos22.cgv_clone.domain.product.entity.Product;
+import com.ceos22.cgv_clone.domain.store.entity.Product;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
+@Builder
 public class OrderDetail {
 
     @Id
@@ -17,6 +17,7 @@ public class OrderDetail {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false)
+    @Setter
     private Order order;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -28,4 +29,25 @@ public class OrderDetail {
 
     @Column(nullable = false)
     private Integer priceAtPurchase; // 주문 시점의 상품 가격
+
+    public Integer getSubtotal() {
+        return quantity * priceAtPurchase;
+    }
+
+    public void changeQuantity(Integer quantity) {
+        if (quantity <= 0){
+            throw new IllegalArgumentException("0개 이상으로만 변경 할 수 있습니다");
+        }
+        this.quantity = quantity;
+    }
+
+
+
+    public static OrderDetail of(Product product, int quantity) {
+        return OrderDetail.builder()
+                .product(product)
+                .quantity(quantity)
+                .priceAtPurchase(product.getPrice()) // 현재 상품 가격으로 설정
+                .build();
+    }
 }

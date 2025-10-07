@@ -20,7 +20,7 @@ public class AdminMovieController {
 
     private final MovieService movieService;
 
-    @PostMapping("/create")
+    @PostMapping
     public ResponseEntity<ApiResponse<MovieDetailResponse>> createMovie(@Valid @RequestBody MovieCreateRequest request) {
         MovieDetailResponse createdMovie = movieService.createMovie(request);
         return ApiResponse.success(SuccessCode.CREATE_SUCCESS, createdMovie);

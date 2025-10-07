@@ -1,20 +1,16 @@
 package com.ceos22.cgv_clone.domain.reservation.entity;
 
 import com.ceos22.cgv_clone.domain.member.entity.Member;
-import com.ceos22.cgv_clone.domain.theater.entity.Seat;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
-@NoArgsConstructor
-@Builder
-@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Reservation {
 
     @Id
@@ -29,18 +25,44 @@ public class Reservation {
     @JoinColumn(name = "schedule_id", nullable = false)
     private Schedule schedule;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "seat_id", nullable = false)
-    private Seat seat;
+    @Column(nullable = false)
+    private Integer totalPrice;
+
+    // 좌석별로 취소 불가
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ReservationStatus status;
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
 
-    @Column(nullable = false)
-    private ReservationStatus status;
+    @OneToMany(mappedBy = "reservation", cascade = CascadeType.ALL)
+    private List<ReservationSeat> reservationSeats = new ArrayList<>();
 
     @PrePersist
     public void setCreatedAt() {
         this.createdAt = LocalDateTime.now();
+    }
+
+    @Builder(access = AccessLevel.PRIVATE)
+    public Reservation(Member member, Schedule schedule, Integer totalPrice) {
+        this.member = member;
+        this.schedule = schedule;
+        this.totalPrice = totalPrice;
+        this.status = ReservationStatus.CONFIRMED;
+        this.createdAt = LocalDateTime.now();
+    }
+
+    public static Reservation create(Member member, Schedule schedule, Integer totalPrice) {
+        return Reservation.builder()
+                .member(member)
+                .schedule(schedule)
+                .totalPrice(totalPrice)
+                .build();
+    }
+
+    public void addReservationSeat(ReservationSeat reservationSeat) {
+        reservationSeats.add(reservationSeat);
+        reservationSeat.setReservation(this);
     }
 }

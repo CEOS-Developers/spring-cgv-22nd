@@ -17,15 +17,13 @@ public class Movie {
     @Column(nullable=false, length=200)
     private String movieTitle;
 
-    private Integer runningTime; // 분 단위 (필요 시)
+    private int runningTime; // 분 단위 (필요 시)
 
     @Column(columnDefinition = "text")
     private String introduction;
 
     //==생성 메서드==//
-    public Movie(String movieTitle, Integer runningTime, String introduction) {
-        this.movieTitle = movieTitle;
-        this.runningTime = runningTime;
-        this.introduction = introduction;
+    public Movie(String movieTitle, int runningTime, String introduction) {
+        this.movieTitle = movieTitle; this.runningTime = runningTime; this.introduction = introduction;
     }
 }

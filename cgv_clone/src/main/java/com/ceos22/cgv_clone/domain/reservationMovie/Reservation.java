@@ -39,7 +39,7 @@ public class Reservation {
     @OneToMany(mappedBy = "reservation", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Ticket> tickets = new ArrayList<>();
 
-    //==생성 메서드==//
+    //==연관관계 메서드==//
     public Reservation(Member member, Screening screening) {
         this.member = member; this.screening = screening;
     }

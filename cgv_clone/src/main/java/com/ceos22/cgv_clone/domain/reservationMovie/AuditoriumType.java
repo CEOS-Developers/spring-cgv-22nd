@@ -14,16 +14,13 @@ public class AuditoriumType {
     private Long id;
 
     @Column(nullable=false, length=50, unique = true)
-    private String code; // REGULAR, IMAX, 4DX ...
+    private String name; // REGULAR, IMAX, 4DX ...
 
-    @Column(nullable=false, length=100)
-    private String name;
-
-    @OneToOne(mappedBy = "auditoriumType", fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "auditoriumType")
     private SeatTemplate seatTemplate;
 
-    public AuditoriumType(String code, String name, int rows, int cols) {
-        this.code = code; this.name = name;
+    public AuditoriumType(String name, int rows, int cols) {
+        this.name = name;
         this.seatTemplate = new SeatTemplate(this, rows, cols);
     }
 }

@@ -5,8 +5,10 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Entity @Table(name="ticket",
-        uniqueConstraints=@UniqueConstraint(name="uk_ticket_res_seat", columnNames={"reservation_id","seat_id"}))
+@Entity
+@Table(name="ticket",
+        uniqueConstraints = @UniqueConstraint(name="uk_ticket_res_seat", columnNames={"reservation_id","seat_id"})
+)
 @Getter @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Ticket {
 
@@ -18,6 +20,9 @@ public class Ticket {
     @JoinColumn(name="reservation_id", nullable=false)
     private Reservation reservation;
 
+    @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name="screening_id", nullable=false)
+    private Screening screening;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="seat_id", nullable=false)
     private Seat seat;
@@ -28,11 +33,12 @@ public class Ticket {
     @Column(nullable=false)
     private int unitPrice; // 스냅샷
 
-    //== 생성 메서드==//
+    //== 생성 메서드 ==//
     public Ticket(Seat seat, AgeGroup ageGroup, int unitPrice) {
         this.seat = seat; this.ageGroup = ageGroup; this.unitPrice = unitPrice;
     }
 
+    //== 연관관계 메서드 ==//
     void setReservation(Reservation r){ this.reservation = r; }
 
 }

@@ -33,11 +33,11 @@ public class ReservationService {
     private final ReservationSeatRepository reservationSeatRepository;
 
     @Transactional
-    public ReservationResponse reserve(ReservationRequest request, Long userId) {
+    public ReservationResponse reserve(ReservationRequest request, User authenticatedUser) {
 
         Schedule schedule = scheduleRepository.findById(request.scheduleId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "상영 스케쥴을 찾을 수 없습니다."));
-        User user = userRepository.findById(userId)
+        User user = userRepository.findById(authenticatedUser.getId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "유저를 찾을 수 없습니다."));
 
 
@@ -80,12 +80,12 @@ public class ReservationService {
     }
 
     @Transactional
-    public ReservationResponse cancel(Long reservationId, Long userId) {
+    public ReservationResponse cancel(Long reservationId, User authenticatedUser) {
 
         Reservation reservation = reservationRepository.findByIdWithSchedule(reservationId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "예약을 찾을 수 없습니다."));
 
-        if (!reservation.getUser().getId().equals(userId)) {
+        if (!reservation.getUser().getId().equals(authenticatedUser.getId())) {
             throw  new ResponseStatusException(HttpStatus.FORBIDDEN, "본인 예약만 취소할 수 있습니다.");
         }
 
@@ -127,19 +127,19 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public List<ReservationResponse> getMyReservations(Long userId) {
-        return reservationRepository.findAllByUserIdWithScheduleAndSeats(userId)
+    public List<ReservationResponse> getMyReservations(User user) {
+        return reservationRepository.findAllByUserIdWithScheduleAndSeats(user.getId())
                 .stream()
                 .map(ReservationResponse::from)
                 .toList();
     }
 
     @Transactional(readOnly = true)
-    public ReservationResponse getReservation(Long reservationId, Long userId) {
+    public ReservationResponse getReservation(Long reservationId, User user) {
         Reservation reservation = reservationRepository.findByIdWithScheduleAndSeats(reservationId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "예약을 찾을 수 없습니다."));
 
-        if (!reservation.getUser().getId().equals(userId)) {
+        if (!reservation.getUser().getId().equals(user.getId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "본인 예약만 조회할 수 있습니다.");
         }
 

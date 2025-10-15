@@ -1,5 +1,7 @@
 package com.ceos22.cgv.response;
 
+import com.ceos22.cgv.codes.SuccessCode;
+import com.ceos22.cgv.module.movie.dto.MovieLikeResponse;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -20,6 +22,15 @@ public class ApiResponse<T> {
         this.response = response;
         this.statusCode = statusCode;
         this.message = message;
+    }
+
+
+    public static <T> ApiResponse<T> of(T response, SuccessCode successCode) {
+        return ApiResponse.<T>builder()
+                .response(response)
+                .statusCode(successCode.getStatusCode())
+                .message(successCode.getMessage())
+                .build();
     }
 
 }

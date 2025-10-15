@@ -4,7 +4,6 @@ import com.ceos22.cgv.module.movie.domain.Movie;
 import com.ceos22.cgv.util.Genre;
 import com.ceos22.cgv.util.Rating;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.Builder;
 
 import java.time.LocalDate;
 

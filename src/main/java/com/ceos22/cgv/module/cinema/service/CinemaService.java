@@ -40,22 +40,21 @@ public class CinemaService {
     @Transactional(readOnly = true)
     public CinemaResponse findCinemaById(Long cinemaId) {
         var cinema = cinemaRepository.findById(cinemaId)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Cinema not found: " + cinemaId));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "해당 영화관이 존재하지 않습니다."));
         return CinemaResponse.from(cinema);
     }
 
     @Transactional
-    public CinemaLikeResponse like(Long cinemaId, Long userId) {
+    public CinemaLikeResponse like(Long cinemaId, User authenticatedUser) {
 
-        User user = userRepository.findById(userId)
+        User user = userRepository.findById(authenticatedUser.getId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "해당 유저가 존재하지 않습니다."));
 
         Cinema cinema = cinemaRepository.findById(cinemaId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "해당 영화가 존재하지 않습니다."));
 
 
-        if (!cinemaLikeRepository.existsByUser_IdAndCinema_Id(userId, cinemaId)) {
+        if (!cinemaLikeRepository.existsByUser_IdAndCinema_Id(user.getId(), cinemaId)) {
             CinemaLike like = CinemaLike.builder()
                     .user(user)
                     .cinema(cinema)
@@ -66,13 +65,15 @@ public class CinemaService {
         return CinemaLikeResponse.of(cinema, user, true);
     }
 
+
     @Transactional
-    public CinemaLikeResponse unlike(Long cinemaId, Long userId) {
+    public CinemaLikeResponse unlike(Long cinemaId, User user) {
 
-        cinemaLikeRepository.findByUser_IdAndCinema_Id(userId, cinemaId)
-                .ifPresent(cinemaLikeRepository::delete);
+        CinemaLike cinemaLike = cinemaLikeRepository.findByUser_IdAndCinema_Id(user.getId(), cinemaId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "해당 좋아요가 존재하지 않습니다."));
 
-        return new CinemaLikeResponse(cinemaId, userId, false);
+        cinemaLikeRepository.delete(cinemaLike);
+
+        return new CinemaLikeResponse(cinemaId, user.getId(), false);
     }
-
 }

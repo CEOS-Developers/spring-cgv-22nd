@@ -19,15 +19,14 @@ public class MenuController {
 
     private final MenuService menuService;
 
-    @GetMapping("/api/menu")
+    @GetMapping("/menu")
     public ResponseEntity<ApiResponse<MenuListResponse>> getMenu(
             @RequestParam(required = false) MenuCategory category) {
 
-        ApiResponse<MenuListResponse> response = ApiResponse.<MenuListResponse>builder()
-                .response(menuService.getMenusByCategory(category))
-                .statusCode(SuccessCode.GET_SUCCESS.getStatusCode())
-                .message(SuccessCode.GET_SUCCESS.getMessage())
-                .build();
+        ApiResponse<MenuListResponse> response = ApiResponse.of(
+                menuService.getMenusByCategory(category),
+                SuccessCode.GET_SUCCESS
+        );
 
         return ResponseEntity.ok().body(response);
     }

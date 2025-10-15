@@ -24,28 +24,26 @@ public class AuthController {
 
     private final AuthService authService;
 
-    @PostMapping("api/login")
+    @PostMapping("/login")
     public ResponseEntity<ApiResponse<AuthResponse>> login (
             @Valid @RequestBody final AuthRequest request) {
 
-        ApiResponse<AuthResponse> response = ApiResponse.<AuthResponse>builder()
-                .response(authService.login(request))
-                .statusCode(SuccessCode.LOGIN_SUCCESS.getStatusCode())
-                .message(SuccessCode.LOGIN_SUCCESS.getMessage())
-                .build();
+        ApiResponse<AuthResponse> response = ApiResponse.of(
+                authService.login(request),
+                SuccessCode.LOGIN_SUCCESS
+        );
 
         return ResponseEntity.ok().body(response);
     }
 
-    @PostMapping("api/signup")
+    @PostMapping("/signup")
     public ResponseEntity<ApiResponse<SignupResponse>> signup (
             @Valid @RequestBody final SignupRequest request) {
 
-        ApiResponse<SignupResponse> response = ApiResponse.<SignupResponse>builder()
-                .response(authService.signup(request))
-                .statusCode(SuccessCode.INSERT_SUCCESS.getStatusCode())
-                .message(SuccessCode.INSERT_SUCCESS.getMessage())
-                .build();
+        ApiResponse<SignupResponse> response = ApiResponse.of(
+                authService.signup(request),
+                SuccessCode.INSERT_SUCCESS
+        );
 
         return ResponseEntity.ok().body(response);
     }

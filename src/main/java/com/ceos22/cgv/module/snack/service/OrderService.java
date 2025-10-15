@@ -36,10 +36,10 @@ public class OrderService {
     private final MenuRepository menuRepository;
 
     @Transactional
-    public OrderResponse order(OrderRequest request, Long userId) {
+    public OrderResponse order(OrderRequest request, User authenticatedUser) {
 
         // 연관 엔티티 조회
-        User user = userRepository.findById(userId)
+        User user = userRepository.findById(authenticatedUser.getId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."));
         Cinema cinema = cinemaRepository.findById(request.cinemaId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "영화관을 찾을 수 없습니다."));
@@ -84,20 +84,20 @@ public class OrderService {
     }
 
     @Transactional(readOnly = true)
-    public OrderResponse getOrder(Long orderId, Long userId) {
+    public OrderResponse getOrder(Long orderId, User user) {
 
         Order order = orderRepository.findByIdWithItems(orderId)
                 .orElseThrow(() ->  new ResponseStatusException(HttpStatus.NOT_FOUND, "주문을 찾을 수 없습니다."));
 
-        if (!order.getUser().getId().equals(userId)) {
+        if (!order.getUser().getId().equals(user.getId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "해당 주문에 접근할 수 없습니다.");
         }
         return toResponse(order, order.getItems());
     }
 
     @Transactional(readOnly = true)
-    public List<OrderResponse> myOrders(Long userId) {
-        List<Order> orders = orderRepository.findByUser_IdOrderByCreatedAtDesc(userId);
+    public List<OrderResponse> myOrders(User user) {
+        List<Order> orders = orderRepository.findByUser_IdOrderByCreatedAtDesc(user.getId());
         return orders.stream()
                 .map(o -> toResponse(o, o.getItems()))
                 .toList();

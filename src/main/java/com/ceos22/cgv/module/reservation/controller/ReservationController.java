@@ -21,62 +21,58 @@ public class ReservationController {
 
     private final ReservationService reservationService;
 
-    @PostMapping("api/reservations")
+    @PostMapping("/reservations")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<ReservationResponse>> reserve(
             @RequestBody ReservationRequest request,
             @AuthenticationPrincipal CustomUserDetails user) {
 
-        ApiResponse<ReservationResponse> response = ApiResponse.<ReservationResponse>builder()
-                .response(reservationService.reserve(request, user.getUserId()))
-                .statusCode(SuccessCode.INSERT_SUCCESS.getStatusCode())
-                .message(SuccessCode.INSERT_SUCCESS.getMessage())
-                .build();
+        ApiResponse<ReservationResponse> response = ApiResponse.of(
+                reservationService.reserve(request, user.getUser()),
+                SuccessCode.INSERT_SUCCESS
+        );
 
         return ResponseEntity.ok().body(response);
     }
 
-    @PostMapping("api/reservations/{reservationId}/cancel")
+    @PostMapping("/reservations/{reservationId}/cancel")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<ReservationResponse>> cancel(
             @PathVariable Long reservationId,
             @AuthenticationPrincipal CustomUserDetails user) {
 
-        ApiResponse<ReservationResponse> response = ApiResponse.<ReservationResponse>builder()
-                .response(reservationService.cancel(reservationId, user.getUserId()))
-                .statusCode(SuccessCode.INSERT_SUCCESS.getStatusCode())
-                .message(SuccessCode.INSERT_SUCCESS.getMessage())
-                .build();
+        ApiResponse<ReservationResponse> response = ApiResponse.of(
+                reservationService.cancel(reservationId,user.getUser()),
+                SuccessCode.INSERT_SUCCESS
+        );
 
         return ResponseEntity.ok().body(response);
     }
 
 
-    @GetMapping("api/reservations")
+    @GetMapping("/reservations")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<List<ReservationResponse>>> myReservations(
             @AuthenticationPrincipal CustomUserDetails user) {
 
-        ApiResponse<List<ReservationResponse>> response = ApiResponse.<List<ReservationResponse>>builder()
-                .response(reservationService.getMyReservations(user.getUserId()))
-                .statusCode(SuccessCode.GET_SUCCESS.getStatusCode())
-                .message(SuccessCode.GET_SUCCESS.getMessage())
-                .build();
+        ApiResponse<List<ReservationResponse>> response = ApiResponse.of(
+                reservationService.getMyReservations(user.getUser()),
+                SuccessCode.GET_SUCCESS
+        );
 
         return ResponseEntity.ok().body(response);
     }
 
-    @GetMapping("api/reservations/{reservationId}")
+    @GetMapping("/reservations/{reservationId}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<ReservationResponse>> getReservation(
             @PathVariable Long reservationId,
             @AuthenticationPrincipal CustomUserDetails user) {
 
-        ApiResponse<ReservationResponse> response = ApiResponse.<ReservationResponse>builder()
-                .response(reservationService.getReservation(reservationId, user.getUserId()))
-                .statusCode(SuccessCode.GET_SUCCESS.getStatusCode())
-                .message(SuccessCode.GET_SUCCESS.getMessage())
-                .build();
+        ApiResponse<ReservationResponse> response = ApiResponse.of(
+                reservationService.getReservation(reservationId, user.getUser()),
+                SuccessCode.GET_SUCCESS
+        );
 
         return ResponseEntity.ok().body(response);
     }

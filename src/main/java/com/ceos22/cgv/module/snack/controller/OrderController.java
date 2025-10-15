@@ -20,47 +20,44 @@ public class OrderController {
 
     private final OrderService orderService;
 
-    @PostMapping("/api/order")
+    @PostMapping("/order")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<OrderResponse>> order(
             @RequestBody OrderRequest request,
             @AuthenticationPrincipal CustomUserDetails user) {
 
-        ApiResponse<OrderResponse> response = ApiResponse.<OrderResponse>builder()
-                .response(orderService.order(request, user.getUserId()))
-                .statusCode(SuccessCode.INSERT_SUCCESS.getStatusCode())
-                .message(SuccessCode.INSERT_SUCCESS.getMessage())
-                .build();
+        ApiResponse<OrderResponse> response = ApiResponse.of(
+                orderService.order(request, user.getUser()),
+                SuccessCode.INSERT_SUCCESS
+        );
 
         return ResponseEntity.ok().body(response);
     }
 
-    @GetMapping("/api/order/{orderId}")
+    @GetMapping("/order/{orderId}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<OrderResponse>> getOrder(
             @PathVariable Long orderId,
             @AuthenticationPrincipal CustomUserDetails user) {
 
-        ApiResponse<OrderResponse> response = ApiResponse.<OrderResponse>builder()
-                .response(orderService.getOrder(orderId, user.getUserId()))
-                .statusCode(SuccessCode.INSERT_SUCCESS.getStatusCode())
-                .message(SuccessCode.INSERT_SUCCESS.getMessage())
-                .build();
+        ApiResponse<OrderResponse> response = ApiResponse.of(
+                orderService.getOrder(orderId, user.getUser()),
+                SuccessCode.INSERT_SUCCESS
+        );
 
         return ResponseEntity.ok().body(response);
     }
 
 
-    @GetMapping("/api/order/my")
+    @GetMapping("/order/my")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<List<OrderResponse>>> getMyOrders(
             @AuthenticationPrincipal CustomUserDetails user) {
 
-        ApiResponse<List<OrderResponse>> response = ApiResponse.<List<OrderResponse>>builder()
-                .response(orderService.myOrders(user.getUserId()))
-                .statusCode(SuccessCode.INSERT_SUCCESS.getStatusCode())
-                .message(SuccessCode.INSERT_SUCCESS.getMessage())
-                .build();
+        ApiResponse<List<OrderResponse>> response = ApiResponse.of(
+                orderService.myOrders(user.getUser()),
+                SuccessCode.INSERT_SUCCESS
+        );
 
         return ResponseEntity.ok().body(response);
     }

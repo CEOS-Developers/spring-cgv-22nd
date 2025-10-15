@@ -1,5 +1,8 @@
 package com.ceos22.cgv.module.movie.service;
 
+import com.ceos22.cgv.module.cinema.domain.Cinema;
+import com.ceos22.cgv.module.cinema.domain.CinemaLike;
+import com.ceos22.cgv.module.cinema.dto.CinemaLikeResponse;
 import com.ceos22.cgv.module.cinema.repository.TheaterRepository;
 import com.ceos22.cgv.module.movie.domain.Movie;
 import com.ceos22.cgv.module.movie.domain.MovieLike;
@@ -93,16 +96,15 @@ public class MovieService {
     }
 
     @Transactional
-    public MovieLikeResponse like(Long movieId, Long userId) {
+    public MovieLikeResponse like(Long movieId, User authenticatedUser) {
 
-        User user = userRepository.findById(userId)
+        User user = userRepository.findById(authenticatedUser.getId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "해당 유저가 존재하지 않습니다."));
 
         Movie movie = movieRepository.findById(movieId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "해당 영화가 존재하지 않습니다."));
 
-
-        if (!movieLikeRepository.existsByUser_IdAndMovie_Id(userId, movieId)) {
+        if (!movieLikeRepository.existsByUser_IdAndMovie_Id(user.getId(), movieId)) {
             MovieLike like = MovieLike.builder()
                     .user(user)
                     .movie(movie)
@@ -113,12 +115,15 @@ public class MovieService {
         return MovieLikeResponse.of(movie, user, true);
     }
 
+
     @Transactional
-    public MovieLikeResponse unlike(Long movieId, Long userId) {
+    public MovieLikeResponse unlike(Long movieId, User user) {
 
-        movieLikeRepository.findByUser_IdAndMovie_Id(userId, movieId)
-                .ifPresent(movieLikeRepository::delete);
+        MovieLike movieLike = movieLikeRepository.findByUser_IdAndMovie_Id(user.getId(), movieId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "해당 좋아요가 존재하지 않습니다."));
 
-        return new MovieLikeResponse(movieId, userId, false);
+        movieLikeRepository.delete(movieLike);
+
+        return new MovieLikeResponse(movieId, user.getId(), false);
     }
 }

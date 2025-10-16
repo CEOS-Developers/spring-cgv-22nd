@@ -6,7 +6,6 @@ import com.ceos22.cgv_clone.web.domain.enums.Region;
 import com.ceos22.cgv_clone.web.dto.CinemaResponseDto;
 import com.ceos22.cgv_clone.web.service.CinemaService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,7 +29,7 @@ public class CinemaController {
 
     @PostMapping("/cinemas/{cinemaId}/prefer")
     public ApiResponse<String> preferCinema(@PathVariable Long cinemaId, @AuthenticationPrincipal CustomUserDetails userDetails) {
-        cinemaService.preferCinema(cinemaId,userDetails.getUser());
+        cinemaService.preferCinema(cinemaId,userDetails.user());
         return ApiResponse.onSuccess("해당 영화관을 찜하셨습니다.");
     }
 }

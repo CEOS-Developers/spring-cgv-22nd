@@ -20,20 +20,20 @@ public class MovieController {
 
     @GetMapping("/movies")
     @Operation(summary = "영화 리스트 조회하기",description = "")
-    public ResponseEntity<List<MovieResponseDto.MovieDetailDto>> getMovies(){
-        return ResponseEntity.ok(movieService.getMovies());
+    public ApiResponse<List<MovieResponseDto.MovieDetailDto>> getMovies(){
+        return ApiResponse.onSuccess(movieService.getMovies());
     }
 
     @GetMapping("/movies/{movieId}")
     @Operation(summary = "영화 상세 조회하기",description = "")
-    public ResponseEntity<MovieResponseDto.MovieDetailDto> getMovie(@PathVariable(name = "movieId")Long movieId){
-        return ResponseEntity.ok(movieService.getMovie(movieId));
+    public ApiResponse<MovieResponseDto.MovieDetailDto> getMovie(@PathVariable(name = "movieId")Long movieId){
+        return ApiResponse.onSuccess(movieService.getMovie(movieId));
     }
 
     @PostMapping("/movies/{movieId}/prefer")
     @Operation(summary = "영화 찜하기", description = "영화를 찜하는 API입니다.")
     public ApiResponse<String> preferMovie(@PathVariable(name = "movieId")Long movieId, @AuthenticationPrincipal CustomUserDetails userDetails){
-        movieService.preferMovie(movieId,userDetails.getUser());
+        movieService.preferMovie(movieId,userDetails.user());
         return ApiResponse.onSuccess("해당 영화를 찜하셨습니다.");
     }
 

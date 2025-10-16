@@ -1,5 +1,7 @@
-package com.ceos22.cgv_clone.global.security;
+package com.ceos22.cgv_clone.global.security.jwt;
 
+import com.ceos22.cgv_clone.global.security.dto.RefreshTokenResponse;
+import com.ceos22.cgv_clone.global.security.dto.TokenResponse;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;
@@ -35,6 +37,9 @@ public class TokenProvider implements InitializingBean {
     @Value("${jwt.token.access-expiration-time}")
     private long accessExpirationTime;
 
+    @Value("${jwt.token.refresh-expiration-time}")
+    private long refreshExpirationTime;
+
     @Override
     public void afterPropertiesSet(){
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
@@ -56,7 +61,33 @@ public class TokenProvider implements InitializingBean {
                 .compact();
     }
 
-    public String getAccessToken(HttpServletRequest request){
+    public String createRefreshTOken(Long id) {
+        Date now = new Date();
+        Date expiration = new Date(now.getTime() + refreshExpirationTime);
+
+        return Jwts.builder()
+                .setSubject(id.toString())
+                .setIssuedAt(now)
+                .setExpiration(expiration)
+                .signWith(key,SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    public TokenResponse createToken(Long userId, Authentication authentication) {
+        return TokenResponse.of(
+                createAccessToken(userId,authentication),
+                createRefreshTOken(userId)
+        );
+    }
+
+    public RefreshTokenResponse recreate(Long userId, Authentication authentication) {
+        String accessToken = createAccessToken(userId,authentication);
+        String refreshToken = createRefreshTOken(userId);
+
+        return RefreshTokenResponse.of(userId,accessToken,refreshToken);
+    }
+
+    public String resolveToken(HttpServletRequest request){
         String token = request.getHeader("Authorization");
         if (StringUtils.hasText(token) && token.startsWith("Bearer ")) {
             return token.substring(7);
@@ -64,7 +95,7 @@ public class TokenProvider implements InitializingBean {
         return null;
     }
 
-    public String getTokenUserId(String token){
+    public String getUserIdFromToken(String token){
         Claims claims = Jwts.parserBuilder()
                 .setSigningKey(key)
                 .build()
@@ -76,12 +107,12 @@ public class TokenProvider implements InitializingBean {
     public Authentication getAuthentication(String token){
         UserDetails userDetails =
                 (UserDetails)
-                        userDetailsService.loadUserByUsername(getTokenUserId(token));
+                        userDetailsService.loadUserByUsername(getUserIdFromToken(token));
         return new UsernamePasswordAuthenticationToken(
                 userDetails, token, userDetails.getAuthorities());
     }
 
-    public boolean validateAccessToken(String token){
+    public boolean validateToken(String token){
         try {
             Jwts.parserBuilder()
                     .setSigningKey(key)

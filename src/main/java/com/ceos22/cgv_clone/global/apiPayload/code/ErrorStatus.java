@@ -23,6 +23,8 @@ public enum ErrorStatus{
     CINEMA_NOT_FOUND(HttpStatus.NOT_FOUND,"CINEMA404", "해당 영화관을 찾을 수 없습니다."),
     PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND,"PRODUCT404","해당 상품을 찾을 수 없습니다."),
 
+    //로그인관련 응답
+    TOKEN_INVALID(HttpStatus.UNAUTHORIZED, "LOGIN4001", "토큰이 유효하지 않습니다."),
 
     //User관련 응답
     ALREADY_EXISTS_EMAIL(HttpStatus.BAD_REQUEST,"USER4001","이미 존재하는 이메일 입니다."),
@@ -43,8 +45,10 @@ public enum ErrorStatus{
 
     //구매 관련 응답
     INVALID_QUANTITY(HttpStatus.BAD_REQUEST,"PURCHASE4001","상품 구매 수량은 최소 1개 이상이어야 합니다."),
-    ;
 
+    REDIS_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "REDIS_ERROR", "Redis 설정에 오류가 발생했습니다."),
+
+    ;
 
     private final HttpStatus httpStatus;
     private final String code;

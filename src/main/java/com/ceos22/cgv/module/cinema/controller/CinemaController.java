@@ -9,6 +9,7 @@ import com.ceos22.cgv.module.cinema.dto.CinemaResponse;
 import com.ceos22.cgv.module.cinema.service.CinemaService;
 import com.ceos22.cgv.module.user.dto.CustomUserDetails;
 import com.ceos22.cgv.common.response.ApiResponse;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +23,7 @@ public class CinemaController {
 
     private final CinemaService cinemaService;
 
+    @Operation(summary = "영화관 목록 조회", description = "지역과 상영관 종류로 영화관 목록을 조회합니다.")
     @GetMapping("/cinemas")
     public ResponseEntity<ApiResponse<CinemaListResponse>> getCinemas(
             @Valid @ModelAttribute CinemaRequest request) {
@@ -34,6 +36,7 @@ public class CinemaController {
         return ResponseEntity.ok().body(response);
     }
 
+    @Operation(summary = "영화관 조회", description = "영화관 id로 특정 영화관을 조회합니다.")
     @GetMapping("/cinemas/{cinemaId}")
     public ResponseEntity<ApiResponse<CinemaResponse>> getCinema(
             @PathVariable Long cinemaId) {
@@ -46,6 +49,7 @@ public class CinemaController {
         return ResponseEntity.ok().body(response);
     }
 
+    @Operation(summary = "영화관 찜 추가", description = "특정 영화관에 찜을 추가합니다. (인증 필요)")
     @PostMapping("/cinemas/{cinemaId}/like")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<CinemaLikeResponse>> postLike(
@@ -60,6 +64,7 @@ public class CinemaController {
         return ResponseEntity.ok().body(response);
     }
 
+    @Operation(summary = "영화관 찜 제거", description = "특정 영화관에서 찜을 제거합니다. (인증 필요)")
     @PostMapping("/cinemas/{cinemaId}/unlike")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<CinemaLikeResponse>> unLike(

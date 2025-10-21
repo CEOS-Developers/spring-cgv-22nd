@@ -13,6 +13,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import io.swagger.v3.oas.annotations.Operation;
 
 @RestController
 @RequiredArgsConstructor
@@ -20,6 +21,7 @@ public class OrderController {
 
     private final OrderService orderService;
 
+    @Operation(summary = "스낵/음료 주문", description = "로그인한 사용자가 스낵/음료를 주문합니다. (인증 필요)")
     @PostMapping("/order")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<OrderResponse>> order(
@@ -34,6 +36,7 @@ public class OrderController {
         return ResponseEntity.ok().body(response);
     }
 
+    @Operation(summary = "주문 상세 조회", description = "주문 ID로 본인 소유의 주문 상세를 조회합니다. (인증 필요)")
     @GetMapping("/order/{orderId}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<OrderResponse>> getOrder(
@@ -49,6 +52,7 @@ public class OrderController {
     }
 
 
+    @Operation(summary = "나의 주문 목록", description = "로그인한 사용자의 주문 내역을 조회합니다. (인증 필요)")
     @GetMapping("/order/my")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<List<OrderResponse>>> getMyOrders(

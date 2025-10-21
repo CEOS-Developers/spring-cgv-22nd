@@ -13,6 +13,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import io.swagger.v3.oas.annotations.Operation;
 
 @RestController
 @RequiredArgsConstructor
@@ -20,6 +21,7 @@ public class ReservationController {
 
     private final ReservationService reservationService;
 
+    @Operation(summary = "좌석 예약", description = "로그인한 사용자가 선택한 상영 스케줄과 좌석 정보로 예약을 생성합니다. (인증 필요)")
     @PostMapping("/reservations")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<ReservationResponse>> reserve(
@@ -34,6 +36,7 @@ public class ReservationController {
         return ResponseEntity.ok().body(response);
     }
 
+    @Operation(summary = "예약 취소", description = "본인 소유의 예약을 취소합니다. (인증 필요)")
     @PostMapping("/reservations/{reservationId}/cancel")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<ReservationResponse>> cancel(
@@ -49,6 +52,7 @@ public class ReservationController {
     }
 
 
+    @Operation(summary = "나의 예약 목록", description = "로그인한 사용자의 모든 예약 내역을 조회합니다. (인증 필요)")
     @GetMapping("/reservations")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<List<ReservationResponse>>> myReservations(
@@ -62,6 +66,7 @@ public class ReservationController {
         return ResponseEntity.ok().body(response);
     }
 
+    @Operation(summary = "예약 상세 조회", description = "예약 ID로 본인 소유의 예약 상세를 조회합니다. (인증 필요)")
     @GetMapping("/reservations/{reservationId}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<ReservationResponse>> getReservation(

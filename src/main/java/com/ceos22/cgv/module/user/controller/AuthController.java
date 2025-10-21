@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import io.swagger.v3.oas.annotations.Operation;
 
 @RestController
 @RequiredArgsConstructor
@@ -20,6 +21,7 @@ public class AuthController {
 
     private final AuthService authService;
 
+    @Operation(summary = "로그인", description = "닉네임과 비밀번호로 인증을 수행하고 액세스 토큰(JWT)을 발급합니다.")
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<AuthResponse>> login (
             @Valid @RequestBody final AuthRequest request) {
@@ -32,6 +34,7 @@ public class AuthController {
         return ResponseEntity.ok().body(response);
     }
 
+    @Operation(summary = "회원가입", description = "닉네임/비밀번호 등 사용자 정보를 입력받아 회원을 생성합니다.")
     @PostMapping("/signup")
     public ResponseEntity<ApiResponse<SignupResponse>> signup (
             @Valid @RequestBody final SignupRequest request) {

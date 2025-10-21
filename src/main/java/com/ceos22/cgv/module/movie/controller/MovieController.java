@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.v3.oas.annotations.Operation;
 
 @RestController
 @RequiredArgsConstructor
@@ -21,6 +22,7 @@ public class MovieController {
     private final MovieService movieService;
     private final ReservationService reservationService;
 
+    @Operation(summary = "영화 목록 조회", description = "영화 제목을 검색어로 필터링하여 목록을 조회합니다. 검색어가 없으면 전체 목록을 반환합니다. (인증 필요)")
     @GetMapping("/movies")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<MovieListResponse>> getMovieTitles(
@@ -34,7 +36,7 @@ public class MovieController {
         return ResponseEntity.ok().body(response);
     }
 
-
+    @Operation(summary = "영화 상세 조회", description = "영화 ID로 특정 영화의 상세 정보를 조회합니다.")
     @GetMapping("/movies/{movieId}")
     public ResponseEntity<ApiResponse<MovieResponse>> getMovie(
             @PathVariable Long movieId) {
@@ -47,6 +49,7 @@ public class MovieController {
         return ResponseEntity.ok().body(response);
     }
 
+    @Operation(summary = "상영 일정 조회", description = "영화/지역/극장/날짜 등 조건으로 상영 일정을 조회합니다.")
     @GetMapping("/movies/schedule")
     public ResponseEntity<ApiResponse<MovieScheduleListResponse>> getSchedule(
             @Valid @ModelAttribute ScheduleRequest request) {
@@ -59,7 +62,7 @@ public class MovieController {
         return ResponseEntity.ok().body(response);
     }
 
-    // 좌석 예약 상태 반환
+    @Operation(summary = "좌석 예약 현황 조회", description = "스케줄 ID로 상영관 좌석의 예약(점유) 상태를 조회합니다.")
     @GetMapping("/movies/schedule/{scheduleId}/availability")
     public ResponseEntity<ApiResponse<SeatAvailabilityResponse>> availability(
             @PathVariable Long scheduleId) {
@@ -72,6 +75,7 @@ public class MovieController {
         return ResponseEntity.ok().body(response);
     }
 
+    @Operation(summary = "영화 찜 추가", description = "특정 영화에 대해 현재 로그인한 사용자의 찜을 추가합니다. (인증 필요)")
     @PostMapping("/movies/{movieId}/like")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<MovieLikeResponse>> postLike(
@@ -86,6 +90,7 @@ public class MovieController {
         return ResponseEntity.ok().body(response);
     }
 
+    @Operation(summary = "영화 찜 제거", description = "특정 영화에 대해 현재 로그인한 사용자의 찜을 제거합니다. (인증 필요)")
     @PostMapping("/movies/{movieId}/unlike")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<MovieLikeResponse>> unLike(

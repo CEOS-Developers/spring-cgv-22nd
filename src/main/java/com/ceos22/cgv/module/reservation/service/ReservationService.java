@@ -12,7 +12,7 @@ import com.ceos22.cgv.module.reservation.repository.ReservationRepository;
 import com.ceos22.cgv.module.reservation.repository.ReservationSeatRepository;
 import com.ceos22.cgv.module.user.domain.User;
 import com.ceos22.cgv.module.user.repository.UserRepository;
-import com.ceos22.cgv.util.ReservationStatus;
+import com.ceos22.cgv.common.util.ReservationStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -41,8 +41,13 @@ public class ReservationService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "유저를 찾을 수 없습니다."));
 
 
-        // 예약 여부 검증
+        Theater theater = schedule.getTheater();
+
+        // 좌석 유효성 및 예약 여부 검증
         for (var seat : request.seats()) {
+            if (seat.row() < 1 || seat.row() > theater.getRow() || seat.column() < 1 || seat.column() > theater.getColumn()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "유효하지 않은 좌석입니다. row=" + seat.row() + ", col=" + seat.column());
+            }
             if (reservationSeatRepository.existsBooked(schedule.getId(), seat.row(), seat.column())) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "이미 예약된 좌석입니다.");
             }
@@ -130,7 +135,7 @@ public class ReservationService {
     public List<ReservationResponse> getMyReservations(User user) {
         return reservationRepository.findAllByUserIdWithScheduleAndSeats(user.getId())
                 .stream()
-                .map(ReservationResponse::from)
+                .map(ReservationResponse::fromReservation)
                 .toList();
     }
 
@@ -143,7 +148,7 @@ public class ReservationService {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "본인 예약만 조회할 수 있습니다.");
         }
 
-        return ReservationResponse.from(reservation);
+        return ReservationResponse.fromReservation(reservation);
     }
 
 }

@@ -4,7 +4,10 @@ import java.util.List;
 
 public record ReservationRequest(
         Long scheduleId,
-        List<SeatReqest> seats
+        List<SeatRequest> seats
 ) {
-    public record SeatReqest(Integer row, Integer column) {}
+    public record SeatRequest(
+            Integer row,
+            Integer column) {
+    }
 }

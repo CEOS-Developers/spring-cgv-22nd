@@ -1,6 +1,7 @@
 package com.ceos22.cgv.module.snack.domain;
 
-import com.ceos22.cgv.util.MenuCategory;
+import com.ceos22.cgv.common.domain.BaseEntity;
+import com.ceos22.cgv.common.util.MenuCategory;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -10,7 +11,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Menu {
+public class Menu extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

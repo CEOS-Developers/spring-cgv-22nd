@@ -8,7 +8,7 @@ public record CinemaLikeResponse(
         Long userId,
         boolean isLiked
 ) {
-    public static CinemaLikeResponse of(
+    public static CinemaLikeResponse fromCinemaAndUser(
             Cinema cinema,
             User user,
             boolean isLiked

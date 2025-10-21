@@ -1,8 +1,8 @@
 package com.ceos22.cgv.module.user.domain;
 
-import com.ceos22.cgv.util.Region;
-import com.ceos22.cgv.util.UserGrade;
-import com.ceos22.cgv.util.UserRole;
+import com.ceos22.cgv.common.domain.BaseEntity;
+import com.ceos22.cgv.common.util.UserGrade;
+import com.ceos22.cgv.common.util.UserRole;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -12,7 +12,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class User {
+public class User extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

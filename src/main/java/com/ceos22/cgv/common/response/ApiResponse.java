@@ -1,7 +1,6 @@
-package com.ceos22.cgv.response;
+package com.ceos22.cgv.common.response;
 
-import com.ceos22.cgv.codes.SuccessCode;
-import com.ceos22.cgv.module.movie.dto.MovieLikeResponse;
+import com.ceos22.cgv.common.codes.SuccessCode;
 import lombok.Builder;
 import lombok.Getter;
 

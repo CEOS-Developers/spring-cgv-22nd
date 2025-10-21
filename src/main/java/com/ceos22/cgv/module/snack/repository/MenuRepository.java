@@ -1,7 +1,7 @@
 package com.ceos22.cgv.module.snack.repository;
 
 import com.ceos22.cgv.module.snack.domain.Menu;
-import com.ceos22.cgv.util.MenuCategory;
+import com.ceos22.cgv.common.util.MenuCategory;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

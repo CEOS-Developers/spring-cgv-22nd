@@ -1,12 +1,12 @@
 package com.ceos22.cgv.module.movie.domain;
 
-import com.ceos22.cgv.util.Genre;
-import com.ceos22.cgv.util.Rating;
+import com.ceos22.cgv.common.domain.BaseEntity;
+import com.ceos22.cgv.common.util.Genre;
+import com.ceos22.cgv.common.util.Rating;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "movie")
@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Movie {
+public class Movie extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

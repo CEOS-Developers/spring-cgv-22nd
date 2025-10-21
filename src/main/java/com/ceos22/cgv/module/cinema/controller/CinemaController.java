@@ -1,6 +1,6 @@
 package com.ceos22.cgv.module.cinema.controller;
 
-import com.ceos22.cgv.codes.SuccessCode;
+import com.ceos22.cgv.common.codes.SuccessCode;
 import com.ceos22.cgv.module.cinema.dto.CinemaLikeResponse;
 import com.ceos22.cgv.module.cinema.dto.CinemaListResponse;
 
@@ -8,7 +8,7 @@ import com.ceos22.cgv.module.cinema.dto.CinemaRequest;
 import com.ceos22.cgv.module.cinema.dto.CinemaResponse;
 import com.ceos22.cgv.module.cinema.service.CinemaService;
 import com.ceos22.cgv.module.user.dto.CustomUserDetails;
-import com.ceos22.cgv.response.ApiResponse;
+import com.ceos22.cgv.common.response.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

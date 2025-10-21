@@ -1,7 +1,7 @@
 package com.ceos22.cgv.module.cinema.dto;
 
 import com.ceos22.cgv.module.cinema.domain.Cinema;
-import com.ceos22.cgv.util.Region;
+import com.ceos22.cgv.common.util.Region;
 
 public record CinemaResponse(
         Long id,
@@ -11,7 +11,7 @@ public record CinemaResponse(
         String description
 ) {
 
-    public static CinemaResponse from(Cinema cinema) {
+    public static CinemaResponse fromCinema(Cinema cinema) {
         return new CinemaResponse(
                 cinema.getId(),
                 cinema.getName(),

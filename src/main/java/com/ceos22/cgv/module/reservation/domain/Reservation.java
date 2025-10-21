@@ -1,13 +1,12 @@
 package com.ceos22.cgv.module.reservation.domain;
 
+import com.ceos22.cgv.common.domain.BaseEntity;
 import com.ceos22.cgv.module.movie.domain.Schedule;
 import com.ceos22.cgv.module.user.domain.User;
-import com.ceos22.cgv.util.ReservationStatus;
+import com.ceos22.cgv.common.util.ReservationStatus;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,7 +17,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Reservation {
+public class Reservation extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "reservation_id")
@@ -31,10 +30,6 @@ public class Reservation {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
-
-    @CreationTimestamp
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)

@@ -1,12 +1,12 @@
 package com.ceos22.cgv.module.movie.controller;
 
-import com.ceos22.cgv.codes.SuccessCode;
+import com.ceos22.cgv.common.codes.SuccessCode;
 import com.ceos22.cgv.module.movie.dto.*;
 import com.ceos22.cgv.module.movie.service.MovieService;
 import com.ceos22.cgv.module.reservation.dto.SeatAvailabilityResponse;
 import com.ceos22.cgv.module.reservation.service.ReservationService;
 import com.ceos22.cgv.module.user.dto.CustomUserDetails;
-import com.ceos22.cgv.response.ApiResponse;
+import com.ceos22.cgv.common.response.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +22,7 @@ public class MovieController {
     private final ReservationService reservationService;
 
     @GetMapping("/movies")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<MovieListResponse>> getMovieTitles(
             @RequestParam(required = false) String query) {
 

@@ -9,8 +9,13 @@ public record CinemaListResponse(
         int count
 ) {
 
-    public static CinemaListResponse fromEntities(List<Cinema> cinemas) {
-        var list = cinemas.stream().map(CinemaResponse::from).toList();
-        return new CinemaListResponse(list, list.size());
+    public static CinemaListResponse fromCinemas(
+            List<Cinema> cinemas
+    ) {
+        var list = cinemas.stream().map(CinemaResponse::fromCinema).toList();
+        return new CinemaListResponse(
+                list,
+                list.size()
+        );
     }
 }

@@ -1,19 +1,15 @@
 package com.ceos22.cgv.module.user.controller;
 
-import com.ceos22.cgv.codes.SuccessCode;
-import com.ceos22.cgv.module.cinema.dto.CinemaListResponse;
+import com.ceos22.cgv.common.codes.SuccessCode;
 import com.ceos22.cgv.module.user.dto.AuthRequest;
 import com.ceos22.cgv.module.user.dto.AuthResponse;
 import com.ceos22.cgv.module.user.dto.SignupRequest;
 import com.ceos22.cgv.module.user.dto.SignupResponse;
 import com.ceos22.cgv.module.user.service.AuthService;
-import com.ceos22.cgv.response.ApiResponse;
+import com.ceos22.cgv.common.response.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;

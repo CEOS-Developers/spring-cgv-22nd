@@ -1,15 +1,13 @@
 package com.ceos22.cgv.module.snack.controller;
 
-import com.ceos22.cgv.codes.SuccessCode;
-import com.ceos22.cgv.module.movie.dto.MovieListResponse;
+import com.ceos22.cgv.common.codes.SuccessCode;
 import com.ceos22.cgv.module.snack.dto.MenuListResponse;
 import com.ceos22.cgv.module.snack.service.MenuService;
-import com.ceos22.cgv.response.ApiResponse;
-import com.ceos22.cgv.util.MenuCategory;
+import com.ceos22.cgv.common.response.ApiResponse;
+import com.ceos22.cgv.common.util.MenuCategory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 

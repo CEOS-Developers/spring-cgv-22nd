@@ -13,7 +13,7 @@ import com.ceos22.cgv.module.snack.repository.OrderItemRepository;
 import com.ceos22.cgv.module.snack.repository.OrderRepository;
 import com.ceos22.cgv.module.user.domain.User;
 import com.ceos22.cgv.module.user.repository.UserRepository;
-import com.ceos22.cgv.util.OrderStatus;
+import com.ceos22.cgv.common.util.OrderStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;

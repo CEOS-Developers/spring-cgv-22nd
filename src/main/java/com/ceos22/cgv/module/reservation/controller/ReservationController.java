@@ -1,12 +1,11 @@
 package com.ceos22.cgv.module.reservation.controller;
 
-import com.ceos22.cgv.codes.SuccessCode;
-import com.ceos22.cgv.module.movie.dto.MovieLikeResponse;
+import com.ceos22.cgv.common.codes.SuccessCode;
 import com.ceos22.cgv.module.reservation.dto.ReservationRequest;
 import com.ceos22.cgv.module.reservation.dto.ReservationResponse;
 import com.ceos22.cgv.module.reservation.service.ReservationService;
 import com.ceos22.cgv.module.user.dto.CustomUserDetails;
-import com.ceos22.cgv.response.ApiResponse;
+import com.ceos22.cgv.common.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;

@@ -14,7 +14,7 @@ public interface ReservationSeatRepository extends JpaRepository<ReservationSeat
         from ReservationSeat rs 
         where rs.schedule.id = :scheduleId
     """)
-    int countByScheduleId(Long scheduleId);
+    long countByScheduleId(Long scheduleId);
 
     // 선검증: 해당 좌표가 이미 BOOKED인지 단건 확인
     @Query("""
@@ -22,7 +22,7 @@ public interface ReservationSeatRepository extends JpaRepository<ReservationSeat
       join rs.reservation r
       where rs.schedule.id = :scheduleId
         and rs.row = :row and rs.column = :col
-        and r.status = com.ceos22.cgv.util.ReservationStatus.RESERVED
+        and r.status = com.ceos22.cgv.common.util.ReservationStatus.RESERVED
     """)
     boolean existsBooked(@Param("scheduleId") Long scheduleId,
                          @Param("row") Integer row,

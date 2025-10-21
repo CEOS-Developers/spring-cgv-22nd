@@ -1,7 +1,7 @@
 package com.ceos22.cgv.module.reservation.dto;
 
 import com.ceos22.cgv.module.reservation.domain.Reservation;
-import com.ceos22.cgv.util.ReservationStatus;
+import com.ceos22.cgv.common.util.ReservationStatus;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.time.LocalDateTime;
@@ -17,7 +17,7 @@ public record ReservationResponse(
         List<SeatResponse> seats
 ) {
 
-    public static ReservationResponse from(Reservation reservation) {
+    public static ReservationResponse fromReservation(Reservation reservation) {
         return new ReservationResponse(
                 reservation.getId(),
                 reservation.getSchedule().getId(),
@@ -30,5 +30,9 @@ public record ReservationResponse(
         );
     }
 
-    public record SeatResponse(Integer row, Integer column) {}
+    public record SeatResponse(
+            Integer row,
+            Integer column) {
+
+    }
 }

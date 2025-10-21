@@ -11,7 +11,10 @@ public record MovieScheduleResponse(
         String movieTitle,
         List<ScheduleResponse> schedules
 ) {
-    public static MovieScheduleResponse of(Movie movie, List<ScheduleResponse> schedules) {
+    public static MovieScheduleResponse fromMovieAndSchedules(
+            Movie movie,
+            List<ScheduleResponse> schedules
+    ) {
         return new MovieScheduleResponse(
                 movie.getId(),
                 movie.getTitle(),

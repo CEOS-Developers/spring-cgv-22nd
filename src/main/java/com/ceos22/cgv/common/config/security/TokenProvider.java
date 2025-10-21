@@ -1,4 +1,4 @@
-package com.ceos22.cgv.config.security;
+package com.ceos22.cgv.common.config.security;
 
 import com.ceos22.cgv.module.user.service.UserService;
 import io.jsonwebtoken.*;
@@ -6,6 +6,7 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.convert.DurationStyle;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Component;
 import javax.crypto.SecretKey;
 import jakarta.servlet.http.HttpServletRequest;
 import java.security.Key;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
 import java.util.stream.Collectors;
@@ -26,14 +28,14 @@ public class TokenProvider implements InitializingBean {
     private Key key;
     private final String secret;
     private final UserService userService;
-    private final long accessTokenValidityInMs;
+    private final Duration accessTokenValidity;
 
     public TokenProvider(
             @Value("${jwt.secret}") String secret,
-            @Value("${jwt.access-token-validity-ms}") long accessTokenValidityMs,
+            @Value("${jwt.access-token-validity:1h}") String accessTokenValidityProp,
             UserService userService) {
         this.secret = secret;
-        this.accessTokenValidityInMs = accessTokenValidityMs;
+        this.accessTokenValidity = DurationStyle.detectAndParse(accessTokenValidityProp);
         this.userService = userService;
     }
 
@@ -60,11 +62,14 @@ public class TokenProvider implements InitializingBean {
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(","));
 
+        Instant now = Instant.now();
+        Instant expiry = now.plus(accessTokenValidity);
+
         return Jwts.builder()
                 .setSubject(String.valueOf(userId))
                 .claim("auth", authorities)
-                .setIssuedAt(Date.from(Instant.now()))
-                .setExpiration(Date.from(Instant.now().plusMillis(accessTokenValidityInMs)))
+                .setIssuedAt(Date.from(now))
+                .setExpiration(Date.from(expiry))
                 .signWith((SecretKey) key, Jwts.SIG.HS256)
                 .compact();
     }
@@ -82,8 +87,8 @@ public class TokenProvider implements InitializingBean {
     // token에서 Authentication 생성 (SecurityContext에 넣을 객체)
     public Authentication getAuthentication(String token) {
 
-        String _userId = getTokenUserId(token);
-        Long userId = Long.valueOf(_userId);
+        String userIdStr = getTokenUserId(token);
+        Long userId = Long.valueOf(userIdStr);
         UserDetails userDetails = userService.loadUserByUserId(userId);
 
         return new UsernamePasswordAuthenticationToken(userDetails, token, userDetails.getAuthorities());

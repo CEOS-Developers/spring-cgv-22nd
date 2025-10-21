@@ -1,7 +1,7 @@
 package com.ceos22.cgv.module.movie.repository;
 
 import com.ceos22.cgv.module.movie.domain.Schedule;
-import com.ceos22.cgv.util.ScheduleCategory;
+import com.ceos22.cgv.common.util.ScheduleCategory;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

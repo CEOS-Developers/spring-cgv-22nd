@@ -8,13 +8,8 @@ import com.ceos22.cgv.module.cinema.dto.CinemaResponse;
 import com.ceos22.cgv.module.cinema.domain.Cinema;
 import com.ceos22.cgv.module.cinema.repository.CinemaLikeRepository;
 import com.ceos22.cgv.module.cinema.repository.CinemaRepository;
-import com.ceos22.cgv.module.movie.domain.Movie;
-import com.ceos22.cgv.module.movie.domain.MovieLike;
-import com.ceos22.cgv.module.movie.dto.MovieLikeResponse;
 import com.ceos22.cgv.module.user.domain.User;
 import com.ceos22.cgv.module.user.repository.UserRepository;
-import com.ceos22.cgv.util.Region;
-import com.ceos22.cgv.util.TheaterType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -34,25 +29,24 @@ public class CinemaService {
 
     @Transactional(readOnly = true)
     public CinemaListResponse findCinemas(CinemaRequest cinemaRequest) {
-        return CinemaListResponse.fromEntities(cinemaRepository.search(cinemaRequest.region(), cinemaRequest.type()));
+        return CinemaListResponse.fromCinemas(cinemaRepository.search(cinemaRequest.region(), cinemaRequest.type()));
     }
 
     @Transactional(readOnly = true)
     public CinemaResponse findCinemaById(Long cinemaId) {
         var cinema = cinemaRepository.findById(cinemaId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "해당 영화관이 존재하지 않습니다."));
-        return CinemaResponse.from(cinema);
+        return CinemaResponse.fromCinema(cinema);
     }
 
     @Transactional
     public CinemaLikeResponse like(Long cinemaId, User authenticatedUser) {
 
         User user = userRepository.findById(authenticatedUser.getId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "해당 유저가 존재하지 않습니다."));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "해당 유저가 존재하지 않습니다."));
 
         Cinema cinema = cinemaRepository.findById(cinemaId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "해당 영화가 존재하지 않습니다."));
-
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "해당 영화관이 존재하지 않습니다."));
 
         if (!cinemaLikeRepository.existsByUser_IdAndCinema_Id(user.getId(), cinemaId)) {
             CinemaLike like = CinemaLike.builder()
@@ -62,7 +56,7 @@ public class CinemaService {
             cinemaLikeRepository.save(like);
         }
 
-        return CinemaLikeResponse.of(cinema, user, true);
+        return CinemaLikeResponse.fromCinemaAndUser(cinema, user, true);
     }
 
 
@@ -70,7 +64,7 @@ public class CinemaService {
     public CinemaLikeResponse unlike(Long cinemaId, User user) {
 
         CinemaLike cinemaLike = cinemaLikeRepository.findByUser_IdAndCinema_Id(user.getId(), cinemaId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "해당 좋아요가 존재하지 않습니다."));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "해당 좋아요가 존재하지 않습니다."));
 
         cinemaLikeRepository.delete(cinemaLike);
 

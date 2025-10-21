@@ -1,30 +1,31 @@
-package com.ceos22.cgv.response;
+package com.ceos22.cgv.common.response;
 
-import com.ceos22.cgv.codes.ErrorCode;
+import com.ceos22.cgv.common.codes.ErrorCode;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.validation.FieldError;
-
-import java.util.List;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ErrorResponse {
 
     private int statusCode;
-    private String code;
     private String message;
 
     @Builder
     protected ErrorResponse(final ErrorCode errorCode){
         this.statusCode = errorCode.getStatusCode();
-        this.code = errorCode.getCode();
         this.message = errorCode.getMessage();
     }
 
-    public static ErrorResponse of(final ErrorCode code) {
+    public static ErrorResponse fromErrorCode(final ErrorCode code) {
         return new ErrorResponse(code);
+    }
+
+    public static ErrorResponse fromResponseStatusException(final ErrorCode code, final String message) {
+        ErrorResponse response = new ErrorResponse(code);
+        response.message = message;
+        return response;
     }
 }

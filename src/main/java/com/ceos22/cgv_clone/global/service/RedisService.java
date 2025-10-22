@@ -15,7 +15,7 @@ public class RedisService {
 
     private final RedisTemplate<String, Object> redisTemplate;
 
-    public void setValue(String key, String value, long ttlMillis) {
+    public void setValue(String key, Object value, long ttlMillis) {
         try {
             ValueOperations<String, Object> values = redisTemplate.opsForValue();
             values.set(key, value, Duration.ofMillis(ttlMillis));
@@ -24,7 +24,16 @@ public class RedisService {
         }
     }
 
-    public String getValue(String key) {
+    public void setValue(String key, Object value) {
+        try {
+            ValueOperations<String, Object> values = redisTemplate.opsForValue();
+            values.set(key, value);
+        } catch (Exception e) {
+            throw new GeneralException(ErrorStatus.REDIS_ERROR);
+        }
+    }
+
+    public Object getValue(String key) {
         try {
             ValueOperations<String, Object> values = redisTemplate.opsForValue();
             if (values.get(key) == null) {

@@ -2,10 +2,6 @@ package com.ceos22.cgv_clone.web.domain.purchase;
 
 public record Price(int value) {
 
-    private Price(int value) {
-        this.value = value;
-    }
-
     public static Price of(int value) {
         return new Price(value);
     }

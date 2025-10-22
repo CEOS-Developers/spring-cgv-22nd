@@ -6,6 +6,7 @@ import com.ceos22.cgv_clone.global.service.RedisService;
 import com.ceos22.cgv_clone.web.domain.*;
 import com.ceos22.cgv_clone.web.domain.reservation.Reservation;
 import com.ceos22.cgv_clone.web.domain.reservation.ReservationAmounts;
+import com.ceos22.cgv_clone.web.domain.reservation.ReservedSeat;
 import com.ceos22.cgv_clone.web.domain.reservation.TotalPrice;
 import com.ceos22.cgv_clone.web.dto.ReservationRequestDto;
 import com.ceos22.cgv_clone.web.dto.ReservationResponseDto;
@@ -16,6 +17,7 @@ import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
 
+import javax.cache.annotation.CacheKey;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -24,114 +26,122 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class ReservationService {
-    private final UserRepository userRepository;
-    private final ScheduleRepository scheduleRepository;
-    private final SeatRepository seatRepository;
+    private final UserService userService;
+    private final ScheduleService scheduleService;
+    private final SeatService seatService;
     private final ReservedSeatRepository reservedSeatRepository;
     private final ReservationRepository reservationRepository;
     private final RedissonClient redissonClient;
     private final RedisService redisService;
+    private final List<RLock> heldLocks;
 
 
     @Transactional
     public ReservationResponseDto.ReservationDto createReservation(ReservationRequestDto.ReservationDto requestdto) {
-        User user = userRepository.findById(requestdto.getUserId())
-                .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
+        User user = userService.getUserById(requestdto.getUserId());
 
         //상영 스케줄이 존재하는지 확인
-        Schedule schedule = scheduleRepository.findById(requestdto.getScheduleId())
-                .orElseThrow(() -> new GeneralException(ErrorStatus.SCHEDULE_NOT_FOUND));
+        Schedule schedule = scheduleService.getScheduleById(requestdto.getScheduleId());
 
         //스케줄이 상영 전인지 확인
         schedule.verifyNotStarted();
 
         //좌석이 존재하는지 확인
         List<Long> reservedSeatList = requestdto.getSeatIdList();
-        List<Seat> seats = seatRepository.findAllById(reservedSeatList);
-        if (seats.size() != reservedSeatList.size()) {
-            throw new GeneralException(ErrorStatus.SEAT_NOT_FOUND);
-        }
+        List<Seat> seats = seatService.getSeatsById(reservedSeatList);
 
         //분산 락
-        List<RLock> locks = new ArrayList<>();
+        lockAll(requestdto.getScheduleId(),reservedSeatList);
         try {
-            for (Long seatId : reservedSeatList) {
-                RLock lock = redissonClient.getLock("schedule:" + schedule.getId() + ":seat:lock:" + seatId);
-                boolean locked = lock.tryLock(0, 5, TimeUnit.SECONDS);
-                if (!locked) {
+            assertSeatsNotReserved(schedule.getId(), reservedSeatList);
+
+            Reservation reservation = createReservation(user, schedule,
+                    requestdto.getAdultAmount(), requestdto.getTeenAmount(), seats);
+
+            reservationRepository.save(reservation);
+            reservedSeatRepository.saveAll(reservation.getReservedSeats());
+
+            markReserved(schedule.getId(),reservedSeatList);
+
+            return ReservationResponseDto.ReservationDto.of(reservation, reservation.reservedSeatNames());
+
+        } finally {
+            unlockAll();
+        }
+    }
+
+    public void lockAll(Long scheduleId, List<Long> seatIds) {
+        seatIds.forEach(id -> {
+            String lockKey = "schedule:" + scheduleId + ":seat:lock:" + id;
+            RLock lock = redissonClient.getLock(lockKey);
+            try {
+                if (!lock.tryLock(0, 5, TimeUnit.SECONDS)) {
                     throw new GeneralException(ErrorStatus.SEAT_LOCK_FAILED);
                 }
-                locks.add(lock);
+                heldLocks.add(lock);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new GeneralException(ErrorStatus.SEAT_LOCK_FAILED);
             }
+        });
+    }
 
-            // 캐시에서 좌석 예약 여부 조회
-            List<Long> alreadyReserved = new ArrayList<>();
-            for (Long seatId : reservedSeatList) {
-                String cacheKey = "schedule:" + schedule.getId() + ":seat:" + seatId + ":reserved";
-                Boolean reserved = (Boolean) redisService.getValue(cacheKey);
-                if (reserved == null) {
-                    // 캐시 미스 → DB 조회
-                    boolean dbReserved = reservedSeatRepository.existsByScheduleIdAndSeatIdAndIsAvailableFalse(schedule.getId(), seatId);
-                    if (dbReserved) {
-                        alreadyReserved.add(seatId);
-                        // 캐시 갱신
-                        redisService.setValue(cacheKey, true);
-                    } else {
-                        redisService.setValue(cacheKey, false);
-                    }
-                } else if (reserved) {
-                    alreadyReserved.add(seatId);
-                }
-            }
+    public void unlockAll() {
+        heldLocks.stream()
+                .filter(RLock::isHeldByCurrentThread)
+                .forEach(RLock::unlock);
+        heldLocks.clear();
+    }
 
-            if (!alreadyReserved.isEmpty()) {
-                throw new GeneralException(ErrorStatus.SEAT_ALREADY_RESERVED);
-            }
-
-            TotalPrice totalPrice = TotalPrice.of(requestdto.getAdultAmount() * 10000 + requestdto.getTeenAmount() * 8000);
-            ReservationAmounts amounts = ReservationAmounts.of(
-                    requestdto.getAdultAmount(), requestdto.getTeenAmount());
-
-            Reservation reservation = Reservation.create(user,schedule,totalPrice,amounts);
-
-            Reservation savedReservation = reservationRepository.save(reservation);
-
-            List<ReservedSeat> reservedSeats = seats.stream()
-                    .map(seat -> ReservedSeat.builder()
-                            .seat(seat)
-                            .schedule(schedule)
-                            .reservation(savedReservation)
-                            .isAvailable(false)
-                            .build())
-                    .collect(Collectors.toList());
-            reservedSeatRepository.saveAll(reservedSeats);
-
-            // Write-Through: 캐시에 예약 상태 즉시 갱신
-            for (Long seatId : reservedSeatList) {
-                String cacheKey = "schedule:" + schedule.getId() + ":seat:" + seatId + ":reserved";
-                redisService.setValue(cacheKey, true);
-            }
-
-            List<String> reservedSeatNames = reservedSeats.stream()
-                    .map(rs -> rs.getSeat().getSeatName())
-                    .collect(Collectors.toList());
-
-            return ReservationResponseDto.ReservationDto.builder()
-                    .id(savedReservation.getId())
-                    .totalAmount(requestdto.getAdultAmount() + requestdto.getTeenAmount())
-                    .scheduleId(schedule.getId())
-                    .reservedSeatNames(reservedSeatNames)
-                    .build();
-
-        } catch (Exception e){
-            throw new RuntimeException();
-        } finally {
-            for (RLock l : locks) {
-                if (l.isHeldByCurrentThread()) {
-                    l.unlock();
-                }
-            }
+    public boolean isReserved(Long scheduleId, Long seatId) {
+        String cacheKey = "schedule:" + scheduleId + ":seat:" + seatId + ":reserved";
+        Boolean reserved = (Boolean) redisService.getValue(cacheKey);
+        if (reserved == null) {
+            boolean dbReserved = reservedSeatRepository.existsByScheduleIdAndSeatIdAndIsAvailableFalse(scheduleId, seatId);
+            redisService.setValue(cacheKey, dbReserved);
+            return dbReserved;
         }
+        return reserved;
+    }
+
+    public void markReserved(Long scheduleId, List<Long> seatIds) {
+        seatIds.forEach(id -> {
+            String cacheKey = "schedule:" + scheduleId + ":seat:" + id + ":reserved";
+            redisService.setValue(cacheKey, true);
+        });
+    }
+
+    public void assertSeatsNotReserved(Long scheduleId,
+                                       List<Long> seatIds) {
+        boolean anyReserved = seatIds.stream()
+                .anyMatch(id -> isReserved(scheduleId, id)
+                        || reservedSeatRepository.existsByScheduleIdAndSeatIdAndIsAvailableFalse(scheduleId, id));
+
+        if (anyReserved) {
+            throw new GeneralException(ErrorStatus.SEAT_ALREADY_RESERVED);
+        }
+    }
+
+    public Reservation createReservation(User user,
+                                         Schedule schedule,
+                                         int adultCount,
+                                         int teenCount,
+                                         List<Seat> seats) {
+
+        TotalPrice totalPrice = TotalPrice.of(adultCount * 10000 + teenCount * 8000);
+        ReservationAmounts amounts = ReservationAmounts.of(
+                adultCount, teenCount);
+
+        Reservation reservation = Reservation.create(user, schedule, totalPrice, amounts);
+
+        List<ReservedSeat> reservedSeats = seats.stream()
+                .map(seat -> ReservedSeat.reserve(seat, schedule, reservation))
+                .collect(Collectors.toList());
+
+        if (reservedSeats.size() != seats.size()) {
+            throw new GeneralException(ErrorStatus.SEAT_NOT_FOUND);
+        }
+        return reservation;
     }
 
     //예매 취소

@@ -91,7 +91,7 @@ public class UserService {
         Authentication authentication = createAuthenticationFromUser(user);
 
         String key = REFRESH_TOKEN_PREFIX + userId;
-        String storedToken = redisService.getValue(key);
+        String storedToken = (String) redisService.getValue(key);
         if (storedToken == null || !storedToken.equals(token)) {
             throw new GeneralException(ErrorStatus.TOKEN_INVALID);
         }
@@ -105,5 +105,11 @@ public class UserService {
     private Authentication createAuthenticationFromUser(User user) {
         UserDetails userDetails = customUserDetailsService.loadUserByUsername(user.getId().toString());
         return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+    }
+
+    public User getUserById(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(()-> new GeneralException(ErrorStatus.USER_NOT_FOUND));
+        return user;
     }
 }

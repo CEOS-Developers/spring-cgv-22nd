@@ -4,10 +4,11 @@ import com.ceos22.cgv_clone.global.apiPayload.code.ErrorStatus;
 import com.ceos22.cgv_clone.global.apiPayload.exception.GeneralException;
 import com.ceos22.cgv_clone.global.service.RedisService;
 import com.ceos22.cgv_clone.web.domain.*;
+import com.ceos22.cgv_clone.web.domain.purchase.Purchase;
+import com.ceos22.cgv_clone.web.domain.purchase.Quantity;
+import com.ceos22.cgv_clone.web.domain.purchase.Price;
 import com.ceos22.cgv_clone.web.dto.PurchaseRequestDto;
 import com.ceos22.cgv_clone.web.dto.PurchaseResponseDto;
-import com.ceos22.cgv_clone.web.repository.CinemaRepository;
-import com.ceos22.cgv_clone.web.repository.ProductRepository;
 import com.ceos22.cgv_clone.web.repository.PurchaseRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -15,133 +16,126 @@ import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class PurchaseService {
     private final PurchaseRepository purchaseRepository;
-    private final CinemaRepository cinemaRepository;
-    private final ProductRepository productRepository;
+    private final CinemaService cinemaService;
+    private final ProductService productService;
     private final RedissonClient redissonClient;
     private final RedisService redisService;
+    private final List<RLock> heldLocks;
+
 
     @Transactional
     public PurchaseResponseDto purchase(PurchaseRequestDto purchaseRequestDto, User user) {
-        Cinema cinema = cinemaRepository.findById(purchaseRequestDto.getCinemaId())
-                .orElseThrow(()-> new GeneralException(ErrorStatus.CINEMA_NOT_FOUND));
+        Cinema cinema = cinemaService.getCinemaById(purchaseRequestDto.getCinemaId());
 
+        //구매 요청한 상품 ID목록
         List<Long> productIds = purchaseRequestDto.getProducts().stream()
                 .map(PurchaseRequestDto.ProductDto::getProductId)
                 .collect(Collectors.toList());
 
-        List<RLock> locks = new ArrayList<>();
+        //해당 상품들에 대한 분산 락 획득
+        lockAll(productIds);
         try{
-            for (Long productId : productIds) {
-                RLock lock = redissonClient.getLock("productLock: " + productId);
-                boolean locked = lock.tryLock(0,5, TimeUnit.SECONDS);
-                if (!locked) {
-                    throw new GeneralException(ErrorStatus.PRODUCT_LOCK_FAILED);
-                }
-                locks.add(lock);
-            }
 
-            //캐시에서 재고 조회 -> 미스발생 시 DB에서 로드 후 캐시에 저장
-            List<Product> products = productRepository.findAllById(productIds);
+            List<Product> products = productService.getProductsById(productIds);
 
-            if (products.size() != productIds.size()) {
-                throw new GeneralException(ErrorStatus.PRODUCT_NOT_FOUND);
-            }
-            Map<Long, Product> productMap = products.stream()
-                    .collect(Collectors.toMap(Product::getId, Function.identity()));
+            List<PurchaseRequestDto.ProductDto> productDtos = purchaseRequestDto.getProducts();
 
-            Purchase purchase = Purchase.builder()
-                    .user(user)
-                    .cinema(cinema)
-                    .totalPrice(0)
-                    .totalQuantity(0)
-                    .build();
-
-            int sumPrice = 0;
-            int sumQuantity = 0;
-            for (PurchaseRequestDto.ProductDto productDto : purchaseRequestDto.getProducts()) {
-                Product product = products.stream()
-                        .filter(p->p.getId().equals(productDto.getProductId()))
-                        .findFirst()
-                        .orElseThrow(()-> new GeneralException(ErrorStatus.PRODUCT_NOT_FOUND));
-
-                int quantity = productDto.getQuantity();
-                if (quantity <= 0){
-                    throw new GeneralException(ErrorStatus.INVALID_QUANTITY);
-                }
-
-                //캐시에서 재고 조회
-                String cacheKey = "product:stock:" + product.getId();
-                Integer cacheStock = (Integer) redisService.getValue(cacheKey);
-
-                if (!cacheStock.equals(product.getStock())){
-                    cacheStock = product.getStock();
-                    redisService.setValue(cacheKey,cacheStock);
-                }
-
-                if(cacheStock == 0){
+            //재고가 충분한지 확인
+            productDtos.forEach(productDto -> {
+                Product product = productService.findProduct(products, productDto.getProductId());
+                int available = getStock(product.getId());
+                if (productDto.getQuantity() > available){
                     throw new GeneralException(ErrorStatus.OUT_OF_STOCK);
                 }
+            });
 
-                // 재고 차감
-                int remaining = cacheStock - quantity;
-                // Write-through: 캐시에 반영
-                redisService.setValue(cacheKey, remaining);
-                // DB에도 동기적으로 반영
-                product.decreaseStock(quantity);
-                productRepository.save(product);
-
-                int unitPrice = product.getPrice() * quantity;
-
-                PurchaseProduct purchaseProduct = PurchaseProduct.builder()
-                        .product(product)
-                        .quantity(quantity)
-                        .unitPrice(unitPrice)
-                        .purchase(purchase)
-                        .build();
-
-                sumPrice += unitPrice;
-                sumQuantity += quantity;
-            }
-
-            purchase.setTotal(sumQuantity, sumPrice);
+            Purchase purchase = createPurchase(user,cinema,productDtos,products);
             purchaseRepository.save(purchase);
 
-            List<PurchaseResponseDto.ProductDto> productDtos = purchase.getProducts().stream()
-                    .map(product -> PurchaseResponseDto.ProductDto.of(
-                            product.getProduct(),
-                            product.getQuantity(),
-                            product.getUnitPrice()
-                    ))
-                    .collect(Collectors.toList());
+            return PurchaseResponseDto.of(purchase);
 
-            return PurchaseResponseDto.builder()
-                    .products(productDtos)
-                    .purchaseId(purchase.getId())
-                    .totalPrice(purchase.getTotalPrice())
-                    .totalQuantity(purchase.getTotalQuantity())
-                    .build();
-
-        } catch (Exception e){
-            throw new RuntimeException(e);
         } finally {
-            // 락 해제
-            for (RLock l : locks) {
-                if (l.isHeldByCurrentThread()) {
-                    l.unlock();
-                }
-            }
+            //락 해제
+            unlockAll();
         }
 
+    }
+
+    //각 상품 ID에 대해 락 획득 시도 및 성공 시 heldLocks에 저장
+    public void lockAll(List<Long> productIds) {
+        productIds.forEach(id -> {
+            String key = "productLock: " + id;
+            RLock lock = redissonClient.getLock(key);
+            try {
+                if (!lock.tryLock(0, 5, TimeUnit.SECONDS)) {
+                    throw new GeneralException(ErrorStatus.PRODUCT_LOCK_FAILED);
+                }
+                heldLocks.add(lock);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new GeneralException(ErrorStatus.PRODUCT_LOCK_FAILED);
+            }
+        });
+    }
+
+    public Purchase createPurchase(User user,
+                                   Cinema cinema,
+                                   List<PurchaseRequestDto.ProductDto> purchaseProducts,
+                                   List<Product> products) {
+        Purchase purchase = Purchase.create(user, cinema);
+        Price totalPrice = Price.of(0);
+        Quantity totalQuantity = Quantity.of(0);
+
+        // 각 요청된 상품에 대해 재고 감소, 가격 계산
+        for (PurchaseRequestDto.ProductDto dto : purchaseProducts) {
+            Product product = productService.findProduct(products, dto.getProductId());
+            Quantity quantity = Quantity.of(dto.getQuantity());
+            Price unitPrice = Price.of(product.getPrice()).multiply(quantity);
+
+            product.decreaseStock(quantity.value());
+            markDecrement(product.getId(), dto.getQuantity());
+            purchase.addProduct(product, quantity, unitPrice);
+
+            totalQuantity = totalQuantity.add(quantity);
+            totalPrice = totalPrice.add(unitPrice);
+        }
+
+        // 총 수량과 총 가격을 설정하여 완료
+        purchase.setTotal(totalQuantity, totalPrice);
+        return purchase;
+    }
+
+    // 획득된 락 중 현재 스레드가 가지고 있는 락을 모두 해제하고 리스트 초기화
+    public void unlockAll() {
+        heldLocks.stream()
+                .filter(RLock::isHeldByCurrentThread)
+                .forEach(RLock::unlock);
+        heldLocks.clear();
+    }
+
+    // 캐시에서 재고 조회, 없으면 DB 조회 후 캐시에 설정
+    public int getStock(Long productId) {
+        String key = "product:stock:" + productId;
+        Integer stock = (Integer) redisService.getValue(key);
+        if (stock == null) {
+            Product product = productService.getProductById(productId);
+            stock = product.getStock();
+            redisService.setValue(key, stock);
+        }
+        return stock;
+    }
+
+    // 재고가 감소된 상품에 대해 캐시에 저장 (write-through)
+    public void markDecrement(Long productId, int remaining) {
+        String key = "product:stock:" + productId;
+        redisService.setValue(key, remaining);
     }
 }

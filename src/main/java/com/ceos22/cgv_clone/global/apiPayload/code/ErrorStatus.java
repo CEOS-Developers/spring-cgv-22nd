@@ -45,10 +45,13 @@ public enum ErrorStatus{
 
     //구매 관련 응답
     INVALID_QUANTITY(HttpStatus.BAD_REQUEST,"PURCHASE4001","상품 구매 수량은 최소 1개 이상이어야 합니다."),
+    OUT_OF_STOCK(HttpStatus.BAD_REQUEST,"PURCHASE4002","상품 재고가 부족합니다."),
 
     REDIS_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "REDIS_ERROR", "Redis 설정에 오류가 발생했습니다."),
 
-    ;
+    //락 관련 응답
+    PRODUCT_LOCK_FAILED(HttpStatus.LOCKED, "PRODUCT4001","상품 구매 관련 Lock이 실패하였습니다"),
+    SEAT_LOCK_FAILED(HttpStatus.LOCKED, "SEAT4001","좌석 예매 관련 Lock이 실패하였습니다");
 
     private final HttpStatus httpStatus;
     private final String code;

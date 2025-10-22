@@ -2,18 +2,8 @@ package com.ceos22.cgv_clone.web.domain.reservation;
 
 import jakarta.persistence.Column;
 
-public class ReservationAmounts {
-    @Column(name = "adult_amount", nullable = false)
-    private final int adultAmount;
-
-    @Column(name = "teen_amount", nullable = false)
-    private final int teenAmount;
-
-
-    public ReservationAmounts(int adultAmount, int teenAmount) {
-        this.adultAmount = adultAmount;
-        this.teenAmount = teenAmount;
-    }
+public record ReservationAmounts(@Column(name = "adult_amount", nullable = false) int adultAmount,
+                                 @Column(name = "teen_amount", nullable = false) int teenAmount) {
 
     public static ReservationAmounts of(int adultAmount, int teenAmount) {
         return new ReservationAmounts(adultAmount, teenAmount);
@@ -29,11 +19,13 @@ public class ReservationAmounts {
         return adultAmount + teenAmount;
     }
 
-    public int getAdultAmount() {
+    @Override
+    public int adultAmount() {
         return adultAmount;
     }
 
-    public int getTeenAmount() {
+    @Override
+    public int teenAmount() {
         return teenAmount;
     }
 }

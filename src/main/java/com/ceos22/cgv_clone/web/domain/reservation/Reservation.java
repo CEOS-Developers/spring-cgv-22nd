@@ -6,7 +6,6 @@ import com.ceos22.cgv_clone.web.domain.User;
 import com.ceos22.cgv_clone.web.domain.enums.ReservationStatus;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.UuidGenerator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +24,7 @@ public class Reservation extends BaseEntity {
     private final ReservationUuid reservationUuid;
 
     @Embedded
-    private final TotalPrice totalPrice;
+    private final ReservationTotalPrice reservationTotalPrice;
 
     @Embedded
     private final ReservationAmounts reservationAmounts;
@@ -45,23 +44,23 @@ public class Reservation extends BaseEntity {
     @OneToMany(mappedBy = "reservation", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ReservedSeat> reservedSeats = new ArrayList<>();
 
-    public Reservation(User user, Schedule schedule,TotalPrice totalPrice, ReservationAmounts reservationAmounts) {
+    public Reservation(User user, Schedule schedule, ReservationTotalPrice reservationTotalPrice, ReservationAmounts reservationAmounts) {
 
         this.user = user;
         this.schedule = schedule;
         this.reservationUuid = ReservationUuid.generate();
-        this.totalPrice = totalPrice;
+        this.reservationTotalPrice = reservationTotalPrice;
         this.reservationAmounts = reservationAmounts;
     }
 
     public static Reservation create(User user,
                                      Schedule schedule,
-                                     TotalPrice totalPrice,
+                                     ReservationTotalPrice reservationTotalPrice,
                                      ReservationAmounts reservationAmounts) {
         schedule.verifyNotStarted();
         reservationAmounts.validatePositive();
-        totalPrice.validateNonNegative();
-        return new Reservation(user, schedule, totalPrice, reservationAmounts);
+        reservationTotalPrice.validateNonNegative();
+        return new Reservation(user, schedule, reservationTotalPrice, reservationAmounts);
     }
 
     public void cancel() {

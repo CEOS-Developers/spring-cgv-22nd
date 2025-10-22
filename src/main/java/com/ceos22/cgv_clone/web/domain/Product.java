@@ -20,4 +20,11 @@ public class Product extends BaseEntity {
 
     @Column(nullable = false)
     private Integer price;
+
+    @Column(nullable = false)
+    private Integer stock;
+
+    public int decreaseStock(int quantity){
+        return this.stock = this.stock - quantity;
+    }
 }

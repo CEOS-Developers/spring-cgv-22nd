@@ -2,7 +2,6 @@ package com.ceos22.cgv_clone.web.service;
 
 import com.ceos22.cgv_clone.global.apiPayload.code.ErrorStatus;
 import com.ceos22.cgv_clone.global.apiPayload.exception.GeneralException;
-import com.ceos22.cgv_clone.global.security.CustomUserDetails;
 import com.ceos22.cgv_clone.global.security.CustomUserDetailsService;
 import com.ceos22.cgv_clone.global.security.dto.RefreshTokenResponse;
 import com.ceos22.cgv_clone.global.security.dto.TokenResponse;

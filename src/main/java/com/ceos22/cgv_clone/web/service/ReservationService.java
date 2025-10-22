@@ -7,7 +7,7 @@ import com.ceos22.cgv_clone.web.domain.*;
 import com.ceos22.cgv_clone.web.domain.reservation.Reservation;
 import com.ceos22.cgv_clone.web.domain.reservation.ReservationAmounts;
 import com.ceos22.cgv_clone.web.domain.reservation.ReservedSeat;
-import com.ceos22.cgv_clone.web.domain.reservation.TotalPrice;
+import com.ceos22.cgv_clone.web.domain.reservation.ReservationTotalPrice;
 import com.ceos22.cgv_clone.web.dto.ReservationRequestDto;
 import com.ceos22.cgv_clone.web.dto.ReservationResponseDto;
 import com.ceos22.cgv_clone.web.repository.*;
@@ -17,8 +17,6 @@ import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
 
-import javax.cache.annotation.CacheKey;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -128,11 +126,11 @@ public class ReservationService {
                                          int teenCount,
                                          List<Seat> seats) {
 
-        TotalPrice totalPrice = TotalPrice.of(adultCount * 10000 + teenCount * 8000);
+        ReservationTotalPrice reservationTotalPrice = ReservationTotalPrice.of(adultCount * 10000 + teenCount * 8000);
         ReservationAmounts amounts = ReservationAmounts.of(
                 adultCount, teenCount);
 
-        Reservation reservation = Reservation.create(user, schedule, totalPrice, amounts);
+        Reservation reservation = Reservation.create(user, schedule, reservationTotalPrice, amounts);
 
         List<ReservedSeat> reservedSeats = seats.stream()
                 .map(seat -> ReservedSeat.reserve(seat, schedule, reservation))

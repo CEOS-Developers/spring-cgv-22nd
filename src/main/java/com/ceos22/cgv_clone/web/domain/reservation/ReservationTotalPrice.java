@@ -2,16 +2,16 @@ package com.ceos22.cgv_clone.web.domain.reservation;
 
 
 
-public class TotalPrice {
+public class ReservationTotalPrice {
 
     private final int value;
 
-    private TotalPrice(int value) {
+    private ReservationTotalPrice(int value) {
         this.value = value;
     }
 
-    public static TotalPrice of(int value) {
-        return new TotalPrice(value);
+    public static ReservationTotalPrice of(int value) {
+        return new ReservationTotalPrice(value);
     }
 
     public void validateNonNegative() {

@@ -1,5 +1,7 @@
 package com.ceos22.cgv_clone.web.domain;
 
+import com.ceos22.cgv_clone.global.apiPayload.code.ErrorStatus;
+import com.ceos22.cgv_clone.global.apiPayload.exception.GeneralException;
 import com.ceos22.cgv_clone.global.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -31,9 +33,13 @@ public class Schedule extends BaseEntity {
     @JoinColumn(name = "theater_id")
     private Theater theater;
 
-    public boolean notStarted() {
+    public boolean verifyNotStarted() {
         LocalDateTime now = LocalDateTime.now();
-        return now.isBefore(startTime);
+        if (now.isBefore(startTime)){
+            return true;
+        } else {
+            throw new GeneralException(ErrorStatus.SCHEDULE_INACTIVE);
+        }
     }
 
 }

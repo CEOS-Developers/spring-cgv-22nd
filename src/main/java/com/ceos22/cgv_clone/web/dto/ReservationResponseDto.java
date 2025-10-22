@@ -1,6 +1,5 @@
 package com.ceos22.cgv_clone.web.dto;
 
-import com.ceos22.cgv_clone.web.domain.Seat;
 import com.ceos22.cgv_clone.web.domain.reservation.Reservation;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -25,7 +24,7 @@ public class ReservationResponseDto {
                     reservation.getId(),
                     reservation.getSchedule().getId(),
                     reservation.getReservationAmounts().getTotalAmount(),
-                    reservation.getTotalPrice().getValue(),
+                    reservation.getReservationTotalPrice().getValue(),
                     seats
             );
         }

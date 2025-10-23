@@ -253,3 +253,127 @@
 4. 서버는 Authorization Server에 코드 검증 요청 후 Access/Refresh Token + 사용자 정보 발급
 5. 서버는 사용자 정보를 DB에 저장(신규면 회원가입, 기존이면 로그인)
 6. 이후 인증은 세션/쿠키 또는 JWT 방식으로 관리  
+
+---
+
+# 동시성 문제
+- 동시성 문제란, 여러 프로세스(혹은 스레드)가 공유자원(메모리, 파일, 소켓 등)에 동시에 접근할 때 발생하는 오류를 말합니다.
+- Race Condition : 자원을 필요로하는 여러 프로세스나 스레드의 실행 순서에 따라 결과가 달라지는 현상
+- 데이터 불일치 : 여러 프로세스가 동시에 데이터를 수정할 때 발생하는 문제
+- 교착 상태(Deadlock) : 두 개 이상의 프로세스가 서로 상대방이 점유한 자원을 기다리며 무한 대기 상태에 빠지는 현상
+- Starvation : 특정 프로세스가 자원을 할당받지 못해 무한 대기 상태에 빠지는 현상
+- 원자성 문제 : 여러 연산이 하나의 단위로 처리되어야 하는데, 중간에 다른 프로세스가 개입하여 일관성이 깨지는 현상
+- 갱신 손실 : 여러 프로세스가 동시에 데이터를 읽고 수정할 때, 마지막에 저장된 값이 이전 수정 내용을 덮어쓰는 현상
+- 비일관성 읽기 : 한 프로세스가 데이터를 읽는 도중에 다른 프로세스가 그 데이터를 수정하여 일관성이 깨지는 현상
+- 쓰레기 읽기 : 한 프로세스가 삭제되었거나 수정 중인 데이터를 읽는 현상
+
+# OS 과목에서 제시하는 해결법
+- 스핀락(Spinlock) : 짧은 시간 동안 자원을 기다리는 경우에 사용되는 락으로, 프로세스가 자원을 얻을 때까지 계속해서 체크합니다.
+- 뮤텍스(Mutex) : 상호 배제를 위해 사용되는 락으로, 한 번에 하나의 프로세스만 공유 자원에 접근할 수 있도록 합니다.
+```
+# Peterson's Algorithm
+
+i, j : process IDs (i ≠ j)
+flag : critical section 진입 의사를 나타내는 boolean 배열
+turn : 어느 프로세스의 차례인지를 나타내는 변수
+
+repeat
+  
+  flag[i] := true; // i가 critical section에 진입하고자 함을 표시
+  turn := j; // process j가 사용할 차례
+  
+  while (flag[j] == true and turn == j) do no-op; // j차례이고 j가 임계 구역에 진입하고자 하면 대기, 그 외에는 진입
+    critical section
+  flag[i] = false; // i가 critical section 사용이 끝났음을 표시
+    
+    ...   
+    remainder section
+
+until false;
+
+```
+- 세마포어(Semaphore) : 카운팅 락으로, 여러 프로세스가 동시에 접근할 수 있는 자원의 개수를 제한합니다.
+```
+type semaphore = record
+    value : integer; // 세마포어의 현재 값
+    L : queue of process; // 대기 중인 프로세스들의 큐
+    end;
+
+// 입장 요청
+wait(S : semaphore) :
+    S.value := S.value - 1;
+    if S.value < 0 :
+        add this process to S.L;
+        block this process;
+    end;
+
+// 퇴장 처리 
+signal(S : semaphore) :
+    S.value := S.value + 1;
+    if S.value <= 0 :
+        remove a process P from S.L;
+        wakeup(P);
+    end;
+
+```
+
+- 모니터(Monitor) : 고수준의 동기화 메커니즘으로, 공유 자원에 대한 접근을 제어합니다.
+
+# Spring에서 동기화 문제 해결법
+
+## 1. synchronized
+- 특정 코드 블록을 Mutual Exclusion 방식으로 감싸서 동일 시점의 진입을 1개로 제한하는 방법
+- 애플리케이션 인스턴스가 1개이고
+- 스프링의 경우 싱글톤 빈이 기본이므로 특정 빈에 대해 synchronized 키워드를 사용하면 해당 빈에 대한 동시 접근을 제한할 수 있다.
+- 단, 분산 환경(다중 서버 or 다중 인스턴스)에서는 효과가 없다.
+
+## 2. DB Lock
+- DB 레벨에서 동시성 문제를 해결하는 방법
+
+### 2.1 Pessimistic Lock
+- 읽거나 수정할 레코드에 Lock을 걸어 다른 트랜젝션을 대기시킴
+- 경합이 많은 경우 지연이나 병목이 발생할 수 있음
+- 데드락이 발생할 수 있어 주의가 필요함
+- 사용자 대기(결제 화면 등)처럼 긴 트랜젝션에는 부적합 (긴 대기시간)
+- 단기 트랜젝션에 사용하는 것이 적합
+
+### 2.2 Optimistic Lock
+- 레코드에 `version`을 두고 수정 시점에 버전을 비교
+- 버전이 다르면 다른 트랜젝션이 수정한 것으로 간주하고 예외 발생
+- 경합이 적은 경우에 효과적이며, 데드락이 발생하지 않음
+- 사용자 대기(결제 화면 등)처럼 긴 트랜젝션에도 적합
+- 재시도 로직을 구현하여야 하며, 충돌이 많을 경우 재시도에 대한 비용이 커짐
+
+### 2.3 Named Lock
+
+## 3. Redis
+- 싱글 스레드 기반
+- 비교적 빠른 속도
+- 
+
+### 3.1 Lettuce
+- 각 스레드가 lock 획득하기 위해 redis에 요청(setnx)
+- spin lock 기반이므로 락을 확들할 때까지 재요청 하는 로직 작성 필요
+  - redis에 부하가 걸릴 수 있음
+- 락 획득 후 작업 수행
+- 작업 완료 후 락 해제(del)
+- 재시도가 필요하지 않을 경우 유리할 수 있음
+
+### 3.2 Redisson
+- Spin lock을 사용하지 않고도 분산 lock을 구현할 수 있는 방법 (Redis 부하가 적음)
+- pub, sub 기반으로 락 획득을 (채널을 publish, subscribe하고 subscribe한 채널의 메세지를 일정시간동안 기대려 lock을 획득하는 구조)
+- 시간을 지정하여 lock 획득을 대기하고 시간이 초과되면 lock 획득에 실패함 
+
+
+
+예약 로직 정리
+
+- 유저가 좌석을 예약 (여러 좌석을 한번에 받아옴)
+
+이때 좌석에 대해서는 동시성 문제 해결이 필요함
+
+- 좌석 예약을 3개 단계로 구분
+  (HOLD, RESERVED, CANCELED)
+
+Reddison에서 scheduleId, row, column을 조합한 key로 분산락을 구현
+

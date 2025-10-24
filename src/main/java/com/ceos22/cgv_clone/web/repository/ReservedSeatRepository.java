@@ -8,7 +8,7 @@ import java.util.List;
 
 @Repository
 public interface ReservedSeatRepository extends JpaRepository<ReservedSeat, Long> {
-    List<Long> findByScheduleIdAndSeatIdInAndIsAvailableFalse(Long scheduleId, List<Long> seatIds);
+    boolean existsByScheduleIdAndSeatIdInAndIsAvailableFalse(Long scheduleId, List<Long> seatIds);
 
     boolean existsByScheduleIdAndSeatIdAndIsAvailableFalse(Long scheduleId, Long seatId);
 }

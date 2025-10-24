@@ -27,4 +27,8 @@ public class Product extends BaseEntity {
     public int decreaseStock(int quantity){
         return this.stock = this.stock - quantity;
     }
+
+    public void setStock(Integer originalStock) {
+        this.stock = originalStock;
+    }
 }

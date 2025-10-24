@@ -1,12 +1,16 @@
 package com.ceos22.cgv_clone.web.domain.reservation;
 
+import com.ceos22.cgv_clone.global.apiPayload.code.ErrorStatus;
+import com.ceos22.cgv_clone.global.apiPayload.exception.GeneralException;
 import com.ceos22.cgv_clone.global.common.BaseEntity;
+import com.ceos22.cgv_clone.web.domain.Payment;
 import com.ceos22.cgv_clone.web.domain.Schedule;
 import com.ceos22.cgv_clone.web.domain.User;
 import com.ceos22.cgv_clone.web.domain.enums.ReservationStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -45,6 +49,9 @@ public class Reservation extends BaseEntity {
     @OneToMany(mappedBy = "reservation", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ReservedSeat> reservedSeats = new ArrayList<>();
 
+    @OneToOne(mappedBy = "reservation",cascade = CascadeType.ALL,orphanRemoval = true)
+    private Payment payment;
+
     public Reservation(User user, Schedule schedule, ReservationTotalPrice reservationTotalPrice, ReservationAmounts reservationAmounts, ReservationStatus reservationStatus) {
 
         this.user = user;
@@ -76,5 +83,11 @@ public class Reservation extends BaseEntity {
         return reservedSeats.stream()
                 .map(rs -> rs.getSeat().getSeatName())
                 .collect(Collectors.toList());
+    }
+
+    public void verifyCancellable() {
+        if (LocalDateTime.now().isAfter(schedule.getStartTime())){
+            throw new GeneralException(ErrorStatus.RESERVTION_CANCEL_FAILED);
+        }
     }
 }

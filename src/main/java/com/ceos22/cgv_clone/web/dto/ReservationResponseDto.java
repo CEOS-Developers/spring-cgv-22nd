@@ -2,9 +2,7 @@ package com.ceos22.cgv_clone.web.dto;
 
 import com.ceos22.cgv_clone.web.domain.reservation.Reservation;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 import java.util.List;
 
@@ -12,7 +10,6 @@ public class ReservationResponseDto {
 
     @Getter
     @AllArgsConstructor
-    @NoArgsConstructor
     public static class ReservationDto {
         private Long id;
         private Long scheduleId;

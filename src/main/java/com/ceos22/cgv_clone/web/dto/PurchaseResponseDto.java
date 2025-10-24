@@ -11,6 +11,7 @@ import lombok.Getter;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Getter
 @Builder
 public class PurchaseResponseDto {
     private Long purchaseId;

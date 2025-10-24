@@ -23,39 +23,58 @@ public class ReservationController {
     public ApiResponse<ReservationResponseDto.ReservationDto> createReservation(
             @RequestBody ReservationRequestDto.ReservationDto request,
             HttpServletRequest httpRequest) {
-        String requestId = java.util.UUID.randomUUID().toString();
         String userId = (httpRequest.getUserPrincipal() != null ? httpRequest.getUserPrincipal().getName() : "anonymous");
         String path = httpRequest.getMethod() + " " + httpRequest.getRequestURI();
         long startTime = System.currentTimeMillis();
 
-        log.info("requestId={} userId={} host={} endpoint={} start", requestId, userId, httpRequest.getRemoteHost(), path);
+        log.info("userId={} host={} endpoint={} start",userId, httpRequest.getRemoteHost(), path);
 
         try {
             ReservationResponseDto.ReservationDto response = reservationService.createReservation(request);
 
             long duration = System.currentTimeMillis() - startTime;
-            log.info("requestId={} userId={} host={} endpoint={} status=200 durationMs={}", requestId, userId, httpRequest.getRemoteHost(), path, duration);
+            log.info("userId={} host={} endpoint={} status=200 durationMs={}",userId, httpRequest.getRemoteHost(), path, duration);
 
             return ApiResponse.onSuccess(response);
         }  catch (GeneralException ge) {
             long duration = System.currentTimeMillis() - startTime;
-            log.warn("requestId={} userId={} host={} endpoint={} status={} durationMs={} warning={}",
-                    requestId, userId, httpRequest.getRemoteHost(), path,
+            log.warn("userId={} host={} endpoint={} status={} durationMs={} warning={}",
+                    userId, httpRequest.getRemoteHost(), path,
                     ge.getErrorStatus(), duration, ge.getMessage());
             throw ge;
 
         } catch (Exception e) {
             long duration = System.currentTimeMillis() - startTime;
-            log.error("requestId={} userId={} host={} endpoint={} status=500 durationMs={} error={}", requestId, userId, httpRequest.getRemoteHost(), path, duration, e.toString(), e);
+            log.error("userId={} host={} endpoint={} status=500 durationMs={} error={}",userId, httpRequest.getRemoteHost(), path, duration, e.toString(), e);
             throw e;
         }
     }
 
     @DeleteMapping("/reservations/{reservationId}")
     @Operation(summary = "예매 취소하기 API", description = "예매를 취소하는 API입니다.")
-    public ApiResponse<String> cancelReservation(@PathVariable Long reservationId) {
-        reservationService.cancelReservation(reservationId);
-        return ApiResponse.onSuccess("예매가 취소되었습니다.");
-    }
+    public ApiResponse<String> cancelReservation(@PathVariable Long reservationId, HttpServletRequest httpRequest) {
+        String userId = (httpRequest.getUserPrincipal() != null ? httpRequest.getUserPrincipal().getName() : "anonymous");
+        String path = httpRequest.getMethod() + " " + httpRequest.getRequestURI();
+        long startTime = System.currentTimeMillis();
 
+        log.info("userId={} host={} endpoint={} start",userId, httpRequest.getRemoteHost(), path);
+
+        try {
+            reservationService.cancelReservation(reservationId);
+
+            long duration = System.currentTimeMillis() - startTime;
+            log.info("userId={} host={} endpoint={} status=200 durationMs={}",userId, httpRequest.getRemoteHost(), path, duration);
+
+            return ApiResponse.onSuccess("예매가 취소되었습니다.");
+        } catch (GeneralException ge) {
+            long duration = System.currentTimeMillis() - startTime;
+            log.warn("userId={} host={} endpoint={} status={} durationMs={} reason={}",userId, httpRequest.getRemoteHost(), path, ge.getErrorStatus(), duration, ge);
+            throw ge;
+        } catch (Exception e) {
+            long duration = System.currentTimeMillis() - startTime;
+            log.error("userId={} host={} endpoint={} status=500 durationMs={} error={}",userId, httpRequest.getRemoteHost(), path, duration, e.toString(), e);
+            throw e;
+        }
+    }
 }
+

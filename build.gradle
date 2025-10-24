@@ -47,6 +47,10 @@ dependencies {
 
 	implementation 'org.redisson:redisson-spring-boot-starter:3.17.7'
 
+	//webClient
+	implementation 'org.springframework.boot:spring-boot-starter-webflux'
+	runtimeOnly "io.netty:netty-resolver-dns-native-macos:4.2.5.Final:osx-aarch_64"
+
 	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
 	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
 }

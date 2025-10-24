@@ -8,6 +8,7 @@ import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
+import java.util.concurrent.TimeUnit;
 
 @Component
 @RequiredArgsConstructor
@@ -58,6 +59,29 @@ public class RedisService {
             return redisTemplate.hasKey(key);
         } catch (Exception e) {
             throw new GeneralException(ErrorStatus.REDIS_ERROR);
+        }
+    }
+
+    // 키를 1씩 증가시키고, 만약 키가 처음 생성된 상태라면 만료시간(초 단위)를 설정
+    public long incrementWithExpire(String key, long expireSeconds) {
+        // opsForValue 로 증가
+        ValueOperations<String, Object> ops = redisTemplate.opsForValue();
+        Long value = ops.increment(key, 1L);
+        if (value == null) {
+            throw new IllegalStateException("Redis increment returned null for key: " + key);
+        }
+
+        // 만약 값이 1 이면 즉, 키가 새로 생성된 상태일 가능성 → 만료시간 설정
+        if (value == 1L && expireSeconds > 0) {
+            redisTemplate.expire(key, expireSeconds, TimeUnit.SECONDS);
+        }
+        return value;
+    }
+
+    //키 만료시간 설정
+    public void expireKey(String key, long expireSeconds) {
+        if (expireSeconds > 0) {
+            redisTemplate.expire(key, expireSeconds, TimeUnit.SECONDS);
         }
     }
 }

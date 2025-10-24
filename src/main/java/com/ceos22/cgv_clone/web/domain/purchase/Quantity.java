@@ -1,6 +1,8 @@
 package com.ceos22.cgv_clone.web.domain.purchase;
 
-public record Quantity(int value) {
+import jakarta.persistence.Column;
+
+public record Quantity(@Column(name = "total_quantity_value") int value) {
 
     public static Quantity of(int value) {
         return new Quantity(value);

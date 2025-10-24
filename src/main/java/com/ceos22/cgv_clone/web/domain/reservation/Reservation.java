@@ -11,8 +11,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Entity
 @Getter
-@Builder
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Reservation extends BaseEntity {
 
     @Id
@@ -21,13 +22,13 @@ public class Reservation extends BaseEntity {
     private Long id;
 
     @Embedded
-    private final ReservationUuid reservationUuid;
+    private ReservationUuid reservationUuid;
 
     @Embedded
-    private final ReservationTotalPrice reservationTotalPrice;
+    private ReservationTotalPrice reservationTotalPrice;
 
     @Embedded
-    private final ReservationAmounts reservationAmounts;
+    private ReservationAmounts reservationAmounts;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
@@ -44,13 +45,14 @@ public class Reservation extends BaseEntity {
     @OneToMany(mappedBy = "reservation", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ReservedSeat> reservedSeats = new ArrayList<>();
 
-    public Reservation(User user, Schedule schedule, ReservationTotalPrice reservationTotalPrice, ReservationAmounts reservationAmounts) {
+    public Reservation(User user, Schedule schedule, ReservationTotalPrice reservationTotalPrice, ReservationAmounts reservationAmounts, ReservationStatus reservationStatus) {
 
         this.user = user;
         this.schedule = schedule;
         this.reservationUuid = ReservationUuid.generate();
         this.reservationTotalPrice = reservationTotalPrice;
         this.reservationAmounts = reservationAmounts;
+        this.reservationStatus = reservationStatus;
     }
 
     public static Reservation create(User user,
@@ -60,7 +62,7 @@ public class Reservation extends BaseEntity {
         schedule.verifyNotStarted();
         reservationAmounts.validatePositive();
         reservationTotalPrice.validateNonNegative();
-        return new Reservation(user, schedule, reservationTotalPrice, reservationAmounts);
+        return new Reservation(user, schedule, reservationTotalPrice, reservationAmounts, ReservationStatus.RESERVED);
     }
 
     public void cancel() {

@@ -1,6 +1,8 @@
 package com.ceos22.cgv_clone.web.domain.purchase;
 
-public record Price(int value) {
+import jakarta.persistence.Column;
+
+public record Price(@Column(name = "price_value") int value) {
 
     public static Price of(int value) {
         return new Price(value);

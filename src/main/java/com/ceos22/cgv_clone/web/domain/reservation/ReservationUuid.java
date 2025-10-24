@@ -1,13 +1,16 @@
 package com.ceos22.cgv_clone.web.domain.reservation;
 
 import jakarta.persistence.Column;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
 import java.util.UUID;
 
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ReservationUuid {
 
-    @Column(nullable = false, updatable = false)
-    private final String value;
+    @Column(nullable = false, updatable = false, name = "uuid_value")
+    private String value;
 
     private ReservationUuid(String value) {
         this.value = value;

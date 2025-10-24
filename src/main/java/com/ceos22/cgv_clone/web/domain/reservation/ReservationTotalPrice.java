@@ -1,10 +1,15 @@
 package com.ceos22.cgv_clone.web.domain.reservation;
 
 
+import jakarta.persistence.Column;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ReservationTotalPrice {
 
-    private final int value;
+    @Column(name = "total_price_value")
+    private int value;
 
     private ReservationTotalPrice(int value) {
         this.value = value;

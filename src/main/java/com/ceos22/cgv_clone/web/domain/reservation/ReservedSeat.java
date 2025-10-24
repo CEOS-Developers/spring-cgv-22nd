@@ -6,7 +6,7 @@ import com.ceos22.cgv_clone.web.domain.Seat;
 import jakarta.persistence.*;
 import lombok.*;
 
-
+@Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ReservedSeat extends BaseEntity {

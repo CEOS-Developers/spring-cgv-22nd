@@ -93,7 +93,20 @@ public class ReservationService {
 
     public boolean isReserved(Long scheduleId, Long seatId) {
         String cacheKey = "schedule:" + scheduleId + ":seat:" + seatId + ":reserved";
-        Boolean reserved = (Boolean) redisService.getValue(cacheKey);
+        //Boolean reserved = (Boolean) redisService.getValue(cacheKey);
+
+        Object raw = redisService.getValue(cacheKey);
+        Boolean reserved = null;
+
+        if (raw instanceof Boolean b) {
+            reserved = b;
+        } else if (raw instanceof Number n) {
+            reserved = n.intValue() != 0;         // 0/1 형태
+        } else if (raw instanceof String s) {
+            String v = s.trim().toLowerCase();
+            reserved = "1".equals(v) || "true".equals(v);
+        }
+
         if (reserved == null) {
             boolean dbReserved = reservedSeatRepository.existsByScheduleIdAndSeatIdAndIsAvailableFalse(scheduleId, seatId);
             redisService.setValue(cacheKey, dbReserved);
@@ -135,6 +148,7 @@ public class ReservationService {
         List<ReservedSeat> reservedSeats = seats.stream()
                 .map(seat -> ReservedSeat.reserve(seat, schedule, reservation))
                 .collect(Collectors.toList());
+        reservedSeatRepository.saveAll(reservedSeats);
 
         if (reservedSeats.size() != seats.size()) {
             throw new GeneralException(ErrorStatus.SEAT_NOT_FOUND);
@@ -143,11 +157,16 @@ public class ReservationService {
     }
 
     //예매 취소
+    @Transactional
     public void cancelReservation(Long reservationId) {
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(()-> new GeneralException(ErrorStatus.RESERVATION_NOT_FOUND));
 
         reservation.cancel();
+
+        reservation.getReservedSeats().clear();
+        reservedSeatRepository.deleteAll(reservation.getReservedSeats());
+
         reservationRepository.save(reservation);
     }
 }

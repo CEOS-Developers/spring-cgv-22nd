@@ -44,4 +44,15 @@ public class Order extends BaseEntity {
         this.totalPrice = newTotalPrice;
     }
 
+    public void pay() {
+        this.status = OrderStatus.PAID;
+    }
+
+    public void cancel() {
+        this.status = OrderStatus.CANCELLED;
+    }
+
+    public void fail() {
+        this.status = OrderStatus.FAILED;
+    }
 }

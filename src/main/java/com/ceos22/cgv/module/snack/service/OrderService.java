@@ -53,7 +53,7 @@ public class OrderService {
         Order order = Order.builder()
                 .cinema(cinema)
                 .user(user)
-                .status(OrderStatus.PAID) // 결제 상태는 고려하지 않음
+                .status(OrderStatus.PENDING)
                 .totalPrice(0) // 이후 계산
                 .build();
         orderRepository.save(order);

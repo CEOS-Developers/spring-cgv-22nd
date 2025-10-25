@@ -152,6 +152,7 @@ public class ReservationService {
         reservation.cancel();
         reservation.getReservationSeats().clear(); // reservationSeat에서 예약된 좌석 제거
 
+
         return new ReservationResponse(
                 reservation.getId(),
                 reservation.getSchedule().getId(),

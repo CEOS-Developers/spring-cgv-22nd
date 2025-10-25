@@ -46,5 +46,8 @@ public class Reservation extends BaseEntity {
     public void confirm(){
         this.status = ReservationStatus.RESERVED;
     }
-}
 
+    public void fail() {
+        this.status = ReservationStatus.FAILED;
+    }
+}

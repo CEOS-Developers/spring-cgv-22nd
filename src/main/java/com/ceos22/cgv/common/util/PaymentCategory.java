@@ -5,12 +5,9 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public enum ReservationStatus {
-    HOLD("예약 대기"),
-    RESERVED("예약 완료"),
-    CANCELLED("예약 취소"),
-    FAILED("결제 실패");
+public enum PaymentCategory {
+    Reservation("영화 예매"),
+    SNACK("매점 구매");
 
     private final String description;
-
 }

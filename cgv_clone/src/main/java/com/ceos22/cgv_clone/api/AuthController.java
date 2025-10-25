@@ -1,7 +1,7 @@
 package com.ceos22.cgv_clone.api;
 
-import com.ceos22.cgv_clone.domain.dto.LoginReq;
-import com.ceos22.cgv_clone.domain.dto.LoginRes;
+import com.ceos22.cgv_clone.domain.dto.LoginRequest;
+import com.ceos22.cgv_clone.domain.dto.LoginResponse;
 import com.ceos22.cgv_clone.domain.dto.SignUpReq;
 import com.ceos22.cgv_clone.service.AuthService;
 import com.ceos22.cgv_clone.service.LoginService;
@@ -24,7 +24,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public LoginRes login(@RequestBody LoginReq req) {
+    public LoginResponse login(@RequestBody LoginRequest req) {
         return loginService.login(req);
     }
 }

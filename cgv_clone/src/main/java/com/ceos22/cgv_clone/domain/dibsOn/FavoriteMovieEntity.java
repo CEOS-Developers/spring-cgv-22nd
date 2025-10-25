@@ -1,7 +1,6 @@
 package com.ceos22.cgv_clone.domain.dibsOn;
 
-import com.ceos22.cgv_clone.domain.member.Member;
-import com.ceos22.cgv_clone.domain.reservationMovie.Movie;
+import com.ceos22.cgv_clone.domain.reservationMovie.MovieEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -14,22 +13,21 @@ import lombok.NoArgsConstructor;
                 columnNames = {"member_id","movie_id"}
         ))
 @Getter @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class FavoriteMovie {
+public class FavoriteMovieEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "favorite_movie_id")
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "member_id", nullable = false)
-    private Member member;
+    @Column(name = "member_id")
+    private Long memberId;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "movie_id", nullable = false)
-    private Movie movie;
+    @Column(name = "movie_id")
+    private Long movieId;
 
-    public FavoriteMovie(Member member, Movie movie) {
-        this.member = member;
-        this.movie = movie;
+    /** 생성 메서드 */
+    public FavoriteMovieEntity(Long memberId, Long movieId) {
+        this.memberId = memberId;
+        this.movieId = movieId;
     }
 }

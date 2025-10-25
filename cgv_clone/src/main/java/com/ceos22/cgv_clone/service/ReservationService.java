@@ -3,7 +3,6 @@ package com.ceos22.cgv_clone.service;
 import com.ceos22.cgv_clone.domain.dto.CreateReservationCommand;
 import com.ceos22.cgv_clone.domain.dto.ReservationSummaryDto;
 import com.ceos22.cgv_clone.domain.dto.SeatSelection;
-import com.ceos22.cgv_clone.domain.member.Member;
 import com.ceos22.cgv_clone.domain.reservationMovie.*;
 import com.ceos22.cgv_clone.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -21,19 +20,22 @@ public class ReservationService {
 
     private final MemberRepository memberRepository;
     private final ScreeningRepository screeningRepository;
+    private final PricingService pricingService;
+    private final TicketRepository ticketRepository;
+
+
     private final SeatRepository seatRepository;
     private final ReservationRepository reservationRepository;
-    private final TicketRepository ticketRepository;
     private final ReservedSeatRepository reservedSeatRepository;
-    private final PricingService pricingService;
+
 
     /** 예매 생성(+좌석 점유 HOLD) 및 티켓 스냅샷 생성 */
     @Transactional
     public ReservationSummaryDto createReservation(CreateReservationCommand cmd) {
-        Member member = memberRepository.findById(cmd.memberId())
-                .orElseThrow(() -> new IllegalArgumentException("회원 없음: " + cmd.memberId()));
-        Screening screening = screeningRepository.findById(cmd.screeningId())
-                .orElseThrow(() -> new IllegalArgumentException("상영회차 없음: " + cmd.screeningId()));
+//        MemberEntity member = memberRepository.findById(cmd.memberId())
+//                .orElseThrow(() -> new IllegalArgumentException("회원 없음: " + cmd.memberId()));
+//        Screening screening = screeningRepository.findById(cmd.screeningId())
+//                .orElseThrow(() -> new IllegalArgumentException("상영회차 없음: " + cmd.screeningId()));
 
         if (cmd.selections() == null || cmd.selections().isEmpty()) {
             throw new IllegalArgumentException("선택된 좌석이 없습니다.");
@@ -48,29 +50,32 @@ public class ReservationService {
 
         // 동일 상영회차의 좌석 점유 여부 검사
         long occupied = reservedSeatRepository.countOccupied(
-                screening.getId(),
+                cmd.screeningId(),
                 seatIds,
                 List.of(HoldStatus.HOLDING, HoldStatus.PAID)
         );
+
         if (occupied > 0) {
             throw new IllegalStateException("이미 선택된 좌석입니다.");
         }
 
         // 예매 엔티티 생성
-        Reservation reservation = new Reservation(member, screening);
+        Long screeningId = cmd.screeningId();
+        Long memberId = cmd.memberId();
+        Reservation reservation = new Reservation(memberId, screeningId);
 
         // 좌석별 티켓 생성 + 좌석 점유(HOLD) 생성
         Map<Long, Seat> seatMap = seats.stream().collect(Collectors.toMap(Seat::getId, s -> s));
         for (SeatSelection sel : cmd.selections()) {
             Seat seat = seatMap.get(sel.seatId());
 
-            int price = pricingService.unitPrice(screening, sel.ageGroup());
+            int price = pricingService.unitPrice(sel.ageGroup());
             Ticket ticket = new Ticket(seat, sel.ageGroup(), price);
             reservation.addTicket(ticket); // totalAmount 증가
 
             // 좌석 점유(HOLD) – 만료시간 (10분)
             ReservedSeat rs = new ReservedSeat(
-                    screening,
+                    screeningId,
                     seat,
                     reservation,
                     LocalDateTime.now().plusMinutes(10)

@@ -21,8 +21,8 @@ public class SwaggerConfig {
 
     private Info apiInfo() {
         return new Info()
-                .title("Spring RESTful API")
-                .description("RESTful API reference for developers")
+                .title("Cgv-clone API")
+                .description("CEOS-Developers / Immmii / spring-cgv-22nd")
                 .version("1.0.0");
     }
 }

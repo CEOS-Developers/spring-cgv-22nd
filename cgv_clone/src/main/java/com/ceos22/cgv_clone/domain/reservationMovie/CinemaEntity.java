@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
         uniqueConstraints = @UniqueConstraint(name="uk_cinema_name", columnNames="name")
 )
 @Getter @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Cinema {
+public class CinemaEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "cinema_id")
@@ -20,7 +20,7 @@ public class Cinema {
     @Column(nullable=false, length=100, unique = true)
     private String name;
 
-    public Cinema(String name) {
+    public CinemaEntity(String name) {
         this.name = name;
     }
 }

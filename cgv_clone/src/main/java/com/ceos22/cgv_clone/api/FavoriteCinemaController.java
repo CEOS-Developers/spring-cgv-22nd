@@ -1,7 +1,7 @@
 package com.ceos22.cgv_clone.api;
 
-import com.ceos22.cgv_clone.domain.dto.FavoriteCinemaDto;
-import com.ceos22.cgv_clone.service.FavoriteCinemaService;
+import com.ceos22.cgv_clone.domain.dto.FavoriteCinema;
+import com.ceos22.cgv_clone.service.cinema.FavoriteCinemaService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,6 +21,7 @@ public class FavoriteCinemaController {
             @PathVariable Long memberId,
             @PathVariable Long cinemaId) {
 
+
         boolean favorited = favoriteCinemaService.toggle(memberId, cinemaId);
         return Map.of(
                 "cinemaId", cinemaId,
@@ -30,7 +31,7 @@ public class FavoriteCinemaController {
 
     // 찜 목록 조회
     @GetMapping("/{memberId}")
-    public List<FavoriteCinemaDto> list(@PathVariable Long memberId) {
+    public List<FavoriteCinema> list(@PathVariable Long memberId) {
         return favoriteCinemaService.list(memberId);
     }
 }

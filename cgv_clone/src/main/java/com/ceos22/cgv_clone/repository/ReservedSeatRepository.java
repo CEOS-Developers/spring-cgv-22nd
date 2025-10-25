@@ -12,7 +12,7 @@ import java.util.List;
 public interface ReservedSeatRepository extends JpaRepository<ReservedSeat, Long> {
     @Query("""
       select count(rs) from ReservedSeat rs
-      where rs.screening.id = :screeningId
+      where rs.screeningId = :screeningId
         and rs.seat.id in :seatIds
         and rs.holdStatus in :statuses
     """)

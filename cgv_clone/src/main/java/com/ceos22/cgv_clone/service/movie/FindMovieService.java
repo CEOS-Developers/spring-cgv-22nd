@@ -1,7 +1,6 @@
-package com.ceos22.cgv_clone.service;
+package com.ceos22.cgv_clone.service.movie;
 
-import com.ceos22.cgv_clone.domain.dto.MovieDto;
-import com.ceos22.cgv_clone.domain.reservationMovie.Movie;
+import com.ceos22.cgv_clone.domain.dto.Movie;
 import com.ceos22.cgv_clone.repository.MovieRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -14,23 +13,22 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class FindMovieService {
     private final MovieRepository movieRepository;
+    private final MovieReader movieReader;
 
     /** 단건 조회 */
-    public MovieDto getById(Long movieId) {
-        Movie movie = movieRepository.findById(movieId)
-                .orElseThrow(() -> new IllegalArgumentException("영화를 찾을 수 없습니다. id=" + movieId));
-        return MovieDto.from(movie);
+    public Movie getById(Long movieId) {
+        return movieReader.findById(movieId);
     }
 
     /** 전체 페이징 조회 */
-    public Page<MovieDto> getPage(Pageable pageable) {
+    public Page<Movie> getPage(Pageable pageable) {
         return movieRepository.findAll(pageable)
-                .map(MovieDto::from);
+                .map(Movie::from);
     }
 
     /** 제목 검색 (페이징) */
-    public Page<MovieDto> searchByTitle(String keyword, Pageable pageable) {
+    public Page<Movie> searchByTitle(String keyword, Pageable pageable) {
         return movieRepository.findByMovieTitleContainingIgnoreCase(keyword, pageable)
-                .map(MovieDto::from);
+                .map(Movie::from);
     }
 }

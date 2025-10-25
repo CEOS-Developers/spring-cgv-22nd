@@ -15,7 +15,7 @@ public record ReservationSummaryDto(
     public static ReservationSummaryDto from(Reservation r){
         return new ReservationSummaryDto(
                 r.getId(),
-                r.getScreening().getId(),
+                r.getScreeningId(),
                 r.getTotalAmount(),
                 r.getStatus(),
                 r.getTickets().stream()

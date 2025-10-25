@@ -1,7 +1,7 @@
 package com.ceos22.cgv_clone.domain.reservationMovie;
 
 
-import com.ceos22.cgv_clone.domain.member.Member;
+import com.ceos22.cgv_clone.domain.member.MemberEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -19,13 +19,11 @@ public class Reservation {
     @Column(name = "reservation_id")
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="member_id")
-    private Member member; // 주문 회원
+    @Column(name="member_id")
+    private Long memberId; // 주문 회원
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name="screening_id", nullable=false)
-    private Screening screening; // 상영 회차
+    @Column(name="screening_id", nullable=false)
+    private Long screeningId; // 상영 회차
 
     @Column(nullable=false)
     private LocalDateTime reservedAt = LocalDateTime.now(); // 예매 시간
@@ -40,8 +38,8 @@ public class Reservation {
     private List<Ticket> tickets = new ArrayList<>();
 
     //==연관관계 메서드==//
-    public Reservation(Member member, Screening screening) {
-        this.member = member; this.screening = screening;
+    public Reservation(Long memberId, Long screeningId) {
+        this.memberId = memberId; this.screeningId = screeningId;
     }
 
     public void addTicket(Ticket t){

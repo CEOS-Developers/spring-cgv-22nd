@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
         uniqueConstraints = @UniqueConstraint(name = "uk_member_login_id", columnNames = "login_id")
 )
 @Getter @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Member {
+public class MemberEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "member_id")
@@ -32,7 +32,7 @@ public class Member {
     @Column(nullable = false, length=255)
     private String password;
 
-    public Member(String name, int age, Gender gender, String loginId, String password) {
+    public MemberEntity(String name, int age, Gender gender, String loginId, String password) {
         this.name = name; this.age = age; this.gender = gender; this.loginId = loginId; this.password = password;
     }
 

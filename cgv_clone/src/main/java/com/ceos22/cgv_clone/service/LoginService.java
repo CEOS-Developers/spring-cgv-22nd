@@ -1,8 +1,8 @@
 package com.ceos22.cgv_clone.service;
 
-import com.ceos22.cgv_clone.domain.dto.LoginReq;
-import com.ceos22.cgv_clone.domain.dto.LoginRes;
-import com.ceos22.cgv_clone.domain.member.Member;
+import com.ceos22.cgv_clone.domain.dto.LoginRequest;
+import com.ceos22.cgv_clone.domain.dto.LoginResponse;
+import com.ceos22.cgv_clone.domain.member.MemberEntity;
 import com.ceos22.cgv_clone.repository.MemberRepository;
 import com.ceos22.cgv_clone.security.TokenProvider;
 import lombok.RequiredArgsConstructor;
@@ -23,9 +23,9 @@ public class LoginService {
     private final PasswordEncoder passwordEncoder;
     private final TokenProvider tokenProvider;
 
-    public LoginRes login(LoginReq req) {
+    public LoginResponse login(LoginRequest req) {
         // 아이디 확인
-        Member m = memberRepository.findByLoginId(req.loginId())
+        MemberEntity m = memberRepository.findByLoginId(req.loginId())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자"));
 
         // 비밀번호 확인
@@ -46,6 +46,6 @@ public class LoginService {
         // 액세스 토큰 발급
         String accessToken = tokenProvider.createAccessToken(m.getId(), auth);
 
-        return new LoginRes(accessToken);
+        return new LoginResponse(accessToken);
     }
 }

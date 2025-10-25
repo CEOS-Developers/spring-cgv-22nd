@@ -19,7 +19,7 @@ public class Screening {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "movie_id", nullable = false)
-    private Movie movie;
+    private MovieEntity movieEntity;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "auditorium_id", nullable = false)
@@ -31,7 +31,7 @@ public class Screening {
     @Column(name="end_at", nullable=false)
     private LocalDateTime endAt;
 
-    public Screening(Movie movie, Auditorium auditorium, LocalDateTime startAt, LocalDateTime endAt) {
-        this.movie = movie; this.auditorium = auditorium; this.startAt = startAt; this.endAt = endAt;
+    public Screening(MovieEntity movieEntity, Auditorium auditorium, LocalDateTime startAt, LocalDateTime endAt) {
+        this.movieEntity = movieEntity; this.auditorium = auditorium; this.startAt = startAt; this.endAt = endAt;
     }
 }

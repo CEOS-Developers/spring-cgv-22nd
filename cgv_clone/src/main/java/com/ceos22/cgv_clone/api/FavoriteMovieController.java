@@ -1,7 +1,7 @@
 package com.ceos22.cgv_clone.api;
 
-import com.ceos22.cgv_clone.domain.dto.FavoriteMovieDto;
-import com.ceos22.cgv_clone.service.FavoriteMovieService;
+import com.ceos22.cgv_clone.domain.dto.FavoriteMovie;
+import com.ceos22.cgv_clone.service.movie.FavoriteMovieService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,7 +30,7 @@ public class FavoriteMovieController {
 
     // 찜 목록 조회
     @GetMapping("/{memberId}")
-    public List<FavoriteMovieDto> list(@PathVariable Long memberId) {
+    public List<FavoriteMovie> list(@PathVariable Long memberId) {
         return favoriteMovieService.list(memberId);
     }
 }

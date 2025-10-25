@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "movie")
 @Getter @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Movie {
+public class MovieEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "movie_id")
@@ -23,7 +23,7 @@ public class Movie {
     private String introduction;
 
     //==생성 메서드==//
-    public Movie(String movieTitle, int runningTime, String introduction) {
+    public MovieEntity(String movieTitle, int runningTime, String introduction) {
         this.movieTitle = movieTitle; this.runningTime = runningTime; this.introduction = introduction;
     }
 }

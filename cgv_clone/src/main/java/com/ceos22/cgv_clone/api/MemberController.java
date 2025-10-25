@@ -1,8 +1,9 @@
 package com.ceos22.cgv_clone.api;
 
-import com.ceos22.cgv_clone.domain.dto.CreateMemberCommand;
-import com.ceos22.cgv_clone.domain.member.Member;
-import com.ceos22.cgv_clone.service.MemberService;
+import com.ceos22.cgv_clone.domain.dto.CreateMemberRequest;
+import com.ceos22.cgv_clone.domain.member.MemberEntity;
+import com.ceos22.cgv_clone.service.member.CreateMemberCommand;
+import com.ceos22.cgv_clone.service.member.MemberService;
 import jakarta.validation.Valid;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -17,8 +18,9 @@ public class MemberController {
     private final MemberService memberService;
 
     @PostMapping("/api/v1/members")
-    public CreateMemberResponse saveMemberV1(@RequestBody @Valid CreateMemberCommand cmd){
-        Member member = new Member(cmd.name(), cmd.age(), cmd.gender(), cmd.loginId(), cmd.password());
+    public CreateMemberResponse saveMemberV1(@RequestBody @Valid CreateMemberRequest cmd){
+        // request~~  CreateMemberRequest // 요청객체는 언제든지 스펙이 바뀔수 있음
+        CreateMemberCommand member = new CreateMemberCommand(cmd.name(), cmd.age(), cmd.gender(), cmd.loginId(), cmd.password());
 
         Long id = memberService.join(member);
         return new CreateMemberResponse(id);

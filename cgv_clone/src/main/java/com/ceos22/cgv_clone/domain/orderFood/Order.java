@@ -1,7 +1,7 @@
 package com.ceos22.cgv_clone.domain.orderFood;
 
-import com.ceos22.cgv_clone.domain.member.Member;
-import com.ceos22.cgv_clone.domain.reservationMovie.Cinema;
+import com.ceos22.cgv_clone.domain.member.MemberEntity;
+import com.ceos22.cgv_clone.domain.reservationMovie.CinemaEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -24,11 +24,11 @@ public class Order {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
-    private Member member; // 회원
+    private MemberEntity member; // 회원
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cinema_id", nullable = false)
-    private Cinema cinema; // 영화관
+    private CinemaEntity cinemaEntity; // 영화관
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -38,12 +38,12 @@ public class Order {
     private final List<OrderFood> orderFoods = new ArrayList<>();
 
     //==연관관계 메서드==//
-    public void changeMember(Member member) {
+    public void changeMember(MemberEntity member) {
         this.member = member;
     }
 
-    public void changeCinema(Cinema cinema) {
-        this.cinema = cinema;
+    public void changeCinema(CinemaEntity cinemaEntity) {
+        this.cinemaEntity = cinemaEntity;
     }
 
     public void addOrderFood(OrderFood orderFood) {
@@ -51,10 +51,10 @@ public class Order {
     }
 
     //==생성 메서드=//
-    public static Order createOrder(Member member, Cinema cinema, OrderFood... items) {
+    public static Order createOrder(MemberEntity member, CinemaEntity cinemaEntity, OrderFood... items) {
         Order order = new Order();
         order.changeMember(member);
-        order.changeCinema(cinema);
+        order.changeCinema(cinemaEntity);
         for (OrderFood item : items) {
             order.addOrderFood(item);
         }

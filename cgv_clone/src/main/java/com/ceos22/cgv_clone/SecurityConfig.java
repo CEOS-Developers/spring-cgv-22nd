@@ -4,8 +4,10 @@ import com.ceos22.cgv_clone.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -19,10 +21,8 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtFilter;
 
-    private static final String[] SWAGGER_WHITELIST = {
-            "/v3/api-docs/**",
-            "/swagger-ui/**",
-            "/swagger-ui.html"
+    private static final String[] SWAGGER = {
+            "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html"
     };
 
     @Bean
@@ -34,18 +34,19 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
-                // (1) csrf - swagger 경로 예외
-                .csrf(csrf -> csrf
-                        .ignoringRequestMatchers(SWAGGER_WHITELIST) // swagger 경로 예외
-                )
+                // (1) csrf
+                .csrf(AbstractHttpConfigurer::disable)
 
                 // (2) 세션
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
                 // (3) 인증 / 인가
                 .authorizeHttpRequests(reg -> reg
-                        .requestMatchers(SWAGGER_WHITELIST).permitAll() // Swagger 허용
-                        .requestMatchers("/api/auth/**").permitAll() // 로그인/회원가입
+                        .requestMatchers(SWAGGER).permitAll() // Swagger 허용
+                        .requestMatchers(HttpMethod.POST,"/api/auth/**").permitAll() // 로그인/회원가입
+                        .requestMatchers("/api/reservation/**",
+                                "/api/favorites/movies/*/*/toggle",
+                                "/api/favorites/cinemas/*/*/toggle").permitAll()
                         .anyRequest().authenticated() // 나머지 인증
                 )
 

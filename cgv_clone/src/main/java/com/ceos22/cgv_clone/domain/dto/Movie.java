@@ -1,15 +1,15 @@
 package com.ceos22.cgv_clone.domain.dto;
 
-import com.ceos22.cgv_clone.domain.reservationMovie.Movie;
+import com.ceos22.cgv_clone.domain.reservationMovie.MovieEntity;
 
-public record MovieDto(
+public record Movie(
         Long id,
         String movieTitle,
         Integer runningTime,
         String introduction
 ) {
-    public static MovieDto from(Movie m) {
-        return new MovieDto(
+    public static Movie from(MovieEntity m) {
+        return new Movie(
                 m.getId(),
                 m.getMovieTitle(),
                 m.getRunningTime(),

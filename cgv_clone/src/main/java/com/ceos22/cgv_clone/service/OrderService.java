@@ -1,10 +1,10 @@
 package com.ceos22.cgv_clone.service;
 
-import com.ceos22.cgv_clone.domain.member.Member;
+import com.ceos22.cgv_clone.domain.member.MemberEntity;
 import com.ceos22.cgv_clone.domain.orderFood.Food;
 import com.ceos22.cgv_clone.domain.orderFood.Order;
 import com.ceos22.cgv_clone.domain.orderFood.OrderFood;
-import com.ceos22.cgv_clone.domain.reservationMovie.Cinema;
+import com.ceos22.cgv_clone.domain.reservationMovie.CinemaEntity;
 import com.ceos22.cgv_clone.repository.CinemaRepository;
 import com.ceos22.cgv_clone.repository.FoodRepository;
 import com.ceos22.cgv_clone.repository.MemberRepository;
@@ -28,15 +28,15 @@ public class OrderService {
     public Long order(Long memberId, Long foodId, Long cinemaId, int count){
 
         // 엔티티 조회
-        Member member = memberRepository.findById(memberId).orElse(null);
+        MemberEntity member = memberRepository.findById(memberId).orElse(null);
         Food food = foodRepository.findById(foodId).orElse(null);
-        Cinema cinema = cinemaRepository.findById(cinemaId).orElse(null);
+        CinemaEntity cinemaEntity = cinemaRepository.findById(cinemaId).orElse(null);
 
         // 주문 상품 생성
         OrderFood orderFood = OrderFood.createOrderFood(food, food.getPrice(), count);
 
         // 주문 생성
-        Order order = Order.createOrder(member, cinema, orderFood);
+        Order order = Order.createOrder(member, cinemaEntity, orderFood);
 
         // 주문 저장
         orderRepository.save(order);

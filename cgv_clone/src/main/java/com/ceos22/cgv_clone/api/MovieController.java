@@ -1,8 +1,8 @@
 package com.ceos22.cgv_clone.api;
 
 
-import com.ceos22.cgv_clone.domain.dto.MovieDto;
-import com.ceos22.cgv_clone.service.FindMovieService;
+import com.ceos22.cgv_clone.domain.dto.Movie;
+import com.ceos22.cgv_clone.service.movie.FindMovieService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,13 +16,13 @@ public class MovieController {
     private final FindMovieService findMovieService;
 
     @GetMapping("/{id}")
-    public MovieDto get(@PathVariable Long id){
+    public Movie get(@PathVariable Long id){
         return findMovieService.getById(id);
     }
 
     @GetMapping
-    public Page<MovieDto> page(Pageable pageable,
-                               @RequestParam(required = false) String q){
+    public Page<Movie> page(Pageable pageable,
+                            @RequestParam(required = false) String q){
         return (q == null || q.isBlank())
                 ? findMovieService.getPage(pageable)
                 : findMovieService.searchByTitle(q, pageable);

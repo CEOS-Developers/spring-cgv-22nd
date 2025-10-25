@@ -256,48 +256,64 @@
 
 ---
 
-# 동시성 문제
-- 동시성 문제란, 여러 프로세스(혹은 스레드)가 공유자원(메모리, 파일, 소켓 등)에 동시에 접근할 때 발생하는 오류를 말합니다.
-- Race Condition : 자원을 필요로하는 여러 프로세스나 스레드의 실행 순서에 따라 결과가 달라지는 현상
-- 데이터 불일치 : 여러 프로세스가 동시에 데이터를 수정할 때 발생하는 문제
-- 교착 상태(Deadlock) : 두 개 이상의 프로세스가 서로 상대방이 점유한 자원을 기다리며 무한 대기 상태에 빠지는 현상
-- Starvation : 특정 프로세스가 자원을 할당받지 못해 무한 대기 상태에 빠지는 현상
-- 원자성 문제 : 여러 연산이 하나의 단위로 처리되어야 하는데, 중간에 다른 프로세스가 개입하여 일관성이 깨지는 현상
-- 갱신 손실 : 여러 프로세스가 동시에 데이터를 읽고 수정할 때, 마지막에 저장된 값이 이전 수정 내용을 덮어쓰는 현상
-- 비일관성 읽기 : 한 프로세스가 데이터를 읽는 도중에 다른 프로세스가 그 데이터를 수정하여 일관성이 깨지는 현상
-- 쓰레기 읽기 : 한 프로세스가 삭제되었거나 수정 중인 데이터를 읽는 현상
+## 동시성 문제
 
-# OS 과목에서 제시하는 해결법
-- 스핀락(Spinlock) : 짧은 시간 동안 자원을 기다리는 경우에 사용되는 락으로, 프로세스가 자원을 얻을 때까지 계속해서 체크합니다.
-- 뮤텍스(Mutex) : 상호 배제를 위해 사용되는 락으로, 한 번에 하나의 프로세스만 공유 자원에 접근할 수 있도록 합니다.
-```
-# Peterson's Algorithm
+동시성 문제는 여러 프로세스(또는 스레드)가 동시에 공유 자원(메모리, 파일, 소켓 등)에 접근하면서 발생하는 오류를 말합니다.
+
+대표 개념:
+- **Race Condition**
+  - 실행 순서에 따라 결과가 달라지는 현상
+- **데이터 불일치**
+  - 동시에 데이터를 수정할 때 일관성이 깨지는 문제
+- **Deadlock(교착 상태)**
+  - 서로가 가진 자원을 기다리며 무한 대기
+- **Starvation(기아 상태)**
+  - 특정 스레드가 자원을 계속 못 받아 굶주리는 상황
+- **원자성(Atomicity) 문제**
+  - 여러 연산이 한 덩어리로 수행돼야 하는데 중간에 끼어들어 일관성이 깨지는 문제
+
+---
+
+### OS 과목에서 제시하는 해결법
+
+#### 1. 스핀락(Spinlock)
+- 자원이 풀릴 때까지 CPU를 돌면서 계속 확인
+- 짧은 임계 구역에서 유용
+
+#### 2. 뮤텍스(Mutex)
+- 상호 배제(Mutual Exclusion)용 잠금
+- 한 번에 한 스레드만 임계 구역 진입 가능
+
+```c
+// Peterson's Algorithm (2-프로세스 상호배제 예시)
 
 i, j : process IDs (i ≠ j)
-flag : critical section 진입 의사를 나타내는 boolean 배열
-turn : 어느 프로세스의 차례인지를 나타내는 변수
+flag : boolean array    // 각 프로세스가 임계 구역에 들어가고 싶은지 여부
+turn : integer          // 누구 차례인지
 
 repeat
-  
-  flag[i] := true; // i가 critical section에 진입하고자 함을 표시
-  turn := j; // process j가 사용할 차례
-  
-  while (flag[j] == true and turn == j) do no-op; // j차례이고 j가 임계 구역에 진입하고자 하면 대기, 그 외에는 진입
-    critical section
-  flag[i] = false; // i가 critical section 사용이 끝났음을 표시
-    
-    ...   
-    remainder section
+  flag[i] := true;   // i가 임계 구역 원함
+  turn := j;         // j에게 우선권 양보
 
+  while (flag[j] == true and turn == j) do no-op; 
+  // j도 임계 구역 원하고, 지금은 j 차례면 기다린다.
+
+  critical section
+
+  flag[i] := false;  // i가 임계 구역 사용 종료
+
+  remainder section
 until false;
+```
 
-```
-- 세마포어(Semaphore) : 카운팅 락으로, 여러 프로세스가 동시에 접근할 수 있는 자원의 개수를 제한합니다.
-```
+#### 3. 세마포어(Semaphore)
+- 공유 자원에 접근 가능한 개수를 관리하는 카운터 기반 동기화 도구
+
+```c
 type semaphore = record
-    value : integer; // 세마포어의 현재 값
-    L : queue of process; // 대기 중인 프로세스들의 큐
-    end;
+    value : integer;          // 현재 사용 가능 자원 수
+    L : queue of process;     // 대기 중인 프로세스 큐
+end;
 
 // 입장 요청
 wait(S : semaphore) :
@@ -307,73 +323,398 @@ wait(S : semaphore) :
         block this process;
     end;
 
-// 퇴장 처리 
+// 퇴장 처리
 signal(S : semaphore) :
     S.value := S.value + 1;
     if S.value <= 0 :
         remove a process P from S.L;
         wakeup(P);
     end;
-
 ```
 
-- 모니터(Monitor) : 고수준의 동기화 메커니즘으로, 공유 자원에 대한 접근을 제어합니다.
+#### 4. 모니터(Monitor)
+- 언어/런타임 차원에서 임계 구역 보호를 캡슐화한 고수준 동기화 구조
+- 공유 자원 접근을 안전하게 직렬화
 
-# Spring에서 동기화 문제 해결법
+---
 
-## 1. synchronized
-- 특정 코드 블록을 Mutual Exclusion 방식으로 감싸서 동일 시점의 진입을 1개로 제한하는 방법
-- 애플리케이션 인스턴스가 1개이고
-- 스프링의 경우 싱글톤 빈이 기본이므로 특정 빈에 대해 synchronized 키워드를 사용하면 해당 빈에 대한 동시 접근을 제한할 수 있다.
-- 단, 분산 환경(다중 서버 or 다중 인스턴스)에서는 효과가 없다.
+## Spring에서 동기화 문제 해결법
 
-## 2. DB Lock
-- DB 레벨에서 동시성 문제를 해결하는 방법
+### 1. `synchronized`
 
-### 2.1 Pessimistic Lock
-- 읽거나 수정할 레코드에 Lock을 걸어 다른 트랜젝션을 대기시킴
-- 경합이 많은 경우 지연이나 병목이 발생할 수 있음
-- 데드락이 발생할 수 있어 주의가 필요함
-- 사용자 대기(결제 화면 등)처럼 긴 트랜젝션에는 부적합 (긴 대기시간)
-- 단기 트랜젝션에 사용하는 것이 적합
+특정 메서드 또는 블록을 한 번에 하나의 스레드만 실행하게 하는 방법.
 
-### 2.2 Optimistic Lock
-- 레코드에 `version`을 두고 수정 시점에 버전을 비교
-- 버전이 다르면 다른 트랜젝션이 수정한 것으로 간주하고 예외 발생
-- 경합이 적은 경우에 효과적이며, 데드락이 발생하지 않음
-- 사용자 대기(결제 화면 등)처럼 긴 트랜젝션에도 적합
-- 재시도 로직을 구현하여야 하며, 충돌이 많을 경우 재시도에 대한 비용이 커짐
+```java
+@Service
+public class StockService {
 
-### 2.3 Named Lock
+    public synchronized void decreaseStock(Long menuId, int qty) {
+        // 재고 조회 -> 검증 -> 차감 -> 저장
+        // 이 메서드에 진입한 스레드가 끝나기 전까지
+        // 다른 스레드는 대기합니다.
+    }
+}
+```
 
-## 3. Redis
-- 싱글 스레드 기반
-- 비교적 빠른 속도
-- 
+- 스프링 빈은 기본적으로 싱글톤이므로, 단일 서버 환경에서는 유효함
+  - 소규모 / 로컬 / 관리자용 툴 수준 서비스에서 유용
+- 한계: **멀티 인스턴스(분산 환경)** 에서는 인스턴스마다 락이 따로라서 동시성 문제가 여전히 발생
 
-### 3.1 Lettuce
-- 각 스레드가 lock 획득하기 위해 redis에 요청(setnx)
-- spin lock 기반이므로 락을 확들할 때까지 재요청 하는 로직 작성 필요
-  - redis에 부하가 걸릴 수 있음
-- 락 획득 후 작업 수행
-- 작업 완료 후 락 해제(del)
-- 재시도가 필요하지 않을 경우 유리할 수 있음
+---
 
-### 3.2 Redisson
-- Spin lock을 사용하지 않고도 분산 lock을 구현할 수 있는 방법 (Redis 부하가 적음)
-- pub, sub 기반으로 락 획득을 (채널을 publish, subscribe하고 subscribe한 채널의 메세지를 일정시간동안 기대려 lock을 획득하는 구조)
-- 시간을 지정하여 lock 획득을 대기하고 시간이 초과되면 lock 획득에 실패함 
+### 2. DB Lock
 
+DB의 락 기능을 활용해서 동시성 제어.
 
+#### 2.1 비관적 락 (Pessimistic Lock)
 
-예약 로직 정리
+- 수정할 레코드에 아예 락을 걸고 다른 트랜잭션을 대기시키는 방식
+- `SELECT ... FOR UPDATE` 등으로 구현
+- 트랜잭션이 끝날 때까지 다른 트랜잭션은 대기 또는 타임아웃
 
-- 유저가 좌석을 예약 (여러 좌석을 한번에 받아옴)
+```java
+public interface MenuRepository extends JpaRepository<Menu, Long> {
 
-이때 좌석에 대해서는 동시성 문제 해결이 필요함
+    @Lock(LockModeType.PESSIMISTIC_WRITE) // Hibernate -> SELECT FOR UPDATE
+    @QueryHints({
+        @QueryHint(
+            name = "jakarta.persistence.lock.timeout",
+            value = "2000" // ms 단위 예: 2초 기다리다 못 잡으면 예외
+        )
+    })
+    @Query("""
+        select m from Menu m
+        where m.menuId in :ids
+        order by m.menuId asc
+    """)
+    List<Menu> findAllForUpdateOrderByIdAsc(@Param("ids") Collection<Long> ids);
+}
+```
 
-- 좌석 예약을 3개 단계로 구분
-  (HOLD, RESERVED, CANCELED)
+- 특징
+  - 트랜잭션이 유지되는 동안 레코드가 잠김
+  - 아주 강력하게 정합성을 보장
+- 단점
+  - 경합이 높은 상황에서 병목/지연
+  - 여러 레코드를 잠글 때 순서를 통일하지 않으면 데드락 위험
+  - 사용자 대기 시간이 긴 흐름(결제 화면 등)에는 부적합
 
-Reddison에서 scheduleId, row, column을 조합한 key로 분산락을 구현
+---
+
+#### 2.2 낙관적 락 (Optimistic Lock)
+
+- 엔티티에 `@Version` 필드를 두고 버전 번호를 비교
+- 커밋 시점에 `where id=? and version=?` 으로 UPDATE
+- 버전이 안 맞으면 예외 → 충돌 감지
+
+```java
+@Entity
+public class Menu {
+
+    @Id
+    private Long menuId;
+
+    private Integer stock;
+
+    @Version
+    private Long version;
+}
+```
+
+```java
+@Transactional
+public void decreaseStock(Long menuId, int qty) {
+    Menu menu = menuRepository.findById(menuId)
+        .orElseThrow();
+
+    if (menu.getStock() < qty) {
+        throw new IllegalStateException("재고 부족");
+    }
+
+    menu.setStock(menu.getStock() - qty);
+    // 트랜잭션 커밋 시 version 비교
+    // version이 바뀌었으면 ObjectOptimisticLockingFailureException 발생
+}
+```
+
+- 장점
+  - DB row-level 락을 오래 안 잡는다 → 데드락 위험 적음
+  - 사용자 대기 중인 긴 트랜잭션에도 적합
+- 단점
+  - 충돌 시 예외 처리 후 **재시도 로직**이 필요
+  - 경합이 심하면 재시도가 너무 잦아질 수 있음
+
+---
+
+#### 2.3 Named Lock
+
+- DB가 제공하는 "이름 기반"의 논리 락
+  - 예: MySQL `GET_LOCK('seat:123', timeout)` / `RELEASE_LOCK('seat:123')`
+- 특정 키에 대해 동시에 한 세션만 진입하게 제어
+- Redis 없이도 "분산 락 비슷한 것"을 DB만으로 구현 가능
+
+주의:
+- DB가 락 관리까지 담당하므로 DB 병목이 발생할 수 있음
+- 락의 획득/해제 라이프사이클을 명확히 설계해야 함
+
+---
+
+### 3. Redis 기반 락
+
+Redis를 분산 환경 전체에서 공통으로 사용하는 **전역 락 저장소**로 활용.
+
+#### 3.1 Lettuce 방식
+
+- `SET key value NX EX ttl` 형태로 락을 획득 (`NX`: 없을 때만 세팅, `EX`: 만료)
+- 성공 시 현재 스레드가 락 보유
+- 임계 구역 수행 후 `DEL key`로 해제
+- 실패 시 반복적으로 시도(spin) → Redis 부하 가능
+- 구현 단순, 빠름
+
+#### 3.2 Redisson 방식
+
+Redisson은 Redis 위에서 고수준 분산 락 API(`RLock`)를 제공.
+
+```java
+@Service
+@RequiredArgsConstructor
+public class OrderService {
+
+    private final RedissonClient redissonClient;
+
+    public void processOrder(Long orderId) throws InterruptedException {
+        RLock lock = redissonClient.getLock("lock:order:" + orderId);
+
+        // tryLock(waitTime, leaseTime, timeUnit)
+        boolean locked = lock.tryLock(2, 5, TimeUnit.SECONDS);
+        // 최대 2초 동안 락을 기다리고,
+        // 성공하면 5초짜리 lease 시간으로 락을 보유
+
+        if (!locked) {
+            throw new IllegalStateException("다른 요청이 처리 중입니다");
+        }
+
+        try {
+            // 임계 구역
+            // (예: 재고 차감, 결제 상태 업데이트 등)
+        } finally {
+            lock.unlock();
+        }
+    }
+}
+```
+
+- 장점
+  - pub/sub 기반으로 불필요한 busy-wait(스핀) 없이 분산 락 구현
+  - 여러 인스턴스 간 전역 1명만 통과시키는 구조 가능
+- 단점
+  - "락을 잡았다" ≠ "DB 정합성 자동 보장"
+    - 임계 구역 안에서 여전히 DB 재고 검증 등은 직접 해야 함
+
+---
+
+## 결제 시스템(외부 연동) 설계 및 동작
+
+### 외부 결제 연동
+
+- 결제 서버: `https://payment.loopz.co.kr`
+- 사용 API
+  - 결제 생성: `POST /payments/{paymentId}/instant`
+  - 결제 취소: `POST /payments/{paymentId}/cancel`
+  - 단건 조회: `GET /payments/{paymentId}`
+- 인증 방식
+  - `Authorization: Bearer {SECRET_KEY}`
+  - `application.yml`에 설정
+- 구성
+  - `PaymentApiService` (RestClient) → 외부 API 호출
+  - `PaymentService` → 도메인 로직 오케스트레이션
+
+---
+
+### PaymentId 규칙
+
+- 형식: `{STORE_ID}_NNNN`
+  - 예: `CEOS-22-STOREID_0001`
+- 고유성 보장: `payment_log.payment_id`에 Unique 제약
+
+---
+
+### 데이터 모델(PaymentLog)
+
+주요 필드:
+- `paymentId`
+- `orderName`
+- `totalAmount`
+- `currency`
+- `pgProvider` (예: `CEOS_PAY`)
+- `category` (`Reservation` | `SNACK`)
+- `paymentStatus` (`PAID` | `CANCELLED` | `FAILED`)
+- `paidAt`
+
+연관관계:
+- `Reservation` 또는 `Order` 와 다대일(ManyToOne)
+
+---
+
+### 결제 생성 플로우(createPayment)
+
+공통 시나리오:
+1. 결제 대상이 예매(Reservation)인지 스낵(Order)인지 판별
+2. 결제 요청 데이터 구성
+  - `orderName`
+  - `totalPayAmount`
+  - `currency`
+3. 외부 결제 API 호출
+4. 응답으로 `paidAt` 등 결제 결과 수신
+
+#### (1) 예매(Reservation) 결제
+- 성공 시
+  - `PaymentLog`를 `PAID` 상태로 저장
+  - `Reservation.confirm()` 호출로 예매 확정
+- 내부 처리 중 오류 발생 시
+  - 외부 결제를 즉시 취소
+  - 취소 로그 저장
+  - `Reservation.cancel()` 수행 권장
+
+#### (2) 스낵(Order) 결제
+- 동시성 제어
+  - 결제 직전, 주문에 포함된 메뉴 ID들을 정렬한 뒤  
+    `Pessimistic Lock (SELECT ... FOR UPDATE)`으로 일괄 잠금
+- 재고 차감
+  - 각 메뉴에 대해 `decreaseQuantity(quantity)`
+- 성공 시
+  - `Order.pay()`
+  - `PaymentLog`를 `PAID` 상태로 저장
+- 오류/보상 처리
+  - **재고 부족**
+    - 외부 결제 취소
+    - 취소 로그 저장
+    - `Order.cancel()`
+    - 클라이언트에 `409 CONFLICT`
+  - **락 경합/타임아웃**
+    - 외부 결제 취소
+    - 취소 로그 저장
+    - `Order.cancel()`
+    - 클라이언트에 `423 LOCKED`
+
+---
+
+### 결제 취소 플로우(cancelPayment)
+
+1. 외부 결제 취소 API 호출 성공
+2. 내부 상태 롤백
+
+내부 처리:
+- `PaymentLog.cancel()`로 상태 업데이트
+- 결제 종류별 처리
+  - Reservation 결제
+    - `Reservation.cancel()`
+  - SNACK(Order) 결제
+    - 재고 복구
+      - 메뉴들을 다시 Pessimistic Lock으로 잠그고  
+        `increaseQuantity()` 수행
+    - `Order.cancel()`
+
+추가로,
+- 재고 복구는 별도의 트랜잭션 (예: `REQUIRES_NEW`)에서 처리
+- 최대 3회 재시도 (짧은 백오프)
+- 모두 실패하면 `423 LOCKED` 반환
+
+---
+
+### 결제 조회 플로우(getPayment)
+
+1. 내부 `PaymentLog`에서 `paymentId` 조회
+2. 외부 단건 조회 API(`GET /payments/{paymentId}`) 호출
+3. 결과를 응답으로 반환
+
+---
+
+## 동시성 제어 전략 요약
+
+### 1) 예매(Reservation) 좌석
+
+- 타이밍: 좌석 선점 / 예매 확정 직전
+- 방법: **Redisson 기반 분산 락**
+  - 락 키 예시:
+    - `lock:schedule:{scheduleId}:row:{row}:col:{col}`
+  - 동일 좌석 동시 요청 중 하나만 성공
+  - 실패한 요청은 타임아웃 후 포기
+- DB 보강
+  - `(schedule_id, row, column)`에 유니크 제약을 걸어 이중 방어
+
+---
+
+### 2) 스낵 주문(SNACK / Order) 재고
+
+- 타이밍: 결제 순간 (최종 확정 직전)
+- 방법: **DB Pessimistic Lock**
+  - `findAllForUpdateOrderByIdAsc(ids)`
+    - 메뉴 ID를 정렬된 순서로 잠가 데드락 위험 완화
+- 성공 시
+  - `decreaseQuantity()`로 재고 차감
+  - 결제 성공 → `Order.pay()`
+- 취소 시
+  - 재고 복구는 별도 트랜잭션에서
+  - Pessimistic Lock + `increaseQuantity()`
+  - 최대 3회 재시도
+
+---
+
+## 로깅 전략
+
+### 로깅 가이드
+
+- **INFO**
+  - 정상 비즈니스 이벤트
+  - 예: 결제 생성/취소 성공, 예약 확정/취소 완료
+- **WARN**
+  - 클라이언트 기인 문제 / 도메인 규칙 위반
+  - 예:
+    - 400 잘못된 요청
+    - 404 미존재
+    - 409 재고 부족
+    - 423 락 경합
+    - 401/403 인증·인가 실패
+- **ERROR**
+  - 서버 내부 오류 / 외부 연동 실패 / 예기치 못한 예외
+  - 주로 5xx 응답에 해당
+
+---
+
+## GlobalExceptionHandler 기반 예외 처리 정책 (ControllerAdvice)
+- 예외를 한 곳에서 받아 표준화된 에러 응답(`ErrorResponse`)으로 변환
+- 상태코드 / 에러코드 / 메시지를 일관되게 제공
+- 내부 로그에는 상세 원인을 남기되, 클라이언트 응답은 안전한 표준 메시지만 노출
+
+#### 주요 처리 흐름
+
+1. **ResponseStatusException**
+  - HTTP 상태코드를 사내 `ErrorCode`로 매핑
+    - 예:
+      - 400 → `BAD_REQUEST_ERROR`
+      - 401 → `UNAUTHORIZED_ERROR`
+      - 403 → `FORBIDDEN_ERROR`
+      - 404 → `NOT_FOUND_ERROR`
+      - 405 → `METHOD_NOT_ALLOWED_ERROR`
+      - 기타 → `INTERNAL_SERVER_ERROR`
+  - 로그 레벨: `warn`
+  - 응답: `ErrorResponse.fromErrorCode(ErrorCode)`
+
+2. **Validation / 바인딩 계열**
+  - `MethodArgumentNotValidException`, `ConstraintViolationException` 등
+  - 로그 레벨: `warn` (잘못된 필드/메시지 요약)
+  - 응답: `400 BAD_REQUEST_ERROR`
+
+3. **보안 계열**
+  - `AuthenticationException` → 401
+  - `AccessDeniedException` → 403
+  - 로그 레벨: `warn`
+  - 응답: 표준 `ErrorResponse`
+
+4. **그 외 처리되지 않은 예외 (`Exception`)**
+  - 로그 레벨: `error` + stacktrace
+  - 응답: `500 INTERNAL_SERVER_ERROR`
+
+---
 

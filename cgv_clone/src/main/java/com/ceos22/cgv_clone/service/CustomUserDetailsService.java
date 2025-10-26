@@ -1,8 +1,6 @@
 package com.ceos22.cgv_clone.service;
 
-import com.ceos22.cgv_clone.domain.dto.Member;
-import com.ceos22.cgv_clone.domain.member.MemberEntity;
-import com.ceos22.cgv_clone.repository.MemberRepository;
+import com.ceos22.cgv_clone.api.dto.Member;
 import com.ceos22.cgv_clone.service.member.MemberReader;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.User;

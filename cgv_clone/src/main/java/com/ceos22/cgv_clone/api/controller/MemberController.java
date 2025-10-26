@@ -1,7 +1,6 @@
-package com.ceos22.cgv_clone.api;
+package com.ceos22.cgv_clone.api.controller;
 
-import com.ceos22.cgv_clone.domain.dto.CreateMemberRequest;
-import com.ceos22.cgv_clone.domain.member.MemberEntity;
+import com.ceos22.cgv_clone.api.dto.CreateMemberRequest;
 import com.ceos22.cgv_clone.service.member.CreateMemberCommand;
 import com.ceos22.cgv_clone.service.member.MemberService;
 import jakarta.validation.Valid;

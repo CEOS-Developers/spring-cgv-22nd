@@ -1,6 +1,6 @@
-package com.ceos22.cgv_clone.api;
+package com.ceos22.cgv_clone.api.controller;
 
-import com.ceos22.cgv_clone.domain.dto.FavoriteCinema;
+import com.ceos22.cgv_clone.api.dto.FavoriteCinema;
 import com.ceos22.cgv_clone.service.cinema.FavoriteCinemaService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;

@@ -1,7 +1,7 @@
 package com.ceos22.cgv_clone.service;
 
-import com.ceos22.cgv_clone.domain.dto.LoginRequest;
-import com.ceos22.cgv_clone.domain.dto.LoginResponse;
+import com.ceos22.cgv_clone.api.dto.LoginRequest;
+import com.ceos22.cgv_clone.api.dto.LoginResponse;
 import com.ceos22.cgv_clone.domain.member.MemberEntity;
 import com.ceos22.cgv_clone.repository.MemberRepository;
 import com.ceos22.cgv_clone.security.TokenProvider;

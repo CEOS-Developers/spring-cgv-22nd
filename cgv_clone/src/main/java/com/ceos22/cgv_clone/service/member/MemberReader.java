@@ -1,11 +1,10 @@
 package com.ceos22.cgv_clone.service.member;
 
-import com.ceos22.cgv_clone.domain.dto.Member;
+import com.ceos22.cgv_clone.api.dto.Member;
 import com.ceos22.cgv_clone.domain.member.MemberEntity;
 import com.ceos22.cgv_clone.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -22,11 +21,21 @@ public class MemberReader {
         return Member.from(member);
     }
 
-    /** 회원 아이디 조회 */
+    /** 회원 아이디 존재 여부 조회 */
     public Member getByLoginIdOrThrow(String loginId) {
         MemberEntity member = memberRepository.findByLoginId(loginId)
                 .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다. id=" + loginId));
         return Member.from(member);
+    }
+
+    /** 회원 아이디 중복 여부 조회 */
+    public boolean getByLoginId(String loginId) {
+        Optional<MemberEntity> member = memberRepository.findByLoginId(loginId);
+        if (!member.isPresent()) {
+            return true; // 가입 가능
+        } else {
+            return false; // 가입 불가능
+        }
     }
 
 }

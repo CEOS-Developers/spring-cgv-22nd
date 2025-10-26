@@ -1,8 +1,8 @@
 package com.ceos22.cgv_clone.service;
 
-import com.ceos22.cgv_clone.domain.dto.CreateReservationCommand;
-import com.ceos22.cgv_clone.domain.dto.ReservationSummaryDto;
-import com.ceos22.cgv_clone.domain.dto.SeatSelection;
+import com.ceos22.cgv_clone.api.dto.CreateReservationCommand;
+import com.ceos22.cgv_clone.api.dto.ReservationSummaryDto;
+import com.ceos22.cgv_clone.api.dto.SeatSelection;
 import com.ceos22.cgv_clone.domain.reservationMovie.*;
 import com.ceos22.cgv_clone.repository.*;
 import lombok.RequiredArgsConstructor;

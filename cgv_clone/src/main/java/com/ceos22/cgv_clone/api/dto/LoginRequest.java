@@ -1,4 +1,4 @@
-package com.ceos22.cgv_clone.domain.dto;
+package com.ceos22.cgv_clone.api.dto;
 
 public record LoginRequest(
         String loginId,

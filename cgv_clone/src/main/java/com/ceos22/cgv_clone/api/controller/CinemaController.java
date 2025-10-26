@@ -1,6 +1,6 @@
-package com.ceos22.cgv_clone.api;
+package com.ceos22.cgv_clone.api.controller;
 
-import com.ceos22.cgv_clone.domain.dto.Cinema;
+import com.ceos22.cgv_clone.api.dto.Cinema;
 import com.ceos22.cgv_clone.service.cinema.FindCinemaService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

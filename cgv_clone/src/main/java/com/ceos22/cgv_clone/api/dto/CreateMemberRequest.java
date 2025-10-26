@@ -1,12 +1,11 @@
-package com.ceos22.cgv_clone.domain.dto;
+package com.ceos22.cgv_clone.api.dto;
 
 import com.ceos22.cgv_clone.domain.member.Gender;
 
-public record SignUpReq(
+public record CreateMemberRequest(
         String name,
         int age,
         Gender gender,
         String loginId,
         String password
-) {
-}
+) {}

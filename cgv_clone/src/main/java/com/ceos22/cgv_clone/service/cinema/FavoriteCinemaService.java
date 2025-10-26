@@ -1,7 +1,6 @@
 package com.ceos22.cgv_clone.service.cinema;
 
-import com.ceos22.cgv_clone.domain.dto.FavoriteCinema;
-import com.ceos22.cgv_clone.domain.dto.FavoriteMovie;
+import com.ceos22.cgv_clone.api.dto.FavoriteCinema;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

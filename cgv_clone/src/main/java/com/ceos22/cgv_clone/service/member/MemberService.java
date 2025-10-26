@@ -21,7 +21,7 @@ public class MemberService {
     public Long join(CreateMemberCommand member) {
         //validate
 
-        return memberSaver.join(member);
+        return memberSaver.execute(member);
     }
 
     /** 회원 권한 검증*/

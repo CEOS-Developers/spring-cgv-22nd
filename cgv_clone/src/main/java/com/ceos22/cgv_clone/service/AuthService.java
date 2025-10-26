@@ -31,7 +31,7 @@ public class AuthService {
                 passwordEncoder.encode(req.password())
         );
 
-        memberSaver.join(m);
+        memberSaver.execute(m);
 
     }
 }

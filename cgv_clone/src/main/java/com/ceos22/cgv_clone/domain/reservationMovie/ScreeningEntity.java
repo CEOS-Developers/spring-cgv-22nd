@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @Entity @Table(name="screening",
         uniqueConstraints=@UniqueConstraint(name="uk_screening_aud_start", columnNames={"auditorium_id","start_at"}))
 @Getter @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Screening {
+public class ScreeningEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "screening_id")
@@ -31,7 +31,7 @@ public class Screening {
     @Column(name="end_at", nullable=false)
     private LocalDateTime endAt;
 
-    public Screening(MovieEntity movieEntity, Auditorium auditorium, LocalDateTime startAt, LocalDateTime endAt) {
+    public ScreeningEntity(MovieEntity movieEntity, Auditorium auditorium, LocalDateTime startAt, LocalDateTime endAt) {
         this.movieEntity = movieEntity; this.auditorium = auditorium; this.startAt = startAt; this.endAt = endAt;
     }
 }

@@ -1,8 +1,8 @@
-package com.ceos22.cgv_clone.api;
+package com.ceos22.cgv_clone.api.controller;
 
-import com.ceos22.cgv_clone.domain.dto.LoginRequest;
-import com.ceos22.cgv_clone.domain.dto.LoginResponse;
-import com.ceos22.cgv_clone.domain.dto.SignUpReq;
+import com.ceos22.cgv_clone.api.dto.LoginRequest;
+import com.ceos22.cgv_clone.api.dto.LoginResponse;
+import com.ceos22.cgv_clone.api.dto.SignUpRequest;
 import com.ceos22.cgv_clone.service.AuthService;
 import com.ceos22.cgv_clone.service.LoginService;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +19,7 @@ public class AuthController {
     private final LoginService loginService;
 
     @PostMapping("/signup")
-    public void signUp(@RequestBody SignUpReq req) {
+    public void signUp(@RequestBody SignUpRequest req) {
         authService.signUp(req);
     }
 

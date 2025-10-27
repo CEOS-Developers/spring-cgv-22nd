@@ -1,6 +1,7 @@
 package com.ceos22.cgv_clone.domain.orderFood;
 
-import com.ceos22.cgv_clone.exception.NotEnoughStockException;
+import com.ceos22.cgv_clone.common.exception.CgvCloneBusinessException;
+import com.ceos22.cgv_clone.common.exception.GlobalErrorCode;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -32,7 +33,7 @@ public class FoodEntity {
     public void removeStock(int quantity) {
         int restStock = this.stockQuantity - quantity;
         if (restStock < 0) {
-            throw new NotEnoughStockException("재고가 부족합니다");
+            throw new CgvCloneBusinessException(GlobalErrorCode.OUT_OF_STOCK);
         }
         this.stockQuantity = restStock;
     }

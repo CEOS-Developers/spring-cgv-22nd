@@ -1,4 +1,4 @@
-package com.ceos22.cgv_clone;
+package com.ceos22.cgv_clone.api.config;
 
 import com.ceos22.cgv_clone.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;

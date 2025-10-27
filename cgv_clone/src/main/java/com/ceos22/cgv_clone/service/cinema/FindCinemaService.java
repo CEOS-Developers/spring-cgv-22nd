@@ -1,6 +1,6 @@
 package com.ceos22.cgv_clone.service.cinema;
 
-import com.ceos22.cgv_clone.domain.dto.Cinema;
+import com.ceos22.cgv_clone.api.dto.Cinema;
 import com.ceos22.cgv_clone.domain.reservationMovie.CinemaEntity;
 import com.ceos22.cgv_clone.repository.CinemaRepository;
 import lombok.RequiredArgsConstructor;

@@ -1,6 +1,6 @@
 package com.ceos22.cgv_clone.service.movie;
 
-import com.ceos22.cgv_clone.domain.dto.Movie;
+import com.ceos22.cgv_clone.api.dto.Movie;
 import com.ceos22.cgv_clone.repository.MovieRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

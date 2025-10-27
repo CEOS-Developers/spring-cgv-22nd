@@ -1,6 +1,6 @@
 package com.ceos22.cgv_clone.api.dto;
 
-public record PaymentRequest(
+public record InstantPaymentRequest(
         String storeId,
         String orderName,
         int totalPayAmount,

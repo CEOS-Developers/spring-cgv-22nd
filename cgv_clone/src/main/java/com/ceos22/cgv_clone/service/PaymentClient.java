@@ -1,7 +1,7 @@
 package com.ceos22.cgv_clone.service;
 
 import com.ceos22.cgv_clone.api.dto.CancelPaymentResponse;
-import com.ceos22.cgv_clone.api.dto.PaymentRequest;
+import com.ceos22.cgv_clone.api.dto.InstantPaymentRequest;
 import com.ceos22.cgv_clone.api.dto.PaymentResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -15,7 +15,7 @@ public class PaymentClient {
 
     private final WebClient paymentWebClient;
 
-    public PaymentResponse pay(String paymentId, PaymentRequest request) {
+    public PaymentResponse pay(String paymentId, InstantPaymentRequest request) {
         return paymentWebClient.post()
                 .uri("/payments/{paymentId}/pay", paymentId)
                 .contentType(MediaType.APPLICATION_JSON)

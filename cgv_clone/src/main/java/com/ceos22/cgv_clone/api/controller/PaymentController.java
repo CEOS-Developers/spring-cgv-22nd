@@ -1,7 +1,7 @@
 package com.ceos22.cgv_clone.api.controller;
 
 import com.ceos22.cgv_clone.api.dto.CancelPaymentResponse;
-import com.ceos22.cgv_clone.api.dto.PaymentRequest;
+import com.ceos22.cgv_clone.api.dto.InstantPaymentRequest;
 import com.ceos22.cgv_clone.api.dto.PaymentResponse;
 import com.ceos22.cgv_clone.service.PaymentClient;
 import lombok.RequiredArgsConstructor;
@@ -14,10 +14,10 @@ public class PaymentController {
 
     private final PaymentClient paymentClient;
 
-    @PostMapping("/{paymentId}/pay")
+    @PostMapping("/{paymentId}/instant")
     public PaymentResponse payInstant(
             @PathVariable String paymentId,
-            @RequestBody PaymentRequest request) {
+            @RequestBody InstantPaymentRequest request) {
         return paymentClient.pay(paymentId, request);
     }
 

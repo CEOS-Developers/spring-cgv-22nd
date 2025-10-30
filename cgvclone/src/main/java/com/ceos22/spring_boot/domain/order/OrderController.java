@@ -35,9 +35,6 @@ public class OrderController {
             @Valid @RequestBody PurchaseRequestDto req,
             @AuthenticationPrincipal CustomUserPrincipal me
     ) {
-        if (me == null) {
-            return ApiResponse.onFailure(ErrorStatus._UNAUTHORIZED);
-        }
         PurchaseResponseDto res = orderService.purchase(me.getUserId(), req);
         return ApiResponse.onSuccess(SuccessStatus._OK, res);
     }

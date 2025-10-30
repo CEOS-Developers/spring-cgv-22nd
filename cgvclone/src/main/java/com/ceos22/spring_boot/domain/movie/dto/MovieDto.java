@@ -1,4 +1,4 @@
-package com.ceos22.spring_boot.domain.movie;
+package com.ceos22.spring_boot.domain.movie.dto;
 
 import com.ceos22.spring_boot.common.enums.Rating;
 import com.ceos22.spring_boot.domain.movie.entity.Movie;
@@ -34,7 +34,7 @@ public class MovieDto {
                 .runningTime(movie.getRunningTime())
                 .releaseDate(movie.getReleaseDate())
                 .rating(movie.getRating())
-                .isActive(movie.isActive())
+                .isActive(movie.getIsActive())
                 .directors(movie.getDirectors())
                 .actors(movie.getActors())
                 .genres(movie.getCategorizings().stream()

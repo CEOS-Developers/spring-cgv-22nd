@@ -4,6 +4,7 @@ import com.ceos22.spring_boot.common.BaseEntity;
 import com.ceos22.spring_boot.common.enums.Rating;
 import jakarta.persistence.*;
 import lombok.Getter;
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
@@ -36,7 +37,8 @@ public class Movie extends BaseEntity {
     private Rating rating;
 
     @Column(name="is_active")
-    private boolean isActive;
+    @ColumnDefault("true")
+    private Boolean isActive;
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "json")

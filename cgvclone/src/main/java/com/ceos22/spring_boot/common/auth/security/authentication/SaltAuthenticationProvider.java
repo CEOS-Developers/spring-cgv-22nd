@@ -28,19 +28,19 @@ public class SaltAuthenticationProvider implements AuthenticationProvider {
         String username = String.valueOf(authentication.getPrincipal());
         String rawPassword = String.valueOf(authentication.getCredentials());
 
-        User u = users.findByUsername(username)
+        User user = users.findByUsername(username)
                 .orElseThrow(() ->
                         new AuthFailureException(ErrorStatus.USER_NOT_FOUND, "존재하지 않는 사용자입니다.")
                 );
 
-        if (!saltService.matches(rawPassword, u.getSalt(), u.getPasswordHash())) {
+        if (!saltService.matches(rawPassword, user.getSalt(), user.getPasswordHash())) {
             throw new AuthFailureException(ErrorStatus.INVALID_CREDENTIALS, "아이디 또는 비밀번호가 올바르지 않습니다.");
         }
 
         var authorities = List.<GrantedAuthority>of(() -> "ROLE_USER");
         var principal = new CustomUserPrincipal(
-                u.getUserId(), u.getPublicId(), u.getUsername(),
-                u.getPasswordHash(), u.getName(), u.getEmail(), authorities
+                user.getUserId(), user.getPublicId(), user.getUsername(),
+                user.getPasswordHash(), user.getName(), user.getEmail(), authorities
         );
         return new UsernamePasswordAuthenticationToken(principal, null, authorities);
     }

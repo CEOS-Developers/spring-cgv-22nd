@@ -37,11 +37,6 @@ public class GlobalExceptionHandler {
         return ApiResponse.onFailure(ErrorStatus._NOT_FOUND);
     }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiResponse<Void>> handleException(Exception e) {
-        return ApiResponse.onFailure(ErrorStatus._INTERNAL_SERVER_ERROR);
-    }
-
     @ExceptionHandler(GeneralException.class)
     public ResponseEntity<ApiResponse<Void>> handleGeneralException(GeneralException e) {
         return ApiResponse.onFailure(e.getErrorStatus(), e.getMessage());
@@ -58,5 +53,9 @@ public class GlobalExceptionHandler {
         return ApiResponse.onFailure(e.getErrorStatus(), e.getMessage());
     }
 
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiResponse<Void>> handleException(Exception e) {
+        return ApiResponse.onFailure(ErrorStatus._INTERNAL_SERVER_ERROR);
+    }
 
 }

@@ -1,6 +1,6 @@
 package com.ceos22.spring_boot.domain.theater.service;
 
-import com.ceos22.spring_boot.domain.theater.TheaterDto;
+import com.ceos22.spring_boot.domain.theater.dto.TheaterDto;
 import com.ceos22.spring_boot.domain.theater.entity.Theater;
 import com.ceos22.spring_boot.domain.theater.repository.TheaterRepository;
 import lombok.RequiredArgsConstructor;

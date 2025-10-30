@@ -1,4 +1,4 @@
-package com.ceos22.spring_boot.domain.theater;
+package com.ceos22.spring_boot.domain.theater.dto;
 
 import com.ceos22.spring_boot.common.enums.Region;
 import com.ceos22.spring_boot.domain.theater.entity.Theater;

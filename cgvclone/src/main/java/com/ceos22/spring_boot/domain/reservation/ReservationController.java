@@ -1,6 +1,7 @@
 package com.ceos22.spring_boot.domain.reservation;
 
 import com.ceos22.spring_boot.common.auth.security.principal.CustomUserPrincipal;
+import com.ceos22.spring_boot.common.payment.PaymentService;
 import com.ceos22.spring_boot.common.response.ApiResponse;
 import com.ceos22.spring_boot.common.response.status.ErrorStatus;
 import com.ceos22.spring_boot.common.response.status.SuccessStatus;
@@ -52,4 +53,34 @@ public class ReservationController {
         reservationService.cancelReservation(me.getUserId(), reservationId);
         return ApiResponse.onSuccess(SuccessStatus._OK, null);
     }
+
+    @Operation(summary = "결제 승인", description = "예약된 예매 건에 대해 결제 서버와 연동하여 결제를 처리합니다.")
+    @PostMapping("/{reservationId}/pay")
+    public ResponseEntity<ApiResponse<Object>> payReservation(
+            @PathVariable Long reservationId,
+            @AuthenticationPrincipal CustomUserPrincipal me
+    ) {
+        if (me == null)
+            return ApiResponse.onFailure(ErrorStatus._UNAUTHORIZED);
+
+        PaymentService.PaymentResponse response = reservationService.processPayment(reservationId, me.getUserId());
+
+        return ApiResponse.onSuccess(SuccessStatus._OK, response);
+    }
+
+    @Operation(summary = "예매 결제 확정", description = "결제 요청 후 성공 시 예매 상태를 확정(SUCCESS)으로 변경합니다.")
+    @PostMapping("/{reservationId}/confirm")
+    public ResponseEntity<ApiResponse<Object>> confirmPayment(
+            @AuthenticationPrincipal CustomUserPrincipal me,
+            @PathVariable Long reservationId
+    ) {
+        if (me == null)
+            return ApiResponse.onFailure(ErrorStatus._UNAUTHORIZED);
+
+        reservationService.confirmReservationPayment(reservationId);
+        return ApiResponse.onSuccess(SuccessStatus._OK, null);
+    }
+
+
+
 }

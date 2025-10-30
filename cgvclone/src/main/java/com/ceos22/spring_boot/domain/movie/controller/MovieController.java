@@ -2,7 +2,7 @@ package com.ceos22.spring_boot.domain.movie.controller;
 
 import com.ceos22.spring_boot.common.response.ApiResponse;
 import com.ceos22.spring_boot.common.response.status.SuccessStatus;
-import com.ceos22.spring_boot.domain.movie.MovieDto;
+import com.ceos22.spring_boot.domain.movie.dto.MovieDto;
 import com.ceos22.spring_boot.domain.movie.service.MovieService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

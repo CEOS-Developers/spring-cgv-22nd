@@ -1,9 +1,9 @@
 package com.ceos22.spring_boot.service;
 
-import com.ceos22.spring_boot.domain.movie.MovieDto;
+import com.ceos22.spring_boot.domain.movie.dto.MovieDto;
 import com.ceos22.spring_boot.domain.movie.service.MovieService;
 import com.ceos22.spring_boot.domain.movie.entity.Movie;
-import com.ceos22.spring_boot.domain.movie.MovieRepository;
+import com.ceos22.spring_boot.domain.movie.repository.MovieRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

@@ -26,7 +26,7 @@ public class FavoriteMovieController {
     public ResponseEntity<Void> remove(@PathVariable Long movieId,
                                        @AuthenticationPrincipal CustomUserPrincipal me) {
         service.remove(me.getUserId(), movieId);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/count") // 해당 영화 찜 수

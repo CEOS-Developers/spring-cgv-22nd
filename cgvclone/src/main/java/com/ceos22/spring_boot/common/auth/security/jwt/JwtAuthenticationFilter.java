@@ -29,8 +29,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String token = resolveToken(request);
 
-        log.info("Authorization Header = {}", request.getHeader("Authorization"));
-        log.info("Parsed token = {}", token);
+        if (log.isDebugEnabled()) {
+            log.debug("Authorization Header = {}", request.getHeader("Authorization"));
+            log.debug("Parsed token = {}", token);
+        }
 
         if (token != null && tokenProvider.validate(token)) {
             var authentication = tokenProvider.getAuthentication(token);
@@ -46,7 +48,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private String resolveToken(HttpServletRequest req) {
         String header = req.getHeader("Authorization");
         if (header != null && header.startsWith("Bearer ")) {
-            return header.substring(7);
+            String token = header.substring(7);
+            if (!token.isBlank()) {
+                return token;
+            }
         }
         return null;
     }

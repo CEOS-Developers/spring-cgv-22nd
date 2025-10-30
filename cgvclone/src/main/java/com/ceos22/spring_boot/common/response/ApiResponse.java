@@ -5,6 +5,7 @@ import com.ceos22.spring_boot.common.response.status.SuccessStatus;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -15,16 +16,24 @@ import java.util.List;
 @Getter
 @RequiredArgsConstructor
 @JsonPropertyOrder({"isSuccess", "code", "message", "pageInfo", "result"})
+@Schema(description = "공통 API 응답 포맷")
 public class ApiResponse<T> {
 
+    @Schema(description = "성공 여부", example = "true")
     @JsonProperty("isSuccess")
     private final Boolean isSuccess;
+
+    @Schema(description = "응답 코드", example = "SUCCESS_200")
     private final String code;
+
+    @Schema(description = "응답 메시지", example = "요청이 성공적으로 처리되었습니다.")
     private final String message;
 
+    @Schema(description = "페이지 정보 (페이징 응답일 때만 포함)", nullable = true)
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private final PageInfo pageInfo;
 
+    @Schema(description = "결과 데이터", nullable = true)
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private final T result;
 

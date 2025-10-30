@@ -9,3 +9,7 @@ CEOS 22기 백엔드 스터디 - CGV 클론 코딩 프로젝트
 - wk3
   - [✨ wk3: 인증 방법 정리](https://github.com/yooniicode/spring-cgv-22nd/wiki/wk3:-%EC%9D%B8%EC%A6%9D-%EB%B0%A9%EB%B2%95-%EC%A0%95%EB%A6%AC)
   - [✨ wk3: 로그인 구현하기](https://github.com/yooniicode/spring-cgv-22nd/wiki/wk3;-%EB%A1%9C%EA%B7%B8%EC%9D%B8-%EA%B5%AC%ED%98%84%ED%95%98%EA%B8%B0)
+
+- wk4
+  - [✨ wk4: 동시성 문제 해결(락)](https://github.com/yooniicode/spring-cgv-22nd/wiki/wk4-:-%EB%8F%99%EC%8B%9C%EC%84%B1-%ED%95%B4%EA%B2%B0-%EB%B0%A9%EB%B2%95)
+  - [🚀 wk4: 느낀점](https://github.com/yooniicode/spring-cgv-22nd/wiki/wk4-:-%EB%8A%90%EB%82%80%EC%A0%90)

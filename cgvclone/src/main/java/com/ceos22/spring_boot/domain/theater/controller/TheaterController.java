@@ -2,7 +2,7 @@ package com.ceos22.spring_boot.domain.theater.controller;
 
 import com.ceos22.spring_boot.common.response.ApiResponse;
 import com.ceos22.spring_boot.common.response.status.SuccessStatus;
-import com.ceos22.spring_boot.domain.theater.TheaterDto;
+import com.ceos22.spring_boot.domain.theater.dto.TheaterDto;
 import com.ceos22.spring_boot.domain.theater.service.TheaterService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;

@@ -16,7 +16,7 @@ import com.ceos22.spring_boot.domain.order.repository.ProductRepository;
 import com.ceos22.spring_boot.domain.order.repository.UserOrderRepository;
 import com.ceos22.spring_boot.domain.user.User;
 import com.ceos22.spring_boot.domain.user.UserRepository;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -51,7 +51,7 @@ public class OrderService {
         int total = 0;
 
         for (var item : req.items()) {
-            Product p = products.findById(item.productId())
+            Product p = products.findByIdWithLock(item.productId())
                     .orElseThrow(() -> new GeneralException(ErrorStatus.PRODUCT_NOT_FOUND, "상품이 존재하지 않습니다. id=" + item.productId()));
 
             if (!p.isAvailable()) {
@@ -68,14 +68,14 @@ public class OrderService {
             int subtotal = unitPrice * item.quantity();
             total += subtotal;
 
-            OrderDetail od = new OrderDetail(
-                    null,         // odId
-                    order,        // userOrder
-                    p,            // product
-                    item.quantity(),
-                    unitPrice,
-                    subtotal
-            );
+            OrderDetail od = OrderDetail.builder()
+                    .userOrder(order)
+                    .product(p)
+                    .quantity(item.quantity())
+                    .unitPrice(unitPrice)
+                    .subtotal(subtotal)
+                    .build();
+
             orderDetails.save(od);
         }
 

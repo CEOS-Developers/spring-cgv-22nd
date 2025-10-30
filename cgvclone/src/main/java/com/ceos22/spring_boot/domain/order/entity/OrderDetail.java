@@ -2,14 +2,13 @@ package com.ceos22.spring_boot.domain.order.entity;
 
 import com.ceos22.spring_boot.common.BaseEntity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
+@Builder
 public class OrderDetail extends BaseEntity {
 
     @Id
@@ -26,6 +25,7 @@ public class OrderDetail extends BaseEntity {
 
     private Integer quantity;
     private Integer price;
+    private Integer unitPrice;
 
     // subtotal = quantity * price
     private Integer subtotal;

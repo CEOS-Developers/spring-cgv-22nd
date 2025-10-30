@@ -28,7 +28,7 @@ springdoc:
 
 jwt:
   secret: ${JWT_SECRET}
-  access-token-validity-in-seconds: 1800
+  access-token-validity: 1h # duration으로 변경함
 
 security:
   password:
@@ -36,3 +36,8 @@ security:
       iterations: 120000
       key-length: 256
       salt-bytes: 16
+
+payment:
+  base-url: https://payment.loopz.co.kr
+  api-secret: ${PAYMENT_API_SECRET}
+  store-id: ${PAYMENT_STORE_ID}

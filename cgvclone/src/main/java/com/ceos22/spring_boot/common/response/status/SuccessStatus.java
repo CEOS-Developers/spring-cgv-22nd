@@ -8,7 +8,9 @@ import org.springframework.http.HttpStatus;
 @AllArgsConstructor
 public enum SuccessStatus {
 
-    _OK(HttpStatus.OK, "COMMON200", "성공입니다.");
+    _OK(HttpStatus.OK, "COMMON200", "성공입니다."),
+    LOGIN_SUCCESS(HttpStatus.OK, "LOGIN200", "로그인에 성공했습니다.")
+    ;
 
     private final HttpStatus httpStatus;
     private final String code;

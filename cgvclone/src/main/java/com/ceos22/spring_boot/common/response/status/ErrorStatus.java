@@ -16,18 +16,27 @@ public enum ErrorStatus {
     _FORBIDDEN(HttpStatus.FORBIDDEN, "COMMON403", "금지된 요청입니다."),
     _NOT_FOUND(HttpStatus.NOT_FOUND, "COMMON404", "페이지를 찾을 수 없습니다."),
 
+    _EXTERNAL_API_ERROR(HttpStatus.BAD_GATEWAY, "COMMON500", "외부 결제 서버 통신 중 오류가 발생했습니다."),
+
     VALIDATION_ERROR(HttpStatus.BAD_REQUEST, "VALID400", "입력값이 올바르지 않습니다."),
 
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "AUTH400", "존재하지 않는 사용자입니다."),
     INVALID_CREDENTIALS(HttpStatus.BAD_REQUEST, "AUTH401", "아이디 또는 비밀번호가 올바르지 않습니다."),
     DUPLICATE_USERNAME(HttpStatus.CONFLICT, "AUTH402", "이미 존재하는 사용자명입니다."),
     DUPLICATE_EMAIL(HttpStatus.CONFLICT, "AUTH403", "이미 존재하는 이메일입니다."),
+    TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "AUTH404", "만료된 토큰입니다."),
+    INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "AUTH405", "유효하지 않은 토큰입니다."),
+
+    FAVORITE_NOT_FOUND(HttpStatus.NOT_FOUND, "FAVORITE400", "즐겨찾기 내역이 없습니다."),
+    ALREADY_FAVORITED(HttpStatus.CONFLICT, "FAVORITE409", "이미 즐겨찾기된 영화입니다."),
 
     OUT_OF_STOCK(HttpStatus.FORBIDDEN, "STORE400", "재고가 부족합니다."),
     PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "STORE401", "상품이 존재하지 않습니다."),
     PRODUCT_NOT_AVAILABLE(HttpStatus.BAD_REQUEST, "STORE402", "판매 중지된 상품입니다."),
 
+    MOVIE_NOT_FOUND(HttpStatus.NOT_FOUND, "MOVIE400", "존재하지 않는 영화입니다."),
 
+    SEAT_ALREADY_RESERVED(HttpStatus.CONFLICT, "SEAT400", "이미 예약된 좌석입니다.")
 
     ;
 

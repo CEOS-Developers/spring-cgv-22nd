@@ -1,14 +1,13 @@
-package com.ceos22.cgv_clone.web.domain;
+package com.ceos22.cgv_clone.web.domain.reservation;
 
 import com.ceos22.cgv_clone.global.common.BaseEntity;
+import com.ceos22.cgv_clone.web.domain.Schedule;
+import com.ceos22.cgv_clone.web.domain.Seat;
 import jakarta.persistence.*;
 import lombok.*;
 
-
 @Entity
 @Getter
-@Builder
-@AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ReservedSeat extends BaseEntity {
     @Id
@@ -30,5 +29,21 @@ public class ReservedSeat extends BaseEntity {
 
     @Column(name = "is_available")
     private boolean isAvailable;
+
+    public ReservedSeat(Seat seat, Schedule schedule, Reservation reservation, boolean isAvailable) {
+        this.seat = seat;
+        this.schedule = schedule;
+        this.reservation = reservation;
+        this.isAvailable = isAvailable;
+    }
+
+    public static ReservedSeat reserve(Seat seat, Schedule schedule, Reservation reservation) {
+        return new ReservedSeat(
+                seat,
+                schedule,
+                reservation,
+                false
+        );
+    }
 
 }

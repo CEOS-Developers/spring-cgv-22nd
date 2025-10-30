@@ -1,6 +1,7 @@
 package com.ceos22.cgv_clone.web.dto;
 
 import com.ceos22.cgv_clone.web.domain.User;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -39,7 +40,23 @@ public class UserResponseDto {
         }
     }
 
+    @Getter
+    @AllArgsConstructor
+    public static class RecreateTokenResponseDto {
+        @Schema(description = "사용자 id", example="1")
+        private Long userId;
+        @Schema(description = "사용자 accessToken", example="exksoijsdjon...")
+        private String accessToken;
+        @Schema(description = "사용자 refreshToken", example="exjnasoicjkdd...")
+        private String refreshToken;
 
+        public static RecreateTokenResponseDto of(Long userId,String accessToken,String refreshToken) {
+            return new RecreateTokenResponseDto(
+                    userId,
+                    accessToken,
+                    refreshToken);
+        }
+    }
 
 
 }

@@ -44,6 +44,7 @@ public class CinemaService {
         return dtoList;
     }
 
+    @Transactional(readOnly = true)
     public CinemaResponseDto.CinemaDetailDto getCinema(Long cinemaId) {
 
         Cinema cinema = cinemaRepository.findById(cinemaId)
@@ -55,7 +56,7 @@ public class CinemaService {
                 .map(theater-> {
                     List<ScheduleResponseDto.ScheduleDto> scheduleDtos = scheduleRepository
                             .findByTheaterId(theater.getId()).stream()
-                            .filter(Schedule::notStarted)
+                            .filter(Schedule::verifyNotStarted)
                             .map(ScheduleResponseDto.ScheduleDto::of)
                             .collect(Collectors.toList());
 
@@ -67,17 +68,25 @@ public class CinemaService {
     }
 
     public void preferCinema(Long cinemaId, User user) {
-        Cinema cinema = cinemaRepository.findById(cinemaId)
-                .orElseThrow(()-> new GeneralException(ErrorStatus.CINEMA_NOT_FOUND));
+        Cinema cinema = getCinemaById(cinemaId);
+        boolean isAlreadyPreferred = cinemaPreferRepository.existsByUserAndCinema(user, cinema);
 
-        if (cinemaPreferRepository.existsByUserAndCinema(user,cinema)){
+        if (isAlreadyPreferred) {
             throw new GeneralException(ErrorStatus.ALREADY_PREFERED_CINEMA);
         }
+
         CinemaPrefer cinemaPrefer = CinemaPrefer.builder()
                 .cinema(cinema)
                 .user(user)
                 .build();
-
         cinemaPreferRepository.save(cinemaPrefer);
     }
+
+    public Cinema getCinemaById(Long cinemaId) {
+        return cinemaRepository.findById(cinemaId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus.CINEMA_NOT_FOUND));
+    }
+
+
+
 }

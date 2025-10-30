@@ -17,17 +17,16 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     private final UserRepository userRepository;
 
+    @Override
     public UserDetails loadUserByUsername(String userIdentifier) throws UsernameNotFoundException {
-        Long userId;
         try {
-            userId = Long.parseLong(userIdentifier);
+           Long userId = Long.valueOf(userIdentifier);
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
+
+            return new CustomUserDetails(user);
         } catch (NumberFormatException e) {
             throw new UsernameNotFoundException("Invalid user identifier: " + userIdentifier);
         }
-
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new GeneralException(ErrorStatus.USER_NOT_FOUND));
-
-        return new CustomUserDetails(user);
     }
 }

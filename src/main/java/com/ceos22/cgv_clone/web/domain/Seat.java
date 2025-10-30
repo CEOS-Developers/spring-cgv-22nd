@@ -16,11 +16,12 @@ public class Seat extends BaseEntity {
     @Column(name = "seat_id")
     private Long id;
 
-    private Integer row;
+    private Integer row_num;
 
-    private Integer col;
+    private Integer col_num;
 
     @Column(name = "seat_type")
+    @Enumerated(EnumType.STRING)
     private SeatType seatType;
 
     @ManyToOne
@@ -28,11 +29,11 @@ public class Seat extends BaseEntity {
     private Theater theater;
 
     public String getSeatName(){
-        if (row <= 0 || row >= theater.getTotalRow()) {
+        if (row_num <= 0 || row_num >= theater.getTotalRow()) {
             throw  new IllegalArgumentException("행이 올바르지 않습니다.");
         }
 
-        return String.valueOf("A"+(row-1))+col.toString();
+        return String.valueOf("A"+(row_num -1))+ col_num.toString();
     }
 
 }

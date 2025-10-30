@@ -20,6 +20,6 @@ public class PurchaseController {
     @PostMapping("/products")
     @Operation(summary = "상품 구매 API",description = "영화관의 매점에서 상품을 구매하는 API입니다.")
     public ApiResponse<PurchaseResponseDto> purchase(@RequestBody PurchaseRequestDto purchaseRequestDto, @AuthenticationPrincipal CustomUserDetails userDetails) {
-        return ApiResponse.onSuccess(purchaseService.purchase(purchaseRequestDto,userDetails.getUser()));
+        return ApiResponse.onSuccess(purchaseService.purchase(purchaseRequestDto,userDetails.user()));
     }
 }

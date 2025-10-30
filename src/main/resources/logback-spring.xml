@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <!-- 로그 패턴 -->
+    <property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"/>
+
+
+    <!-- 개발 환경 (dev) -->
+    <springProfile name="dev">
+
+        <!-- 콘솔 -->
+        <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder>
+                <pattern>${LOG_PATTERN}</pattern>
+            </encoder>
+        </appender>
+
+        <!-- 루트 로그레벨 DEBUG -->
+        <root level="DEBUG">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+
+        <logger name="com.ceos22.cgv_clone" level="DEBUG"/>
+    </springProfile>
+
+
+    <!--  운영 환경 -->
+    <springProfile name="prod">
+
+        <!-- 로그 파일 저장 경로 (원하면 변경 가능) -->
+        <property name="LOG_PATH" value="./logs"/>
+
+        <!-- 파일 출력 -->
+        <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <file>${LOG_PATH}/app.log</file>
+            <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                <fileNamePattern>${LOG_PATH}/app.%d{yyyy-MM-dd}.gz</fileNamePattern>
+                <maxHistory>2</maxHistory> <!-- 보관 일수 -->
+            </rollingPolicy>
+            <encoder>
+                <pattern>${LOG_PATTERN}</pattern>
+            </encoder>
+        </appender>
+
+        <!-- 루트 로그레벨 INFO -->
+        <root level="INFO">
+            <appender-ref ref="FILE"/>
+        </root>
+
+        <logger name="com.ceos22.cgv_clone" level="INFO"/>
+    </springProfile>
+
+</configuration>

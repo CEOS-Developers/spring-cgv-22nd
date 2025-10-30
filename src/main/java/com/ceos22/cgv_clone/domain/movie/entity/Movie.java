@@ -5,6 +5,7 @@ import com.ceos22.cgv_clone.domain.common.enums.Rating;
 import jakarta.persistence.*;
 import lombok.Getter;
 
+import java.time.Duration;
 import java.time.LocalDate;
 
 @Entity
@@ -23,7 +24,7 @@ public class Movie {
     private LocalDate releaseDate;
 
     @Column(nullable = false)
-    private Integer runtime;
+    private Duration runtime;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)

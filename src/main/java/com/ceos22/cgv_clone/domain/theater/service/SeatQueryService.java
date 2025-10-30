@@ -17,13 +17,13 @@ import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class SeatQueryService {
 
     private final ScreeningRepository screeningRepository;
     private final SeatRepository seatRepository;
     private final BookingSeatRepository bookingSeatRepository;
 
+    @Transactional(readOnly = true)
     public List<SeatStatusDto> getSeatMap(Long screeningId) {
         Screening screening = screeningRepository.findById(screeningId)
                 .orElseThrow(() -> new CustomException(ErrorCode.SCREENING_NOT_FOUND));

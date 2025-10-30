@@ -13,16 +13,17 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class MovieService {
 
     private final MovieRepository movieRepository;
 
+    @Transactional(readOnly = true)
     public List<MovieDto> getMovieList() {
         return movieRepository.findAll()
                 .stream().map(MovieDto::of).toList();
     }
 
+    @Transactional(readOnly = true)
     public MovieDto getMovie(Long movieId) {
         Movie movie = movieRepository.findById(movieId)
                 .orElseThrow(() -> new CustomException(ErrorCode.MOVIE_NOT_FOUND));

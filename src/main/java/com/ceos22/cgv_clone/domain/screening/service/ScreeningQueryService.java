@@ -9,18 +9,17 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.security.InvalidParameterException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class ScreeningQueryService {
 
     private final ScreeningRepository screeningRepository;
 
+    @Transactional(readOnly = true)
     public List<ScreeningDto> findByConditions(
             Long cinemaId, Long auditoriumId, Long movieId, LocalDate date
     ) {

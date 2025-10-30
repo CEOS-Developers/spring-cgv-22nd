@@ -23,7 +23,7 @@ import java.util.List;
 @Tag(name="상영 관련 API", description = "상영 목록 조회")
 public class ScreeningQueryController {
 
-    private final ScreeningQueryService service;
+    private final ScreeningQueryService screeningQueryService;
 
     @Operation(summary = "상영 목록 조회")
     @GetMapping("/screenings")
@@ -34,6 +34,8 @@ public class ScreeningQueryController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
     ) {
 
-        return CustomResponse.onSuccess(SuccessCode.OK, service.findByConditions(cinemaId, auditoriumId, movieId, date));
+
+        List<ScreeningDto> screenings = screeningQueryService.findByConditions(cinemaId, auditoriumId, movieId, date);
+        return CustomResponse.onSuccess(SuccessCode.OK, screenings);
     }
 }

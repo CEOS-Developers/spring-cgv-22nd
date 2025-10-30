@@ -1,4 +1,5 @@
 package com.ceos22.cgv_clone.domain.booking.dto.response;
+import com.ceos22.cgv_clone.domain.booking.entity.Booking;
 import com.ceos22.cgv_clone.domain.common.enums.BookingStatus;
 import com.ceos22.cgv_clone.domain.common.enums.PaymentType;
 import lombok.AllArgsConstructor;
@@ -37,4 +38,25 @@ public class BookingDetailResponseDto {
 
     // 좌석
     private List<String> seats;
+
+    public static BookingDetailResponseDto of(Booking b, List<String> seatLabels) {
+
+        return BookingDetailResponseDto.builder()
+                .bookingId(b.getId())
+                .memberId(b.getMember().getId())
+                .paymentType(b.getPaymentType())
+                .status(b.getStatus())
+                .bookingAt(b.getBookingAt())
+                .adultCount(b.getAdultCount())
+                .teenCount(b.getTeenCount())
+                .totalPeople(b.getTotalPeople())
+                .totalPrice(b.getTotalPrice())
+                .screeningId(b.getScreening().getId())
+                .movieTitle(b.getScreening().getMovie().getTitle())
+                .auditoriumName(b.getScreening().getAuditorium().getName())
+                .startedAt(b.getScreening().getStartedAt())
+                .endedAt(b.getScreening().getEndedAt())
+                .seats(seatLabels)
+                .build();
+    }
 }

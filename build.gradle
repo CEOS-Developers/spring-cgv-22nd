@@ -27,6 +27,7 @@ repositories {
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
 
     // MySQL
     runtimeOnly 'com.mysql:mysql-connector-j'
@@ -51,6 +52,13 @@ dependencies {
     implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+
+    // Redisson
+    implementation 'org.redisson:redisson-spring-boot-starter:3.27.2'
+
+    // WebClient
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+    runtimeOnly "io.netty:netty-resolver-dns-native-macos:4.2.5.Final:osx-aarch_64"
 }
 
 tasks.named('test') {

@@ -41,7 +41,7 @@ public class SecurityConfig {
         // 경로별 인가 설정
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/api/members/**", "/api/login", "/api/signup", "/swagger-ui/**", "v3/api-docs/**").permitAll()
+                        .requestMatchers("/api/members/**", "/api/login", "/api/signup", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .anyRequest().authenticated());
 
         // STATELESS 방식 설정

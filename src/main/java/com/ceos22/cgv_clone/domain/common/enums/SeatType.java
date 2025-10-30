@@ -9,5 +9,5 @@ public enum SeatType {
     STANDARD("일반석"),
     DISABLED("장애인석");
 
-    private final String type;
+    private final String description;
 }

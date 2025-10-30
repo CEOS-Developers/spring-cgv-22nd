@@ -14,7 +14,6 @@ import java.util.List;
 @Builder
 public class BookingRequestDto {
 
-    private Long memberId;
     private Long screeningId;
     private List<Long> seatIds;
 

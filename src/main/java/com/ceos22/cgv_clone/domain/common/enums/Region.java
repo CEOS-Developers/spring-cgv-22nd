@@ -16,5 +16,5 @@ public enum Region {
     GYUNGSANG("경상"),
     GWANGJU_JEOLLA_JEJU("광주/전라/제주");
 
-    private final String regionName;
+    private final String description;
 }

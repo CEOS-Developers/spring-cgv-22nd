@@ -17,6 +17,9 @@ public enum ErrorCode implements BaseErrorCode{
 
     // 회원
     MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "MEMBER404", "회원을 찾을 수 없습니다"),
+    EMAIL_DUPLICATED(HttpStatus.CONFLICT, "MEMBER409", "이미 사용 중인 이메일입니다"),
+    EMAIL_NOT_FOUND(HttpStatus.NOT_FOUND, "MEMBER404_1", "가입되지 않은 이메일입니다"),
+    PASSWORD_WRONG(HttpStatus.BAD_REQUEST, "MEMBER400", "비밀번호가 일치하지 않습니다"),
 
     // 영화
     MOVIE_NOT_FOUND(HttpStatus.NOT_FOUND, "MOVIE404", "영화를 찾을 수 없습니다"),
@@ -28,6 +31,7 @@ public enum ErrorCode implements BaseErrorCode{
     BOOKING_NOT_FOUND(HttpStatus.NOT_FOUND, "BOOKING404", "예매를 찾을 수 없습니다"),
     BOOKING_COUNT_VALIDATION_FAILED(HttpStatus.BAD_REQUEST, "BOOKING400", "좌석 수와 사람 수가 일치하지 않습니다"),
     PAYMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "BOOKING404", "예매 방식을 선택해주세요"),
+    SEAT_ALREADY_BOOKED(HttpStatus.CONFLICT, "BOOKING409", "이미 예매된 좌석입니다."),
 
     // 좌석
     SEAT_NOT_FOUND(HttpStatus.NOT_FOUND, "SEAT404", "좌석을 찾을 수 없습니다."),
@@ -40,7 +44,11 @@ public enum ErrorCode implements BaseErrorCode{
     ITEM_VALIDATION_FAILED(HttpStatus.BAD_REQUEST, "STORE400", "아이템 파라미터가 필요합니다."),
     PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "STORE404", "상품을 찾을 수 없습니다."),
     ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "STORE404", "주문을 찾을 수 없습니다."),
-    PRODUCT_STOCK_VALIDATION_FAILED(HttpStatus.BAD_REQUEST, "STORE400", "상품 재고가 부족합니다");
+    PRODUCT_STOCK_VALIDATION_FAILED(HttpStatus.BAD_REQUEST, "STORE400", "상품 재고가 부족합니다"),
+
+    // 결제
+    PAYMENT_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "PAYMENT500", "결제 처리 중 오류가 발생했습니다.");
+
 
 
     private final HttpStatus status;

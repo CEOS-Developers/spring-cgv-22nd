@@ -21,7 +21,6 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class LikeService {
 
     private final MovieLikeRepository movieLikeRepository;

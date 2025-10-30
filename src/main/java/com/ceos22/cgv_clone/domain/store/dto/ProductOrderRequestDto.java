@@ -13,7 +13,6 @@ import java.util.List;
 @Builder
 public class ProductOrderRequestDto {
 
-    private Long memberId;
     private Long cinemaId;
     private List<OrderItem> items;
 

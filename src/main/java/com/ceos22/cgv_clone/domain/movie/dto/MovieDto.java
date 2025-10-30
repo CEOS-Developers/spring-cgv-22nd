@@ -6,6 +6,7 @@ import com.ceos22.cgv_clone.domain.movie.entity.Movie;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+import java.time.Duration;
 import java.time.LocalDate;
 
 @Getter
@@ -15,7 +16,7 @@ public class MovieDto {
     private final Long movieId;
     private final String title;
     private final LocalDate releaseDate;
-    private final Integer runtime;
+    private final Duration runtime;
     private final Genre genre;
     private final Rating rating;
     private final String posterUrl;

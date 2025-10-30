@@ -19,9 +19,14 @@ public class GlobalExceptionHandler {
     // CustomException 처리
     @ExceptionHandler(CustomException.class)
     public ResponseEntity<CustomResponse<?>> handleCustomException(CustomException ex) {
-        log.warn("[ CustomException ]: {}", ex.getCode().getMessage());
 
         BaseErrorCode errorCode = ex.getCode();
+
+        if (errorCode.getStatus().is5xxServerError()) {
+            log.error("[CustomException-ERROR]: Code: {}, Message: {}", errorCode.getCode(), errorCode.getMessage(), ex);
+        } else {
+            log.warn("[CustomException-WARN]: Code: {}, Message: {}", errorCode.getCode(), errorCode.getMessage());
+        }
 
         // errorCode가 반환할 응답을 직접 생성하도록 변경
         CustomResponse<?> errorResponse = CustomResponse.onFailure(errorCode);
@@ -44,6 +49,9 @@ public class GlobalExceptionHandler {
 
         BaseErrorCode validationErrorCode = ErrorCode.VALIDATION_FAILED;
 
+        // 유효성 검사 실패는 WARN 레벨
+        log.warn("[ValidationFailed]: {}", errors);
+
         CustomResponse<Map<String, String>> errorResponse = CustomResponse.onFailure(
                 validationErrorCode.getStatus(),
                 validationErrorCode.getCode(),
@@ -57,7 +65,9 @@ public class GlobalExceptionHandler {
     // 일반 예외 처리
     @ExceptionHandler({Exception.class})
     public ResponseEntity<CustomResponse<String>> handleGeneralException(Exception ex) {
-        log.error("[WARNING] Internal Server Error : {}", ex.getMessage());
+
+        // 모든 예상치 못한 예외는 ERROR 레벨
+        log.error("[UncaughtException-ERROR]: {}", ex.getMessage(), ex);
 
         BaseErrorCode errorCode = ErrorCode.INTERNAL_SERVER_ERROR_500;
 

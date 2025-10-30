@@ -10,7 +10,8 @@ import com.ceos22.cgv_clone.global.apiPayload.code.success.SuccessCode;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,8 +26,12 @@ public class ProductOrderQueryController {
 
     @Operation(summary = "주문 생성")
     @PostMapping("/stores/orders")
-    public CustomResponse<ProductOrderResponseDto> create(@RequestBody ProductOrderRequestDto req) {
-        return CustomResponse.onSuccess(SuccessCode.CREATED, productOrderService.createOrder(req));
+    public CustomResponse<ProductOrderResponseDto> create(
+            @RequestBody ProductOrderRequestDto request,
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        String email = userDetails.getUsername();
+        return CustomResponse.onSuccess(SuccessCode.CREATED, productOrderService.createOrder(email, request));
     }
 
     @Operation(summary = "주문 목록 조회", description = "회원의 주문 목록을 조회하는 API")

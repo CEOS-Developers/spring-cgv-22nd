@@ -19,8 +19,7 @@ public interface SeatRepository extends JpaRepository<Seat, Long> {
     """)
     List<Seat> findAllByAuditoriumIdSorted(Long auditoriumId);
 
-    // 좌석 선점용 (비관적 락 사용)
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
+
     @Query("SELECT s FROM Seat s WHERE s.id IN :ids")
     List<Seat> findAllByIdWithLock(@Param("ids") List<Long> ids);
 }

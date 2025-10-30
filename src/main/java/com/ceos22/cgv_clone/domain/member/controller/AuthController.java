@@ -3,12 +3,12 @@ package com.ceos22.cgv_clone.domain.member.controller;
 import com.ceos22.cgv_clone.domain.member.dto.LoginRequestDto;
 import com.ceos22.cgv_clone.domain.member.dto.SignUpRequestDto;
 import com.ceos22.cgv_clone.domain.member.service.AuthService;
+import com.ceos22.cgv_clone.global.apiPayload.CustomResponse;
+import com.ceos22.cgv_clone.global.apiPayload.code.success.SuccessCode;
 import com.ceos22.cgv_clone.global.security.dto.TokenDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,15 +24,15 @@ public class AuthController {
 
     @Operation(summary = "회원가입")
     @PostMapping("/signup")
-    public ResponseEntity<String> signup(@RequestBody SignUpRequestDto requestDto) {
-        memberService.signup(requestDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body("회원가입이 성공적으로 완료되었습니다.");
+    public CustomResponse<?> signup(@RequestBody SignUpRequestDto request) {
+        memberService.signup(request);
+        return CustomResponse.onSuccess(SuccessCode.MEMBER_CREATED);
     }
 
     @Operation(summary = "로그인")
     @PostMapping("/login")
-    public ResponseEntity<TokenDto> login(@RequestBody LoginRequestDto requestDto) {
-        TokenDto tokenDto = memberService.login(requestDto.getEmail(), requestDto.getPassword());
-        return ResponseEntity.ok(tokenDto);
+    public CustomResponse<TokenDto> login(@RequestBody LoginRequestDto request) {
+        TokenDto tokenDto = memberService.login(request.getEmail(), request.getPassword());
+        return CustomResponse.onSuccess(SuccessCode.LOGIN_SUCCESS, tokenDto);
     }
 }

@@ -1,42 +1,22 @@
 package com.ceos22.cgv_clone.service;
 
 
-import com.ceos22.cgv_clone.domain.booking.dto.request.BookingRequestDto;
-import com.ceos22.cgv_clone.domain.booking.dto.response.BookingCancelResponseDto;
-import com.ceos22.cgv_clone.domain.booking.dto.response.BookingResponseDto;
-import com.ceos22.cgv_clone.domain.booking.eneity.Booking;
 import com.ceos22.cgv_clone.domain.booking.repository.BookingRepository;
 import com.ceos22.cgv_clone.domain.booking.repository.BookingSeatRepository;
 import com.ceos22.cgv_clone.domain.booking.service.BookingService;
-import com.ceos22.cgv_clone.domain.common.enums.BookingStatus;
-import com.ceos22.cgv_clone.domain.common.enums.PaymentType;
-import com.ceos22.cgv_clone.domain.member.entity.Member;
 import com.ceos22.cgv_clone.domain.member.repository.MemberRepository;
-import com.ceos22.cgv_clone.domain.screening.entity.Screening;
 import com.ceos22.cgv_clone.domain.screening.repository.ScreeningRepository;
-import com.ceos22.cgv_clone.domain.theater.entity.Auditorium;
-import com.ceos22.cgv_clone.domain.theater.entity.Seat;
 import com.ceos22.cgv_clone.domain.theater.repository.SeatRepository;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
-
-import java.util.List;
-import java.util.Optional;
 
 import static com.ceos22.cgv_clone.domain.common.enums.TicketPrice.ADULT_PRICE;
 import static com.ceos22.cgv_clone.domain.common.enums.TicketPrice.TEEN_PRICE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)

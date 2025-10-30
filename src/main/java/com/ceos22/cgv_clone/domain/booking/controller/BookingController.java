@@ -10,6 +10,8 @@ import com.ceos22.cgv_clone.global.apiPayload.code.success.SuccessCode;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -22,8 +24,12 @@ public class BookingController {
 
     @Operation(summary = "예매 생성")
     @PostMapping("/booking")
-    public CustomResponse<BookingResponseDto> create(@RequestBody BookingRequestDto req) {
-        return CustomResponse.onSuccess(SuccessCode.CREATED, bookingService.create(req));
+    public CustomResponse<BookingResponseDto> create(
+            @RequestBody BookingRequestDto request,
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        String email = userDetails.getUsername();
+        return CustomResponse.onSuccess(SuccessCode.CREATED, bookingService.create(email, request));
     }
 
     @Operation(summary = "예매 내역 조회")

@@ -15,12 +15,12 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class CinemaService {
 
     private final CinemaRepository cinemaRepository;
 
     /** 전체 영화관 목록 조회 */
+    @Transactional(readOnly = true)
     public List<CinemaSummaryDto> getCinemaList() {
 
         return cinemaRepository.findAll()
@@ -28,6 +28,7 @@ public class CinemaService {
     }
 
     /** 특정 영화관의 상세 정보 조회 */
+    @Transactional(readOnly = true)
     public CinemaDetailDto getCinema(Long cinemaId) {
 
         Cinema cinema = cinemaRepository.findByIdWithAuditoriums(cinemaId)

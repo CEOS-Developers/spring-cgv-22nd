@@ -1,40 +1,123 @@
 package com.ceos22.springcgv.global.exception;
 
-import com.ceos22.springcgv.global.response.ErrorResponse;
+
+import com.ceos22.springcgv.global.response.ApiResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    // @Valid를 사용한 DTO의 유효성 검증 실패 시
+    /**
+     * CustomException 처리
+     */
+    @ExceptionHandler
+    public ResponseEntity<ApiResponse<Void>> handleCustomException(CustomException e) {
+        ErrorCode errorCode = e.getErrorCode();
+        log.error("CustomException 발생: code={}, message={}", errorCode.getCode(), errorCode.getMessage());
+
+        ApiResponse<Void> response = ApiResponse.failure(
+                errorCode.getHttpStatus().value(),
+                errorCode.getMessage(),
+                errorCode.getCode()
+        );
+
+        return ResponseEntity
+                .status(errorCode.getHttpStatus())
+                .body(response);
+    }
+    /**
+     * @Valid 검증 실패 시 발생하는 예외 처리
+     */
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    protected ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
-        log.error("MethodArgumentNotValidException", e);
-        // 직접 에러 메시지와 상태 코드를 지정
-        ErrorResponse response = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), "입력값이 유효하지 않습니다.");
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    public ResponseEntity<ApiResponse<Void>> handleValidationException(MethodArgumentNotValidException e) {
+        log.error("Validation 실패: {}", e.getMessage());
+
+        Map<String, String> errors = new HashMap<>();
+        e.getBindingResult().getAllErrors().forEach(error -> {
+            String fieldName = ((FieldError) error).getField();
+            String errorMessage = error.getDefaultMessage();
+            errors.put(fieldName, errorMessage);
+        });
+
+        ApiResponse<Void> response = ApiResponse.<Void>builder()
+                .isSuccess(false)
+                .code(HttpStatus.BAD_REQUEST.value())
+                .message(ErrorCode.VALIDATION_ERROR.getMessage())
+                .data(null)
+                .error(errors)
+                .build();
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(response);
     }
 
-    // 직접 정의한 BusinessException 처리
-    @ExceptionHandler(BusinessException.class)
-    protected ResponseEntity<ErrorResponse> handleBusinessException(BusinessException e) {
-        log.error("BusinessException", e);
-        HttpStatus httpStatus = e.getHttpStatus();
-        ErrorResponse response = new ErrorResponse(httpStatus.value(), e.getMessage());
-        return new ResponseEntity<>(response, httpStatus);
+    /**
+     * JSON 파싱 실패 시 발생하는 예외 처리
+     */
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiResponse<Void>> handleJsonParseException(HttpMessageNotReadableException e) {
+        log.error("JSON 파싱 실패: {}", e.getMessage());
+
+        ApiResponse<Void> response = ApiResponse.failure(
+                HttpStatus.BAD_REQUEST.value(),
+                ErrorCode.JSON_PARSE_ERROR.getMessage(),
+                ErrorCode.JSON_PARSE_ERROR.getCode()
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(response);
     }
 
-    // 위에 명시되지 않은 모든 예외 처리
+    /**
+     * 메서드 인자 타입 불일치 예외 처리
+     */
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ApiResponse<Void>> handleTypeMismatchException(MethodArgumentTypeMismatchException e) {
+        log.error("타입 불일치: parameter={}, value={}, requiredType={}",
+                e.getName(), e.getValue(), e.getRequiredType());
+
+        String errorMessage = String.format("%s 파라미터의 값이 올바르지 않습니다.", e.getName());
+
+        ApiResponse<Void> response = ApiResponse.failure(
+                HttpStatus.BAD_REQUEST.value(),
+                errorMessage,
+                ErrorCode.INVALID_INPUT.getCode()
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(response);
+    }
+
+    /**
+     * 기타 모든 예외 처리
+     */
     @ExceptionHandler(Exception.class)
-    protected ResponseEntity<ErrorResponse> handleException(Exception e) {
-        log.error("Exception", e);
-        ErrorResponse response = new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "서버 내부 오류가 발생했습니다.");
-        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+    public ResponseEntity<ApiResponse<Void>> handleGlobalException(Exception e) {
+        log.error("예상치 못한 에러 발생: ", e);
+
+        ApiResponse<Void> response = ApiResponse.failure(
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                ErrorCode.INTERNAL_SERVER_ERROR.getMessage(),
+                ErrorCode.INTERNAL_SERVER_ERROR.getCode()
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(response);
     }
 }

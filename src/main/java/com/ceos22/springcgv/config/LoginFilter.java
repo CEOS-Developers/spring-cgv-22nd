@@ -1,7 +1,7 @@
 package com.ceos22.springcgv.config;
 
 import com.ceos22.springcgv.config.jwt.JWTUtil;
-import com.ceos22.springcgv.dto.LoginRequestDto;
+import com.ceos22.springcgv.dto.user.LoginRequestDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -59,6 +59,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         CustomUserDetails customUserDetails = (CustomUserDetails) authResult.getPrincipal();
 
         // 사용자 이름과 역할을 추출
+        Long userId = customUserDetails.getUserId();
         String username = customUserDetails.getUsername();
         Collection<? extends GrantedAuthority> authorities = authResult.getAuthorities();
         Iterator<? extends GrantedAuthority> iterator = authorities.iterator();
@@ -66,7 +67,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         String role = auth.getAuthority();
 
         long expireMs = 60 * 60 * 1000L; // 1시간
-        String token = jwtUtil.createJwt(username, role, expireMs);
+        String token = jwtUtil.createJwt(userId, username, role, expireMs);
 
         response.addHeader("Authorization", "Bearer " + token); // Authorization: Bearer [토큰값]
         response.setStatus(HttpServletResponse.SC_OK); // 200 OK

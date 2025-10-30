@@ -52,7 +52,13 @@ public class SecurityConfig {
 
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/signup", "/api/auth/login").permitAll()
+                                .requestMatchers("/**").permitAll() // 개발용
+//                                .requestMatchers(
+//                                "/api/auth/signup",
+//                                "/api/auth/login",
+//                                "/swagger-ui/**",
+//                                "/v3/api-docs/**")
+//                                         .permitAll()
 //                        .requestMatchers("/admin/**").hasRole("ROLE_ADMIN")
                         .anyRequest().authenticated()
                 );

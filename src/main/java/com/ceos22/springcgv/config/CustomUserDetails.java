@@ -1,6 +1,6 @@
 package com.ceos22.springcgv.config;
 
-import com.ceos22.springcgv.domain.User;
+import com.ceos22.springcgv.domain.user.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -9,7 +9,7 @@ import java.util.Collection;
 
 public class CustomUserDetails implements UserDetails {
 
-    private User user;
+    private final User user;
 
     public CustomUserDetails(User user){
         this.user = user;
@@ -31,7 +31,9 @@ public class CustomUserDetails implements UserDetails {
         return collection;
     }
 
-
+    public Long getUserId() {
+        return user.getId();
+    }
     @Override
     public String getPassword() {
         return user.getPassword();

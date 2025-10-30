@@ -9,9 +9,13 @@ public record MenuResponse(
         String shortDescription,
         String description
 ) {
-    public static MenuResponse from(Menu menu) {
+    public static MenuResponse fromMenu(Menu menu) {
         return new MenuResponse(
-                menu.getMenuId(), menu.getName(), menu.getPrice(), menu.getShortDescription(), menu.getDescription()
+                menu.getMenuId(),
+                menu.getName(),
+                menu.getPrice(),
+                menu.getShortDescription(),
+                menu.getDescription()
         );
     }
 }

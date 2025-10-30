@@ -1,8 +1,8 @@
 package com.ceos22.cgv.module.snack.domain;
 
+import com.ceos22.cgv.common.domain.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
-import org.aspectj.weaver.ast.Or;
 
 @Entity
 @Table(name = "order_item")
@@ -10,7 +10,7 @@ import org.aspectj.weaver.ast.Or;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class OrderItem {
+public class OrderItem extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "item_id")

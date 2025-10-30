@@ -8,5 +8,9 @@ public record SeatAvailabilityResponse(
         int numColumn,
         List<Seat> seats
 ) {
-    public record Seat(int row, int column, boolean booked) {}
+    public record Seat(
+            int row,
+            int column,
+            boolean booked) {
+    }
 }

@@ -6,13 +6,13 @@ import java.util.List;
 
 public record MovieListResponse(List<MovieResponse> movies) {
 
-    public static MovieListResponse fromEntities(List<Movie> movies) {
-        var list = movies.stream().map(MovieResponse::from).toList();
+    public static MovieListResponse fromMovies(List<Movie> movies) {
+        var list = movies.stream().map(MovieResponse::fromMovie).toList();
         return new MovieListResponse(list);
     }
 
-    public static MovieListResponse fromSummaryEntities(List<Movie> movies) {
-        var list = movies.stream().map(MovieResponse::of).toList();
+    public static MovieListResponse fromMovieSummaries(List<Movie> movies) {
+        var list = movies.stream().map(MovieResponse::fromMovieToMovieSummary).toList();
         return new MovieListResponse(list);
     }
 }

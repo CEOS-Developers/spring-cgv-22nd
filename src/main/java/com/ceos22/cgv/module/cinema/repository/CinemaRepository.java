@@ -1,8 +1,8 @@
 package com.ceos22.cgv.module.cinema.repository;
 
 import com.ceos22.cgv.module.cinema.domain.Cinema;
-import com.ceos22.cgv.util.Region;
-import com.ceos22.cgv.util.TheaterType;
+import com.ceos22.cgv.common.util.Region;
+import com.ceos22.cgv.common.util.TheaterType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

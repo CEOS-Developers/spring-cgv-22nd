@@ -6,5 +6,9 @@ public record OrderRequest(
         Long cinemaId,
         List<OrderItemRequest> items
 ) {
-    public record OrderItemRequest(Long menuId, Integer quantity) {}
+    public record OrderItemRequest(
+            Long menuId,
+            Integer quantity
+        ) {
+    }
 }

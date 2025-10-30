@@ -1,6 +1,7 @@
 package com.ceos22.cgv.module.cinema.domain;
 
-import com.ceos22.cgv.util.Region;
+import com.ceos22.cgv.common.domain.BaseEntity;
+import com.ceos22.cgv.common.util.Region;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -13,7 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Cinema {
+public class Cinema extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

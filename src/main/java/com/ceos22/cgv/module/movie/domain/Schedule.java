@@ -1,7 +1,8 @@
 package com.ceos22.cgv.module.movie.domain;
 
+import com.ceos22.cgv.common.domain.BaseEntity;
 import com.ceos22.cgv.module.cinema.domain.Theater;
-import com.ceos22.cgv.util.ScheduleCategory;
+import com.ceos22.cgv.common.util.ScheduleCategory;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -14,7 +15,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Schedule {
+public class Schedule extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -1,5 +1,6 @@
 package com.ceos22.cgv.module.reservation.domain;
 
+import com.ceos22.cgv.common.domain.BaseEntity;
 import com.ceos22.cgv.module.movie.domain.Schedule;
 import jakarta.persistence.*;
 import lombok.*;
@@ -18,7 +19,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ReservationSeat {
+public class ReservationSeat extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -1,6 +1,7 @@
 package com.ceos22.cgv.module.cinema.domain;
 
-import com.ceos22.cgv.util.TheaterType;
+import com.ceos22.cgv.common.domain.BaseEntity;
+import com.ceos22.cgv.common.util.TheaterType;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -10,7 +11,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Theater {
+public class Theater extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

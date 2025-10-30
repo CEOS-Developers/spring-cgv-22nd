@@ -1,5 +1,8 @@
 package com.ceos22.cgv.module.movie.service;
 
+import com.ceos22.cgv.module.cinema.domain.Cinema;
+import com.ceos22.cgv.module.cinema.domain.CinemaLike;
+import com.ceos22.cgv.module.cinema.dto.CinemaLikeResponse;
 import com.ceos22.cgv.module.cinema.repository.TheaterRepository;
 import com.ceos22.cgv.module.movie.domain.Movie;
 import com.ceos22.cgv.module.movie.domain.MovieLike;
@@ -36,14 +39,14 @@ public class MovieService {
 
     @Transactional(readOnly = true)
     public MovieListResponse findMovies(MovieRequest request) {
-        return MovieListResponse.fromEntities(movieRepository.findAll());
+        return MovieListResponse.fromMovies(movieRepository.findAll());
     }
 
     @Transactional(readOnly = true)
     public MovieListResponse findMovieTitleList(String query) {
         if (query == null || query.isEmpty())  query = "";
         List<Movie> movies = movieRepository.findByQuery(query);
-        return MovieListResponse.fromSummaryEntities(movies);
+        return MovieListResponse.fromMovieSummaries(movies);
 
     }
 
@@ -52,19 +55,11 @@ public class MovieService {
         var movie = movieRepository.findById(movieId)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Movie not found: " + movieId));
-        return MovieResponse.from(movie);
+        return MovieResponse.fromMovie(movie);
     }
 
     @Transactional(readOnly = true)
     public MovieScheduleListResponse findMovieSchedule(ScheduleRequest request) {
-
-
-        if (request.movieId() != null && request.cinemaId() == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "cinema id가 필요합니다");
-        }
-        if (request.movieId() == null && request.cinemaId() == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "movieId 또는 cinemaId 중 하나는 반드시 필요합니다.");
-        }
 
         // 조건에 맞는 모든 상영 일정 조회
         List<Schedule> schedules = scheduleRepository.findForSearch(request.movieId(), request.cinemaId(), request.date(), request.category());
@@ -73,9 +68,9 @@ public class MovieService {
         List<ScheduleResponse> scheduleResponses = schedules.stream()
                 .map(s -> {
                     int totalSeat = s.getTheater().getRow() * s.getTheater().getColumn();
-                    int reserved = reservationSeatRepository.countByScheduleId(s.getId());
+                    long reserved = reservationSeatRepository.countByScheduleId(s.getId());
                     int available = Math.max(0, totalSeat - (int) reserved);
-                    return ScheduleResponse.from(s, available, totalSeat);
+                    return ScheduleResponse.fromScheduleAndAvailability(s, available, totalSeat);
                 })
                 .toList();
 
@@ -89,20 +84,19 @@ public class MovieService {
                         ));
 
 
-        return MovieScheduleListResponse.fromGrouped(groupedMovieSchedule);
+        return MovieScheduleListResponse.fromMovieSchedules(groupedMovieSchedule);
     }
 
     @Transactional
-    public MovieLikeResponse like(Long movieId, Long userId) {
+    public MovieLikeResponse like(Long movieId, User authenticatedUser) {
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "해당 유저가 존재하지 않습니다."));
+        User user = userRepository.findById(authenticatedUser.getId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "해당 유저가 존재하지 않습니다."));
 
         Movie movie = movieRepository.findById(movieId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "해당 영화가 존재하지 않습니다."));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "해당 영화가 존재하지 않습니다."));
 
-
-        if (!movieLikeRepository.existsByUser_IdAndMovie_Id(userId, movieId)) {
+        if (!movieLikeRepository.existsByUser_IdAndMovie_Id(user.getId(), movieId)) {
             MovieLike like = MovieLike.builder()
                     .user(user)
                     .movie(movie)
@@ -110,15 +104,18 @@ public class MovieService {
             movieLikeRepository.save(like);
         }
 
-        return MovieLikeResponse.of(movie, user, true);
+        return MovieLikeResponse.fromMovieAndUser(movie, user, true);
     }
 
+
     @Transactional
-    public MovieLikeResponse unlike(Long movieId, Long userId) {
+    public MovieLikeResponse unlike(Long movieId, User user) {
 
-        movieLikeRepository.findByUser_IdAndMovie_Id(userId, movieId)
-                .ifPresent(movieLikeRepository::delete);
+        MovieLike movieLike = movieLikeRepository.findByUser_IdAndMovie_Id(user.getId(), movieId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "해당 좋아요가 존재하지 않습니다."));
 
-        return new MovieLikeResponse(movieId, userId, false);
+        movieLikeRepository.delete(movieLike);
+
+        return new MovieLikeResponse(movieId, user.getId(), false);
     }
 }

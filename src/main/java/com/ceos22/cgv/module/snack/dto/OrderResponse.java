@@ -10,5 +10,6 @@ public record OrderResponse(
     Long userId,
     Integer totalPrice,
     LocalDateTime createdAt,
-    List<OrderItemResponse> items){
+    List<OrderItemResponse> items
+    ) {
 }

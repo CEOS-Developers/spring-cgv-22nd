@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+
 import java.util.List;
 import java.util.Optional;
 
@@ -22,7 +23,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
       select count(rs) from ReservationSeat rs
       join rs.reservation r
       where rs.schedule.id = :scheduleId
-        and r.status = com.ceos22.cgv.util.ReservationStatus.RESERVED
+        and r.status = com.ceos22.cgv.common.util.ReservationStatus.RESERVED
     """)
     long countBooked(@Param("scheduleId") Long scheduleId);
 
@@ -30,9 +31,23 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
       select rs from ReservationSeat rs
       join rs.reservation r
       where rs.schedule.id = :scheduleId
-        and r.status = com.ceos22.cgv.util.ReservationStatus.RESERVED
+        and r.status = com.ceos22.cgv.common.util.ReservationStatus.RESERVED
     """)
     List<ReservationSeat> findBookedSeats(@Param("scheduleId") Long scheduleId);
+
+
+    @Query("""
+      select rs from ReservationSeat rs
+      join rs.reservation r
+      where rs.schedule.id = :scheduleId
+        and (
+          r.status = com.ceos22.cgv.common.util.ReservationStatus.RESERVED or
+          r.status = com.ceos22.cgv.common.util.ReservationStatus.HOLD
+        )
+    """)
+    List<ReservationSeat> findOccupiedSeats(@Param("scheduleId") Long scheduleId);
+
+
 
     @Query("select distinct r from Reservation r " +
             "left join fetch r.schedule s " +

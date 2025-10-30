@@ -1,13 +1,12 @@
 package com.ceos22.cgv.module.snack.domain;
 
+import com.ceos22.cgv.common.domain.BaseEntity;
 import com.ceos22.cgv.module.cinema.domain.Cinema;
 import com.ceos22.cgv.module.user.domain.User;
-import com.ceos22.cgv.util.OrderStatus;
+import com.ceos22.cgv.common.util.OrderStatus;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,7 +16,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Order {
+public class Order extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "order_id")
@@ -34,10 +33,6 @@ public class Order {
     @Column(name = "total_price", nullable = false)
     private Integer totalPrice;
 
-    @CreationTimestamp
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private OrderStatus status;
@@ -49,4 +44,15 @@ public class Order {
         this.totalPrice = newTotalPrice;
     }
 
+    public void pay() {
+        this.status = OrderStatus.PAID;
+    }
+
+    public void cancel() {
+        this.status = OrderStatus.CANCELLED;
+    }
+
+    public void fail() {
+        this.status = OrderStatus.FAILED;
+    }
 }

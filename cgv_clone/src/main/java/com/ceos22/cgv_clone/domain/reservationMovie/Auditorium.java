@@ -16,7 +16,7 @@ public class Auditorium {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "cinema_id", nullable = false)
-    private Cinema cinema;
+    private CinemaEntity cinemaEntity;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "auditorium_type_id", nullable = false)
@@ -25,7 +25,7 @@ public class Auditorium {
     @Column(nullable=false, length=100)
     private String name;
 
-    public Auditorium(Cinema cinema, AuditoriumType type, String name) {
-        this.cinema = cinema; this.auditoriumType = type; this.name = name;
+    public Auditorium(CinemaEntity cinemaEntity, AuditoriumType type, String name) {
+        this.cinemaEntity = cinemaEntity; this.auditoriumType = type; this.name = name;
     }
 }

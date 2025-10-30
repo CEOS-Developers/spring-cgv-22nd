@@ -24,9 +24,8 @@ public class ReservedSeat {
     @Column(name = "reserved_seat_id")
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "screening_id", nullable = false)
-    private Screening screening; // 상영 회차
+    @Column(name = "screening_id", nullable = false)
+    private Long screeningId; // 상영 회차
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "seat_id", nullable = false)
@@ -43,8 +42,8 @@ public class ReservedSeat {
     private LocalDateTime expireAt; // 점유 만료 시간 -> 예매 도중 결제 안하면 해제
 
     //== 생성 메서드 ==//
-    public ReservedSeat(Screening screening, Seat seat, Reservation reservation, LocalDateTime expireAt) {
-        this.screening = screening;
+    public ReservedSeat(Long screeningId, Seat seat, Reservation reservation, LocalDateTime expireAt) {
+        this.screeningId = screeningId;
         this.seat = seat;
         this.reservation = reservation;
         this.expireAt = expireAt;

@@ -1,0 +1,41 @@
+package com.ceos22.cgv_clone.domain.orderFood;
+
+import com.ceos22.cgv_clone.common.exception.CgvCloneBusinessException;
+import com.ceos22.cgv_clone.common.exception.GlobalErrorCode;
+import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@Entity
+@Table(name = "food")
+@Getter @NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class FoodEntity {
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String name;
+    private int price;
+    private int stockQuantity;
+
+    //==생성 메서드==//
+    public FoodEntity(String name, int price, int stockQuantity) {
+        this.name = name;
+        this.price = price;
+        this.stockQuantity = stockQuantity;
+    }
+
+    //==비즈니스 로직==//
+    public void addStock(int quantity) {
+        this.stockQuantity += quantity;
+    }
+
+    public void removeStock(int quantity) {
+        int restStock = this.stockQuantity - quantity;
+        if (restStock < 0) {
+            throw new CgvCloneBusinessException(GlobalErrorCode.OUT_OF_STOCK);
+        }
+        this.stockQuantity = restStock;
+    }
+
+}

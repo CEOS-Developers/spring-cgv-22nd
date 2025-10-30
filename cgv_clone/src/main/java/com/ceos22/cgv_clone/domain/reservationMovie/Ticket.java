@@ -21,7 +21,7 @@ public class Ticket {
     private Reservation reservation;
 
     @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name="screening_id", nullable=false)
-    private Screening screening;
+    private ScreeningEntity screeningEntity;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="seat_id", nullable=false)

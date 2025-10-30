@@ -16,3 +16,7 @@ spring:
   jwt:
     secret: ${jwt.secret}
     access-token-validity-ms: ${jwt.access-token-validity-ms}
+
+  payment:
+    base-url: ${payment.base-url}
+    api-secret: ${payment.api-secret}

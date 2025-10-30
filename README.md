@@ -1,140 +1,211 @@
-# 제목 없음
+# 동시성 문제 해결 방법
 
-## Spring Security
+## 동시성 문제란?
 
-- Spring Security : 웹 애플리케이션의 인증+인가를 책임지는 프레임워크
-    - 인증 : 사용자 식별
-    - 인가 : 사용자 권한 검증, 접근 제어
+동시성 문제는 멀티 스레드 환경에서 여러 스레드가 동일한 자원에 동시에 접근하거나 수정할 때 발생하는 비정상적인 상태를 의미합니다.
 
-# Spring Security의 전체 흐름
+### 왜 멀티 스레드 환경에서 발생하는가?
 
-- 클라이언트 요청
-- Filter Chain 진입
-    - 로그인 / 토큰 확인 등 필요한 필터를 거침
-    - 모든 필터를 순서대로 성공적으로 통과한 요청은 DispatcherServlet으로 전달
-    - 만약, 중간에 필터를 통과하지 못한다면 다음 필터로 넘기지 않고 에러 응답
-- DispatcherServlet 도달
-- 응답 반환
-
-- 요청의 종류(URL)에 따라 필요한 필터들을 선택하여 통과하도록 할 수 있음
-    - 특정 URL만 이 필터를 통과하도록 함
-    - 특정 URL에서는 이 필터를 거치지 않도록 함
-<img width="1506" height="745" alt="image" src="https://github.com/user-attachments/assets/f6f9ad97-6e47-4a74-a3f4-8aac7a71794a" />
-
-
-→ 인증 과정에서 발생하는 전체적인 흐름
-
-## 초기화
-
-<img width="672" height="212" alt="image 1" src="https://github.com/user-attachments/assets/d7423914-6388-444e-a6da-e50ef4172091" />
-
-
-WebSecurityConfiguerAdapter를 구현한 설정파일의 내용을 기반으로
-
-HttpSecurity가 실제 필터를 생성합니다
-
-각 설정 파일(WebSecurityConfiguerAdapter)별로 필터의 목록을 가지게 된 이후,
-
-이 필터들이 WebSecurity으로 전달됩니다
-
-WebSecurity는 각 설정 파일 별 목록을 전달받고, 이를 FilterChainProxy의 생성자 파라미터로 전달합니다.
-
-결과적으로 FilterChainProxy는 Filter의 목록을 가지고 있게 됩니다
-
-## 사용자 요청 이후
-<img width="602" height="339" alt="image 2" src="https://github.com/user-attachments/assets/60b5dbe0-67b1-46c3-8363-21ba08f2b467" />
-
-
-사용자 요청 이후 DelegatingFilterProxy가 가장 먼저 요청을 받아 FilterChainProxy에게 요청을 위임합니다.
-
-DelegatingFilterProxy는 springSecurityFilterChain이라는 이름을 갖는 Bean을 찾는데,
-
-FilterChainProxy가 바로 springSecurityFilterChain입니다.
-
-(FilterChainProxy는 초기화 과정에서 Bean으로 등록되며, Filter 목록을 가지고 있습니다.)
-
-FilterChainProxy는 위임받은 요청을 등록된 Filter들을 차례대로 거치게 합니다.
-
-각 필터에서는 doFilter() 메서드에 정의된 작업을 수행하고, 다음 필터로 요청을 넘깁니다.
-
-## FilterChain
-<img width="1044" height="317" alt="image 3" src="https://github.com/user-attachments/assets/387e9f81-613a-4c10-aaf5-10bcc75592ee" />
-
-
+Spring은 기본적으로 멀티 스레드 환경에서 동작합니다. 
+싱글 스레드 환경에서는 하나의 스레드가 모든 일을 순차적으로 처리하기 때문에 동시성 문제가 발생하지 않습니다. 하지만 멀티 스레드 환경에서는 한 자원에 여러 스레드가 동시에 접근할 경우 경쟁 조건(Race Condition)에 의해 문제가 발생합니다.
 
 ---
 
-### SecurityContextPersistenceFilter
+## 동시성 해결 방법
 
-세션 방식의 인증에서는 `SecurityContextRepository` 를 통해 이전에 생성된 SecurityContext를 불러오거나, 새로운 사용자에게 새로운 SecurityContext를 생성하고 SecurityContext를 영속화하는 역할을 합니다.
+## 1. Synchronized (JVM 내부 락)
 
-그럼에도 JWT를 사용하는 인증 방식에서도 SecurityContextPersistenceFilter를 사용하는데요,
-그 이유는 SecurityContext를 사용하기 위해서입니다.
+### 개념
+Java에서 제공하는 `synchronized` 키워드를 사용하여 메서드 또는 블록 단위로 상호 배제를 보장하는 방식입니다.
 
-인증/인가를 처리하는 Security단과 로직을 처리하는 Service단은 분리되어 있어 사용자 인증/인가 정보를 
-Service단에서 사용하기에 어려움이 있습니다.
-이를 해결하기 위해 매 요청마다 사용자 정보를 Authentication에 저장하고, 이를 SecurityContext에 담아 영속화합니다. 영속화 된 데이터는 서버의 특정 메모리에 저장되어 Service단에서 접근하기 쉽습니다.
+### 장점
+- 구현이 간단하고 직관적
+- 메서드 / 블록의 실행이 끝나면 자동으로 Lock을 반환함
 
-추가적으로 세션과 다르게 토큰 방식의 인증/인가에서는 요청이 끝날 때 마다
-SecurityContext를 비영속화하며, 저장하지 않고 완전 삭제합니다.
-
----
-
-### UsernamePasswordAuthentificationFilter
-
-UsernamePasswordAuthentificationFilter는 사용자의 username, password으로 
-사용자 인증을 처리하는 필터입니다.
-
-1. 요청이 로그인에 대한 요청인지 URL을 확인합니다.
-    - 로그인 요청이 아니면 다음 필터로 요청을 넘깁니다
-2. attemptAuthentification() 메서드가 username, password를 추출하고 
-인증 전의 Authentification 객체를 생성하여 AuthentificationManager에게 넘깁니다
-3. AuthentificationManager는 전달받은 Authentification을 처리할 수 있는
-AuthentificationProvider를 선택하고 요청을 위임합니다.
-4. AuthentificationProvider는 UserDetailService를 통해 
-DB에서 조회한 사용자 정보와 비교해 인증을 합니다.
--  DB에서 조회한 사용자 정보를 UserDetail으로 감싸서 반환합니다.
-- PasswordEncoder으로 비밀번호를 검증합니다
-5. 인증에 성공하면 Authentification을 SecurityContext에 저장하고
-인증에 실패하면 AuthentificationException을 발생시킵니다.
-
-+) UsernamePasswordAuthenticationFilter는 AbstractAuthenticationProcessingFilter를 상속받는다.
-
-AbstractAuthenticationProcessingFilter는 사용자가 보낸 데이터의 형식에 따라 여러 구현체가 존재
-
-- OAuth2LoginAuthentificationFilter : OAuth2 형식
-- 이외에 JSON을 받도록 커스텀해서 구현하여 필터로 등록할 수도 있다.
+### 단점
+- 단일 서버 환경에서만 유효
+- 멀티 서버 환경에서는 각 서버마다 별도 메모리를 사용하므로 서버 간 락이 공유되지 않음
+- `@Transactional`과 함께 사용 시, 트랜잭션이 종료되기 전에 다른 스레드에서 메서드에 접근할 수 있어 문제 발생 가능
+- 락 범위가 너무 크면 성능 저하 발생
+- 데드락(Deadlock) 가능성 존재
 
 ---
 
-### FilterSecurityInterceptor
+## 2. 데이터베이스 락 (DB Lock)
 
-인가처리를 담당하는 필터로 필터체인의 마지막에 위치하여
-인증된 사용자의 권한을 확인하여 특정 URL에 대한 접근 권한을 확인합니다 
-<img width="1204" height="554" alt="image 4" src="https://github.com/user-attachments/assets/b6d6d338-c788-4e52-ad47-8c4213600a51" />
+### (1) 비관적 락 (Pessimistic Lock)
 
+#### 개념
+동시성 문제가 발생한다는 가정 하에, 트랜잭션 시작 시점에 해당 row를 잠금(lock)하여 다른 트랜잭션이 해당 row를 수정하거나 읽는 것을 차단하는 방식입니다.
 
+#### 장점
+- 동시 수정 충돌을 확실히 방지
+- 데이터 정합성을 보장
+- 롤백 오버헤드가 없음
 
-1. 인증된 사용자인지 확인
-2. SecurityMetadataSource는 사용자가 요청한 자원에 대한 접근 권한을 조회하여 권한 정보를
-AccessDecisionManager에게 전달.
-3. AccessDecisionManager 내부의 AccessDecisionVoter가 
-사용자가 자원에 대한 권한이 있는지 투표를 받아 최종적으로 접근 허용 여부가 결정된다AccessDecisionVoter 는 아래의 3가지의 파라미터를 기준으로 투표를 한다.
-    - Authentication - 인증 정보
-    - FilterInvocation - 요청 정보
-    - ConfigAttributes - 권한 정보
+#### 단점
+- 조회할 때마다 락을 사용하므로 데이터베이스에 부담
+- 락 점유 시간이 길어지면 병목 현상 발생
+- 트랜잭션 대기나 데드락 발생 가능성
+- 동시 처리량 낮음
 
----
-
-### **ExceptionTranslationFilter**
-
-예외 처리를 담당하는 필터로, 
-인증 및 인가 관련 예외를 적절히 처리하여 HTTP 응답 코드를 설정하거나, 
-인증 실패 후의 리다이렉트 처리 등을 합니다.
+#### 적용 상황
+- 트래픽이 많지 않은 서비스
+- 충돌 가능성이 높은 경우
+- 데이터 정합성이 매우 중요한 경우
 
 ---
 
-여기까지 주요 필터들에 대해 살펴봤습니다.
+### (2) 낙관적 락 (Optimistic Lock)
 
-이외에도 필요한 필터들을 가져와서 사용하거나, 
-필요하다면 직접 구현하여 필터로 등록하여 사용하면 됩니다
+#### 개념
+동시성 문제가 드물 것이라는 가정 하에 락을 걸지 않고 처리하다가, 저장 시 version 필드를 이용해 충돌을 감지하는 방식입니다.
+    
+    
+    @Version
+    private Long version; 
+
+
+#### 동작 원리
+1. 스레드 A, B가 동시에 version이 1인 데이터에 접근
+2. 스레드 A가 작업을 완료하여 데이터를 변경하면 version은 2로 변경
+3. 스레드 B가 가지고 있는 version에 변경이 감지되어 `OptimisticLockException` 발생
+4. 스레드 B는 새로운 version의 데이터를 다시 조회하여 재시도
+
+#### 장점
+- 데이터 조회 시 Lock을 사용하지 않아 비관적 락보다 성능이 좋음
+- 데드락이 발생하지 않음
+- 동시 처리량이 높음
+
+#### 단점
+- version 충돌 발생시 재시도가 늘어나면 성능이 떨어질 수 있음
+- 충돌 발생 시 재시도 로직을 직접 작성해야 함
+- Facade 계층에서 별도의 트랜잭션 제어가 필요
+
+#### 적용 상황
+- 트래픽이 많고 동시 수정 확률이 낮은 경우
+- 읽기 작업이 많고 쓰기 작업이 적은 경우
+
+---
+
+## 3. 분산 락 (Redis)
+
+분산 환경(멀티 서버)에서 여러 서버가 공유 자원에 접근할 때 발생하는 Race Condition을 해결하기 위한 방법입니다. 공유 자원 자체가 아닌 **임계 영역(critical region)에 Lock을 설정**하는 것이 특징입니다.
+
+### Redis의 장점
+- **싱글 스레드 기반**: 멀티플렉싱 기술을 사용하고 작업 처리가 싱글 스레드로 이루어져 원자성을 보장
+- 여러 서버가 하나의 Redis에 접근하므로 서버 간 락 공유 가능
+- 성능이 빠르고 확장성이 높음
+
+### (1) Lettuce
+
+#### 개념
+분산 락을 구현하고, Spin Lock 방식을 사용하여 동시성 문제를 해결합니다.
+```java
+public void decrease(Long id) {
+    while (!tryLock(id)) {
+        // 락 획득 실패 시 대기
+        Thread.sleep(50);
+    }
+    
+    try {
+        // 비즈니스 로직
+        stockService.decrease(id);
+    } finally {
+        unlock(id);
+    }
+}
+
+private boolean tryLock(Long key) {
+    return redisTemplate
+        .opsForValue()
+        .setIfAbsent(key.toString(), "lock", Duration.ofMillis(3000));
+}
+```
+
+#### 장점
+- `spring-data-redis`를 사용하면 기본으로 설정된 라이브러리이므로 별도의 라이브러리 불필요
+- 구현이 간단함
+
+#### 단점
+- 락 획득할 때까지 반복적으로 시도 ->  Redis 부하 증가, CPU 자원 낭비
+- 락 획득 재요청 로직을 직접 구현해야 함
+- Redis 장애 시 위험
+
+#### 적용 환경
+- 락 경합이 적은 환경
+- Redis 트래픽이 여유로운 환경
+
+---
+
+### (2) Redisson
+
+#### 개념
+Pub/Sub 기반 Lock을 사용하여 동시성 문제를 해결합니다. RedLock 알고리즘을 사용해서 Lock 획득-해제를 수행합니다.
+
+#### 동작 원리
+1. 스레드 A가 락을 획득하여 작업 수행
+2. 스레드 A가 작업 완료 후 락을 해제하면 Redis 채널에 메시지를 발행(publish)
+3. 대기 중인 스레드 B가 구독(subscribe)하여 메시지를 수신
+4. 스레드 B가 락 획득을 시도
+
+#### 장점
+- 채널에서 메시지를 확인하고 락 획득 요청을 하므로 Redis 부하가 적음
+- Spin Lock보다 효율적
+- 재시도 및 만료시간 관리가 자동화됨
+
+#### 단점
+- Lettuce에 비해 구현이 복잡함
+- 별도의 라이브러리 필요
+
+#### 적용 환경
+- 락 경합이 많은 환경
+- 성능이 중요한 분산 시스템
+
+---
+
+### 로깅
+
+**로깅이 필요한 이유**
+- **디버깅**: 애플리케이션 실행 중 발생하는 문제 추적
+- **모니터링**: 시스템 상태와 성능 지표 관찰
+- **감사(Audit)**: 사용자 행동과 시스템 변경 이력 기록
+- **분석**: 비즈니스 인사이트 도출 및 패턴 파악
+- **알림**: 심각한 오류 발생 시 즉각적인 대응
+
+---
+
+### 2.2 로그 레벨 (Log Level)
+
+로그 레벨은 메시지의 중요도를 나타내며, 일반적으로 다음과 같이 구분됩니다.
+
+#### TRACE
+- **목적**: 가장 상세한 정보, 코드 실행 경로 추적
+- **사용 시점**: 메서드 진입/종료, 반복문 내부 상태
+
+
+#### DEBUG
+- **목적**: 개발 및 디버깅 정보
+- **사용 시점**: 변수 값, 조건 분기, 내부 상태
+
+
+#### INFO
+- **목적**: 일반적인 정보성 메시지
+- **사용 시점**: 주요 비즈니스 로직 실행, 상태 변경
+
+#### WARN
+- **목적**: 잠재적 문제 상황, 비정상적이지만 처리 가능한 상황
+- **사용 시점**: 재시도 로직, 폴백 사용, deprecated 기능 사용
+
+
+#### ERROR
+- **목적**: 심각한 오류, 즉각적인 조치 필요
+- **사용 시점**: 예외 발생, 트랜잭션 실패, 외부 시스템 장애
+
+
+#### FATAL
+- **목적**: 애플리케이션을 중단시킬 수 있는 치명적 오류
+- **사용 시점**: 시스템 크래시, 핵심 자원 사용 불가
+
+
+

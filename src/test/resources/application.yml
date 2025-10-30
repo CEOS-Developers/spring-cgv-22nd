@@ -1,0 +1,44 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+        format_sql: true
+    show-sql: true
+
+  h2:
+    console:
+      enabled: true
+
+  # Redis 자동 구성 비활성화
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
+
+  # JWT 설정
+  jwt:
+    secret: test-secret-key-for-jwt-token-generation-and-validation-minimum-256-bits-test-secret-key-for-testing-purposes-only
+    token:
+      access-expiration-time: 43200000
+      refresh-expiration-time: 604800000
+
+logging:
+  level:
+    org.hibernate.SQL: debug
+    org.hibernate.type.descriptor.sql.BasicBinder: trace
+
+# Payment 설정
+payment:
+  mock:
+    base-url: https://payment.loopz.co.kr
+    api-secret: test-payment-secret-for-testing-purposes-only
+    store-id: "CEOS-22-3475832"

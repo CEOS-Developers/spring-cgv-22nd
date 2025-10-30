@@ -1,0 +1,120 @@
+<changelist name="25__10__30__오후_5_27,_업데이트_전에_커밋되지_않은_변경_내용_[변경]" date="1761812916847" recycled="true" deleted="true">
+  <option name="PATH" value="$PROJECT_DIR$/.idea/shelf/25__10__30__오후_5_27,_업데이트_전에_커밋되지_않은_변경_내용_[변경]/shelved.patch" />
+  <option name="DESCRIPTION" value="25. 10. 30. 오후 5:27, 업데이트 전에 커밋되지 않은 변경 내용 [변경]" />
+  <binary>
+    <option name="AFTER_PATH" value="build/tmp/compileJava/compileTransaction/stash-dir/CartService.class.uniqueId9" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/25__10__30__오후_5_27,_업데이트_전에_커밋되지_않은_변경_내용_[변경]/CartService.class.uniqueId9" />
+  </binary>
+  <binary>
+    <option name="AFTER_PATH" value=".gradle/8.14.3/fileHashes/fileHashes.bin" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/25__10__30__오후_5_27,_업데이트_전에_커밋되지_않은_변경_내용_[변경]/fileHashes.bin" />
+  </binary>
+  <binary>
+    <option name="AFTER_PATH" value="build/tmp/compileJava/compileTransaction/stash-dir/Payment.class.uniqueId10" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/25__10__30__오후_5_27,_업데이트_전에_커밋되지_않은_변경_내용_[변경]/Payment.class.uniqueId10" />
+  </binary>
+  <binary>
+    <option name="AFTER_PATH" value="build/tmp/compileJava/compileTransaction/stash-dir/OrderDetailRepository.class.uniqueId16" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/25__10__30__오후_5_27,_업데이트_전에_커밋되지_않은_변경_내용_[변경]/OrderDetailRepository.class.uniqueId16" />
+  </binary>
+  <binary>
+    <option name="AFTER_PATH" value="build/tmp/compileTestJava/previous-compilation-data.bin" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/25__10__30__오후_5_27,_업데이트_전에_커밋되지_않은_변경_내용_[변경]/previous-compilation-data.bin" />
+  </binary>
+  <binary>
+    <option name="AFTER_PATH" value=".gradle/buildOutputCleanup/outputFiles.bin" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/25__10__30__오후_5_27,_업데이트_전에_커밋되지_않은_변경_내용_[변경]/outputFiles.bin" />
+  </binary>
+  <binary>
+    <option name="AFTER_PATH" value="build/tmp/compileJava/compileTransaction/stash-dir/OrderResponse.class.uniqueId15" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/25__10__30__오후_5_27,_업데이트_전에_커밋되지_않은_변경_내용_[변경]/OrderResponse.class.uniqueId15" />
+  </binary>
+  <binary>
+    <option name="AFTER_PATH" value=".gradle/8.14.3/fileHashes/resourceHashesCache.bin" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/25__10__30__오후_5_27,_업데이트_전에_커밋되지_않은_변경_내용_[변경]/resourceHashesCache.bin" />
+  </binary>
+  <binary>
+    <option name="AFTER_PATH" value="build/tmp/compileJava/compileTransaction/stash-dir/CartController.class.uniqueId6" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/25__10__30__오후_5_27,_업데이트_전에_커밋되지_않은_변경_내용_[변경]/CartController.class.uniqueId6" />
+  </binary>
+  <binary>
+    <option name="AFTER_PATH" value="build/tmp/compileJava/compileTransaction/stash-dir/PaymentType.class.uniqueId11" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/25__10__30__오후_5_27,_업데이트_전에_커밋되지_않은_변경_내용_[변경]/PaymentType.class.uniqueId11" />
+  </binary>
+  <binary>
+    <option name="AFTER_PATH" value="build/tmp/compileJava/compileTransaction/stash-dir/PaymentResponse.class.uniqueId1" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/25__10__30__오후_5_27,_업데이트_전에_커밋되지_않은_변경_내용_[변경]/PaymentResponse.class.uniqueId1" />
+  </binary>
+  <binary>
+    <option name="AFTER_PATH" value="build/test-results/test/binary/output.bin.idx" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/25__10__30__오후_5_27,_업데이트_전에_커밋되지_않은_변경_내용_[변경]/output.bin.idx" />
+  </binary>
+  <binary>
+    <option name="AFTER_PATH" value="build/tmp/compileJava/compileTransaction/stash-dir/PaymentController.class.uniqueId14" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/25__10__30__오후_5_27,_업데이트_전에_커밋되지_않은_변경_내용_[변경]/PaymentController.class.uniqueId14" />
+  </binary>
+  <binary>
+    <option name="AFTER_PATH" value="build/tmp/compileJava/previous-compilation-data.bin" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/25__10__30__오후_5_27,_업데이트_전에_커밋되지_않은_변경_내용_[변경]/previous-compilation-data1.bin" />
+  </binary>
+  <binary>
+    <option name="AFTER_PATH" value="build/test-results/test/binary/output.bin" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/25__10__30__오후_5_27,_업데이트_전에_커밋되지_않은_변경_내용_[변경]/output.bin" />
+  </binary>
+  <binary>
+    <option name="AFTER_PATH" value="build/tmp/compileJava/compileTransaction/stash-dir/PaymentService.class.uniqueId4" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/25__10__30__오후_5_27,_업데이트_전에_커밋되지_않은_변경_내용_[변경]/PaymentService.class.uniqueId4" />
+  </binary>
+  <binary>
+    <option name="AFTER_PATH" value="build/tmp/compileJava/compileTransaction/stash-dir/OrderRepository.class.uniqueId8" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/25__10__30__오후_5_27,_업데이트_전에_커밋되지_않은_변경_내용_[변경]/OrderRepository.class.uniqueId8" />
+  </binary>
+  <binary>
+    <option name="AFTER_PATH" value="build/tmp/compileJava/compileTransaction/stash-dir/PaymentRepository.class.uniqueId17" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/25__10__30__오후_5_27,_업데이트_전에_커밋되지_않은_변경_내용_[변경]/PaymentRepository.class.uniqueId17" />
+  </binary>
+  <binary>
+    <option name="AFTER_PATH" value="build/tmp/compileJava/compileTransaction/stash-dir/OrderDetail.class.uniqueId2" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/25__10__30__오후_5_27,_업데이트_전에_커밋되지_않은_변경_내용_[변경]/OrderDetail.class.uniqueId2" />
+  </binary>
+  <binary>
+    <option name="AFTER_PATH" value=".gradle/8.14.3/executionHistory/executionHistory.bin" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/25__10__30__오후_5_27,_업데이트_전에_커밋되지_않은_변경_내용_[변경]/executionHistory.bin" />
+  </binary>
+  <binary>
+    <option name="AFTER_PATH" value="build/tmp/compileJava/compileTransaction/stash-dir/OrderItemResponse.class.uniqueId0" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/25__10__30__오후_5_27,_업데이트_전에_커밋되지_않은_변경_내용_[변경]/OrderItemResponse.class.uniqueId0" />
+  </binary>
+  <binary>
+    <option name="AFTER_PATH" value="build/tmp/compileJava/compileTransaction/stash-dir/PaymentService$CustomDataItem.class.uniqueId5" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/25__10__30__오후_5_27,_업데이트_전에_커밋되지_않은_변경_내용_[변경]/PaymentService$CustomDataItem.class.uniqueId5" />
+  </binary>
+  <binary>
+    <option name="AFTER_PATH" value="build/tmp/compileJava/compileTransaction/stash-dir/OrderService.class.uniqueId3" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/25__10__30__오후_5_27,_업데이트_전에_커밋되지_않은_변경_내용_[변경]/OrderService.class.uniqueId3" />
+  </binary>
+  <binary>
+    <option name="AFTER_PATH" value="build/tmp/compileJava/compileTransaction/stash-dir/OrderController.class.uniqueId12" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/25__10__30__오후_5_27,_업데이트_전에_커밋되지_않은_변경_내용_[변경]/OrderController.class.uniqueId12" />
+  </binary>
+  <binary>
+    <option name="AFTER_PATH" value="build/tmp/compileJava/compileTransaction/stash-dir/CartResponse.class.uniqueId18" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/25__10__30__오후_5_27,_업데이트_전에_커밋되지_않은_변경_내용_[변경]/CartResponse.class.uniqueId18" />
+  </binary>
+  <binary>
+    <option name="AFTER_PATH" value="build/tmp/compileJava/compileTransaction/stash-dir/CartItemResponse.class.uniqueId7" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/25__10__30__오후_5_27,_업데이트_전에_커밋되지_않은_변경_내용_[변경]/CartItemResponse.class.uniqueId7" />
+  </binary>
+  <binary>
+    <option name="AFTER_PATH" value="build/test-results/test/binary/results.bin" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/25__10__30__오후_5_27,_업데이트_전에_커밋되지_않은_변경_내용_[변경]/results.bin" />
+  </binary>
+  <binary>
+    <option name="AFTER_PATH" value=".gradle/file-system.probe" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/25__10__30__오후_5_27,_업데이트_전에_커밋되지_않은_변경_내용_[변경]/file-system.probe" />
+  </binary>
+  <binary>
+    <option name="AFTER_PATH" value="build/tmp/compileJava/compileTransaction/stash-dir/Order.class.uniqueId13" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/25__10__30__오후_5_27,_업데이트_전에_커밋되지_않은_변경_내용_[변경]/Order.class.uniqueId13" />
+  </binary>
+</changelist>

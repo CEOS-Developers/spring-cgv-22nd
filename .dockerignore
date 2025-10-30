@@ -1,0 +1,23 @@
+# Gradle
+.gradle
+build/
+!build/libs/*.jar
+
+# IDE
+.idea
+*.iml
+*.iws
+*.ipr
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git
+.gitignore
+
+# 로그 및 임시 파일
+*.log
+tmp/
+temp/

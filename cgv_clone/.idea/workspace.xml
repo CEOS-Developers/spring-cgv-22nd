@@ -1,0 +1,575 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="fbba6173-ed0f-43ba-b6fb-6175df4d0c4c" name="변경" comment="fix : cicd.yml">
+      <change beforePath="$PROJECT_DIR$/.dockerignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitattributes" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/8.14.3/checksums/checksums.lock" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/8.14.3/checksums/md5-checksums.bin" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/8.14.3/checksums/sha1-checksums.bin" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/8.14.3/executionHistory/executionHistory.lock" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/8.14.3/fileChanges/last-build.bin" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/8.14.3/fileHashes/fileHashes.lock" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/8.14.3/gc.properties" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/buildOutputCleanup/cache.properties" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/vcs-1/gc.properties" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/jarRepositories.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/material_theme_project_new.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules/cgv_clone.main.iml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Dockerfile" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/HELP.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build.gradle" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docker-compose.yml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/github/workflows/cicd.yml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.properties" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gradlew" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/gradlew.bat" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/deploy.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/settings.gradle" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/CgvCloneApplication.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/common/config/JpaConfig.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/common/config/OpenApiConfig.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/common/config/RedisConfig.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/common/config/SecurityConfig.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/common/config/WebConfig.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/common/entity/BaseEntity.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/common/error/CustomException.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/common/error/ErrorCode.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/common/error/GlobalExceptionHandler.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/common/error/SuccessCode.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/common/response/ApiResponse.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/auth/controller/AuthController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/auth/jwt/JwtAuthenticationFilter.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/auth/jwt/JwtTokenProvider.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/auth/jwt/error/BlacklistedTokenException.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/auth/jwt/error/ExpiredTokenException.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/auth/jwt/error/InvalidTokenException.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/auth/jwt/error/JwtException.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/auth/jwt/error/MalformedTokenException.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/auth/jwt/error/UnsupportedTokenException.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/auth/service/AuthService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/auth/service/CustomUserDetailService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/auth/service/RedisService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/member/controller/WishController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/member/dto/request/LoginRequest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/member/dto/request/LogoutRequest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/member/dto/request/RefreshTokenRequest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/member/dto/request/SignUpRequest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/member/dto/response/MemberInfoResponse.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/member/dto/response/MovieWishResponse.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/member/dto/response/TheaterWishResponse.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/member/dto/response/TokenResponse.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/member/entity/Member.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/member/entity/MovieWish.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/member/entity/Role.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/member/entity/TheaterWish.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/member/repository/MemberRepository.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/member/repository/MovieWishRepository.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/member/repository/TheaterWishRepository.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/member/service/WishService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/member/vo/BirthDate.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/member/vo/Email.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/member/vo/MemberName.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/member/vo/Password.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/movie/controller/AdminActorController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/movie/controller/AdminDirectorController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/movie/controller/AdminMovieController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/movie/controller/MovieController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/movie/dto/request/ActorCreateRequest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/movie/dto/request/DirectorCreateRequest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/movie/dto/request/MovieCreateRequest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/movie/dto/response/ActorResponse.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/movie/dto/response/DirectorResponse.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/movie/dto/response/MovieDetailResponse.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/movie/dto/response/MovieSimpleResponse.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/movie/entity/Actor.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/movie/entity/Director.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/movie/entity/Genre.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/movie/entity/Movie.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/movie/entity/MovieStatus.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/movie/repository/ActorRepository.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/movie/repository/DirectorRepository.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/movie/repository/MovieRepository.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/movie/service/ActorService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/movie/service/DirectorService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/movie/service/MovieService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/order/controller/CartController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/order/controller/OrderController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/order/dto/request/CartItemRequest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/order/dto/request/CartItemUpdateRequest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/order/dto/request/OrderCreateRequest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/order/dto/response/CartItemResponse.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/order/dto/response/CartResponse.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/order/dto/response/OrderItemResponse.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/order/dto/response/OrderResponse.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/order/entity/Order.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/order/entity/OrderDetail.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/order/entity/OrderStatus.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/order/repository/OrderDetailRepository.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/order/repository/OrderRepository.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/order/service/CartService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/order/service/OrderService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/payment/client/PaymentClient.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/payment/config/PaymentConfig.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/payment/config/WebClientConfig.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/payment/controller/PaymentController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/payment/dto/request/InstantPaymentRequest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/payment/dto/request/PaymentCreateRequest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/payment/dto/response/InstantPaymentResponse.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/payment/dto/response/PaymentDetailResponse.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/payment/dto/response/PaymentResponse.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/payment/entity/Payment.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/payment/entity/PaymentStatus.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/payment/repository/PaymentRepository.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/payment/service/PaymentService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/reservation/controller/AdminScheduleController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/reservation/controller/ReservationController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/reservation/controller/ScheduleController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/reservation/dto/request/ReservationCreateRequest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/reservation/dto/request/ScheduleCreateRequest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/reservation/dto/response/ReservationResponse.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/reservation/dto/response/ScheduleResponse.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/reservation/dto/response/ScheduleSeatResponse.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/reservation/entity/Reservation.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/reservation/entity/ReservationSeat.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/reservation/entity/ReservationStatus.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/reservation/entity/Schedule.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/reservation/repository/ReservationRepository.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/reservation/repository/ReservationSeatRepository.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/reservation/repository/ScheduleRepository.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/reservation/service/ReservationService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/reservation/service/ScheduleService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/store/controller/StoreController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/store/dto/request/ProductCreateRequest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/store/dto/request/StoreCreateRequest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/store/dto/request/StoreStockCreateRequest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/store/dto/response/ProductResponse.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/store/dto/response/ProductSimpleResponse.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/store/dto/response/StoreProductResponse.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/store/dto/response/StoreResponse.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/store/entity/Product.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/store/entity/ProductCategory.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/store/entity/Store.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/store/entity/StoreStock.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/store/entity/StoreStockId.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/store/entity/StoreType.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/store/repository/ProductRepository.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/store/repository/StoreRepository.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/store/repository/StoreStockRepository.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/store/service/ProductService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/store/service/StoreService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/theater/controller/AdminTheaterController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/theater/controller/TheaterController.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/theater/dto/request/ScreenCreateRequest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/theater/dto/request/TheaterCreateRequest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/theater/dto/response/ScreenResponse.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/theater/dto/response/TheaterResponse.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/theater/entity/Region.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/theater/entity/Screen.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/theater/entity/ScreenType.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/theater/entity/Seat.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/theater/entity/Theater.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/theater/repository/ScreenRepository.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/theater/repository/SeatRepository.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/theater/repository/TheaterRepository.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/ceos22/cgv_clone/domain/theater/service/TheaterService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/application-docker.yml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/com/ceos22/cgv_clone/CgvCloneApplicationTests.java" beforeDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ExternalProjectsData">
+    <projectState path="$PROJECT_DIR$">
+      <ProjectState />
+    </projectState>
+  </component>
+  <component name="ExternalProjectsManager">
+    <system id="GRADLE">
+      <state>
+        <projects_view>
+          <tree_state>
+            <expand>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="cgv_clone" type="f1a62948:ProjectNode" />
+              </path>
+            </expand>
+            <select />
+          </tree_state>
+        </projects_view>
+      </state>
+    </system>
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="package-info" />
+        <option value="Record" />
+        <option value="Exception" />
+        <option value="Enum" />
+        <option value="Interface" />
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="GithubProjectSettings">
+    <option name="branchProtectionPatterns">
+      <list>
+        <option value="master" />
+      </list>
+    </option>
+  </component>
+  <component name="KubernetesApiPersistence">{}</component>
+  <component name="KubernetesApiProvider">{
+  &quot;isMigrated&quot;: true
+}</component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 5
+}</component>
+  <component name="ProjectId" id="32n2c9ylPkgNAOCUWr8UTfTlqge" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Gradle.cgv_clone 빌드.executor": "Run",
+    "RequestMappingsPanelOrder0": "0",
+    "RequestMappingsPanelOrder1": "1",
+    "RequestMappingsPanelWidth0": "75",
+    "RequestMappingsPanelWidth1": "75",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "Spring Boot.CgvCloneApplication.executor": "Run",
+    "git-widget-placeholder": "develop",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "C:/Users/gilbe/spring-cgv-22nd/cgv_clone/src/main/java/com/ceos22/cgv_clone/domain/store",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "MTThemeSelectorConfigurable",
+    "vue.rearranger.settings.migration": "true"
+  },
+  "keyToStringList": {
+    "DatabaseDriversLRU": [
+      "mysql"
+    ]
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="CreateClassDialog.RecentsKey">
+      <recent name="com.ceos22.cgv_clone.domain.theater.entity" />
+    </key>
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\gilbe\spring-cgv-22nd\cgv_clone\src\main\java\com\ceos22\cgv_clone\domain\store" />
+      <recent name="C:\Users\gilbe\spring-cgv-22nd\cgv_clone\src\main\java\com\ceos22\cgv_clone\domain\theater" />
+      <recent name="C:\Users\gilbe\spring-cgv-22nd\cgv_clone\src\main\java\com\ceos22\cgv_clone\domain\reservation" />
+      <recent name="C:\Users\gilbe\spring-cgv-22nd\cgv_clone\src\main\java\com\ceos22\cgv_clone\domain\region" />
+      <recent name="C:\Users\gilbe\spring-cgv-22nd\cgv_clone\src\main\java\com\ceos22\cgv_clone\domain\product" />
+    </key>
+    <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="com.ceos22.cgv_clone.domain.member.dto.response" />
+      <recent name="com.ceos22.cgv_clone.domain.member.entity" />
+    </key>
+  </component>
+  <component name="RunManager">
+    <configuration name="CgvCloneApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <module name="cgv_clone.main" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="com.ceos22.cgv_clone.CgvCloneApplication" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="docker-deploy" factoryName="dockerfile" temporary="true">
+      <deployment type="dockerfile">
+        <settings />
+      </deployment>
+      <method v="2" />
+    </configuration>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-9823dce3aa75-b114ca120d71-intellij.indexing.shared.core-IU-242.21829.227" />
+        <option value="bundled-js-predefined-d6986cc7102b-7c0b70fcd90d-JavaScript-IU-242.21829.227" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="애플리케이션 수준" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="디폴트 작업">
+      <changelist id="fbba6173-ed0f-43ba-b6fb-6175df4d0c4c" name="변경" comment="" />
+      <created>1758042092574</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1758042092574</updated>
+      <workItem from="1758042094728" duration="17176000" />
+      <workItem from="1758130960872" duration="4938000" />
+      <workItem from="1758251017865" duration="34112000" />
+      <workItem from="1758459540485" duration="562000" />
+      <workItem from="1758460374463" duration="7516000" />
+      <workItem from="1758517433667" duration="4554000" />
+      <workItem from="1758597809579" duration="20646000" />
+      <workItem from="1758707574538" duration="29630000" />
+      <workItem from="1758890351568" duration="29639000" />
+      <workItem from="1759877616655" duration="4006000" />
+      <workItem from="1760023726950" duration="7511000" />
+      <workItem from="1760465429219" duration="527000" />
+      <workItem from="1760547314986" duration="578000" />
+      <workItem from="1760648040797" duration="8000" />
+      <workItem from="1760878100171" duration="527000" />
+      <workItem from="1761188148329" duration="9091000" />
+      <workItem from="1761208992691" duration="532000" />
+      <workItem from="1761209545558" duration="23123000" />
+      <workItem from="1761379454073" duration="12804000" />
+      <workItem from="1761532335082" duration="5654000" />
+      <workItem from="1761617536487" duration="1913000" />
+      <workItem from="1761702022340" duration="917000" />
+      <workItem from="1761703850498" duration="10022000" />
+      <workItem from="1761805034889" duration="7377000" />
+    </task>
+    <task id="LOCAL-00001" summary="project settings">
+      <option name="closed" value="true" />
+      <created>1758042626606</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1758042626606</updated>
+    </task>
+    <task id="LOCAL-00002" summary="feat : 배우/감독/영화 등록 &amp; 영화 조회">
+      <option name="closed" value="true" />
+      <created>1758302141214</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1758302141214</updated>
+    </task>
+    <task id="LOCAL-00003" summary="feat : 스케쥴 생성 및 조회">
+      <option name="closed" value="true" />
+      <created>1758336405043</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1758336405043</updated>
+    </task>
+    <task id="LOCAL-00004" summary="feat : 예매/예매 내역 조회">
+      <option name="closed" value="true" />
+      <created>1758462021158</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1758462021158</updated>
+    </task>
+    <task id="LOCAL-00005" summary="refactor : Region 클래스 Enum으로 변경 -&gt; Theater 도메인에 통합">
+      <option name="closed" value="true" />
+      <created>1758684402369</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1758684402369</updated>
+    </task>
+    <task id="LOCAL-00006" summary="refactor : Reservation 도메인 설계 수정">
+      <option name="closed" value="true" />
+      <created>1758788531489</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1758788531489</updated>
+    </task>
+    <task id="LOCAL-00007" summary="feat : TokenProvider">
+      <option name="closed" value="true" />
+      <created>1758819920461</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1758819920461</updated>
+    </task>
+    <task id="LOCAL-00008" summary="feat : 회원가입/로그인/로그아웃">
+      <option name="closed" value="true" />
+      <created>1758901402715</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1758901402715</updated>
+    </task>
+    <task id="LOCAL-00009" summary="feat : 매점 관련 기능">
+      <option name="closed" value="true" />
+      <created>1758929558023</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1758929558024</updated>
+    </task>
+    <task id="LOCAL-00010" summary="chore : BaseEntity + 코드리뷰 반영">
+      <option name="closed" value="true" />
+      <created>1759879997316</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1759879997316</updated>
+    </task>
+    <task id="LOCAL-00011" summary="refactor : JWT Filter Error Handling 개선">
+      <option name="closed" value="true" />
+      <created>1760031235185</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1760031235186</updated>
+    </task>
+    <task id="LOCAL-00012" summary="refactor : Redis + VO">
+      <option name="closed" value="true" />
+      <created>1761207601177</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1761207601177</updated>
+    </task>
+    <task id="LOCAL-00013" summary="refactor : AuthService Refactoring">
+      <option name="closed" value="true" />
+      <created>1761211874911</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1761211874911</updated>
+    </task>
+    <task id="LOCAL-00014" summary="feat : Movie &amp; Theater Wish">
+      <option name="closed" value="true" />
+      <created>1761217175721</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1761217175721</updated>
+    </task>
+    <task id="LOCAL-00015" summary="refactor : 상점 관련 엔티티 수정">
+      <option name="closed" value="true" />
+      <created>1761279250043</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1761279250043</updated>
+    </task>
+    <task id="LOCAL-00016" summary="refactor : Cart Service &amp; Order Service Refactor">
+      <option name="closed" value="true" />
+      <created>1761284909216</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1761284909216</updated>
+    </task>
+    <task id="LOCAL-00017" summary="refactor : Reservation Service &amp; Schedule Service Refactor">
+      <option name="closed" value="true" />
+      <created>1761362083822</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1761362083822</updated>
+    </task>
+    <task id="LOCAL-00018" summary="refactor : Reservation Service &amp; Schedule Service Refactor">
+      <option name="closed" value="true" />
+      <created>1761391451799</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1761391451799</updated>
+    </task>
+    <task id="LOCAL-00019" summary="refactor : Reservation Service &amp; Schedule Service Refactor">
+      <option name="closed" value="true" />
+      <created>1761812701516</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1761812701516</updated>
+    </task>
+    <task id="LOCAL-00020" summary="feat : CI/CD">
+      <option name="closed" value="true" />
+      <created>1761812848365</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1761812848365</updated>
+    </task>
+    <task id="LOCAL-00021" summary="fix : cicd.yml">
+      <option name="closed" value="true" />
+      <created>1761813894212</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1761813894212</updated>
+    </task>
+    <option name="localTasksCounter" value="22" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="origin/develop" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="project settings" />
+    <MESSAGE value="feat : 배우/감독/영화 등록 &amp; 영화 조회" />
+    <MESSAGE value="feat : 스케쥴 생성 및 조회" />
+    <MESSAGE value="feat : 예매/예매 내역 조회" />
+    <MESSAGE value="refactor : Region 클래스 Enum으로 변경 -&gt; Theater 도메인에 통합" />
+    <MESSAGE value="refactor : Reservation 도메인 설계 수정" />
+    <MESSAGE value="feat : TokenProvider" />
+    <MESSAGE value="feat : 회원가입/로그인/로그아웃" />
+    <MESSAGE value="feat : 매점 관련 기능" />
+    <MESSAGE value="chore : BaseEntity + 코드리뷰 반영" />
+    <MESSAGE value="refactor : JWT Filter Error Handling 개선" />
+    <MESSAGE value="refactor : Redis + VO" />
+    <MESSAGE value="refactor : AuthService Refactoring" />
+    <MESSAGE value="feat : Movie &amp; Theater Wish" />
+    <MESSAGE value="refactor : 상점 관련 엔티티 수정" />
+    <MESSAGE value="refactor : Cart Service &amp; Order Service Refactor" />
+    <MESSAGE value="refactor : Reservation Service &amp; Schedule Service Refactor" />
+    <MESSAGE value="feat : CI/CD" />
+    <MESSAGE value="fix : cicd.yml" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix : cicd.yml" />
+  </component>
+</project>

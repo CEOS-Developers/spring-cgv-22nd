@@ -82,8 +82,6 @@ public class ReservationService {
         } catch(Exception ex) {
             log.error("Unexpected error during reservation: userId={}, scheduleId={}, seatIds={}, paymentId={}, seatsMarked={}",
                     user.getId(), schedule.getId(), seatIdList, payment != null ? payment.getId() : null, seatsMarked, ex);
-
-
             // 결제 호출 오류 or 내부 저장 오류
             if (payment != null) {
                 try {

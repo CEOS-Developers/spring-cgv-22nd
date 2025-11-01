@@ -22,9 +22,8 @@ public class MovieController {
     private final MovieService movieService;
     private final ReservationService reservationService;
 
-    @Operation(summary = "영화 목록 조회", description = "영화 제목을 검색어로 필터링하여 목록을 조회합니다. 검색어가 없으면 전체 목록을 반환합니다. (인증 필요)")
+    @Operation(summary = "영화 목록 조회", description = "영화 제목을 검색어로 필터링하여 목록을 조회합니다. 검색어가 없으면 전체 목록을 반환합니다.")
     @GetMapping("/movies")
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<MovieListResponse>> getMovieTitles(
             @RequestParam(required = false) String query) {
 

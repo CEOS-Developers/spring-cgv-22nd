@@ -42,21 +42,18 @@ public class CinemaService {
     @Transactional
     public CinemaLikeResponse like(Long cinemaId, User authenticatedUser) {
 
-        User user = userRepository.findById(authenticatedUser.getId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "해당 유저가 존재하지 않습니다."));
-
         Cinema cinema = cinemaRepository.findById(cinemaId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "해당 영화관이 존재하지 않습니다."));
 
-        if (!cinemaLikeRepository.existsByUser_IdAndCinema_Id(user.getId(), cinemaId)) {
+        if (!cinemaLikeRepository.existsByUser_IdAndCinema_Id(authenticatedUser.getId(), cinemaId)) {
             CinemaLike like = CinemaLike.builder()
-                    .user(user)
+                    .user(authenticatedUser)
                     .cinema(cinema)
                     .build();
             cinemaLikeRepository.save(like);
         }
 
-        return CinemaLikeResponse.fromCinemaAndUser(cinema, user, true);
+        return CinemaLikeResponse.fromCinemaAndUser(cinema, authenticatedUser, true);
     }
 
 

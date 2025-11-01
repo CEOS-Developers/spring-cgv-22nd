@@ -3,7 +3,7 @@ package com.ceos22.cgv.module.payment.service;
 import com.ceos22.cgv.common.util.PaymentCategory;
 import com.ceos22.cgv.common.util.PaymentStatus;
 import com.ceos22.cgv.module.payment.domain.PaymentLog;
-import com.ceos22.cgv.module.payment.dto.DomainAndParams;
+import com.ceos22.cgv.module.payment.dto.PaymentApiRequest;
 import com.ceos22.cgv.module.payment.dto.PaymentRequest;
 import com.ceos22.cgv.module.payment.repository.PaymentRepository;
 import com.ceos22.cgv.module.reservation.domain.Reservation;
@@ -35,12 +35,16 @@ public class PaymentTransactionService {
 
     @Value("${payment.secret-key}")
     private String SECRET_KEY;
+
     @Value("${payment.store-id}")
     private String STORE_ID;
-    private final String STORE_PREFIX = "CEOS-22-";
+
+    @Value("${payment.store-prefix}")
+    private String STORE_PREFIX;
 
     @Value("${payment.base-url}")
     private String BASE_URL;
+
     private final String PG_PROVIDER = "CEOS_PAY";
 
     private final ReservationRepository reservationRepository;
@@ -52,13 +56,13 @@ public class PaymentTransactionService {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     protected void confirmReservation(Reservation reservation,
                                       String paymentId,
-                                      DomainAndParams params,
+                                      PaymentApiRequest parameters,
                                       LocalDateTime paidAt) {
         PaymentLog paymentLog = PaymentLog.builder()
                 .paymentId(paymentId)
-                .orderName(params.orderName())
-                .totalAmount(params.totalPayAmount())
-                .currency(params.currency())
+                .orderName(parameters.orderName())
+                .totalAmount(parameters.totalPayAmount())
+                .currency(parameters.currency())
                 .pgProvider(PG_PROVIDER)
                 .paymentCategory(PaymentCategory.Reservation)
                 .paymentStatus(PaymentStatus.PAID)
@@ -75,7 +79,7 @@ public class PaymentTransactionService {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     protected void confirmOrder(Order order,
                                 String paymentId,
-                                DomainAndParams params,
+                                PaymentApiRequest parameters,
                                 LocalDateTime paidAt) {
 
         // 1) 락 획득을 위한 메뉴 ID 수집
@@ -97,9 +101,9 @@ public class PaymentTransactionService {
         orderRepository.save(order);
         PaymentLog paymentLog = PaymentLog.builder()
                 .paymentId(paymentId)
-                .orderName(params.orderName())
-                .totalAmount(params.totalPayAmount())
-                .currency(params.currency())
+                .orderName(parameters.orderName())
+                .totalAmount(parameters.totalPayAmount())
+                .currency(parameters.currency())
                 .pgProvider(PG_PROVIDER)
                 .paymentCategory(PaymentCategory.SNACK)
                 .paymentStatus(PaymentStatus.PAID)
@@ -110,19 +114,21 @@ public class PaymentTransactionService {
         paymentRepository.save(paymentLog);
     }
 
+
+
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    protected void saveCancelledPaymntLog(String paymentId, DomainAndParams params, LocalDateTime paidAt) {
+    protected void saveCancelledPaymentLog(String paymentId, PaymentApiRequest parameters, LocalDateTime paidAt) {
 
         PaymentLog log = PaymentLog.builder()
                 .paymentId(paymentId)
-                .orderName(params.orderName())
-                .totalAmount(params.totalPayAmount())
-                .currency(params.currency())
+                .orderName(parameters.orderName())
+                .totalAmount(parameters.totalPayAmount())
+                .currency(parameters.currency())
                 .pgProvider(PG_PROVIDER)
                 .paymentCategory(PaymentCategory.SNACK)
                 .paymentStatus(PaymentStatus.CANCELLED)
-                .reservation(params.reservation())
-                .order(params.order())
+                .reservation(parameters.reservation())
+                .order(parameters.order())
                 .paidAt(paidAt)
                 .build();
 
@@ -130,7 +136,12 @@ public class PaymentTransactionService {
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void cancelReservation(Reservation reservation) {
+    public void cancelReservation(Reservation r) {
+
+        // 동일 객체에 대한 중복 변경 시도를 방지하기 위해 DB에서 다시 조회
+        Reservation reservation = reservationRepository.findByIdWithScheduleAndSeats(r.getId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "예약을 찾을 수 없습니다."));
+
         reservation.cancel();
         reservation.getReservationSeats().clear();
         reservationRepository.save(reservation);
@@ -177,24 +188,52 @@ public class PaymentTransactionService {
         catch (JsonProcessingException e) { return String.valueOf(obj); }
     }
 
-    public DomainAndParams buildParams(PaymentRequest request, boolean isReservation, User user) {
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public PaymentApiRequest buildParams(PaymentRequest request, boolean isReservation, User user) {
+
+        String storeId = STORE_PREFIX + STORE_ID;
+        String orderName;
+        Integer total;
         String currency = "KRW";
+        String customData;
+
         if (isReservation) {
+
             Reservation reservation = reservationRepository.findByIdWithScheduleAndSeats(request.reservationId())
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "예약이 존재하지 않습니다."));
             int seatCount = reservation.getReservationSeats().size();
             Integer price = reservation.getSchedule().getTheater().getPrice();
-            int total = seatCount * price;
-            String orderName = "Reservation-" + reservation.getId() + "-User-" + user.getId();
-            String customData = toJson(new CustomData("reservation", reservation.getId(), null, user.getId()));
-            return new DomainAndParams(orderName, total, currency, customData, reservation, null);
+            total = seatCount * price;
+            orderName = "Reservation-" + reservation.getId() + "-User-" + user.getId();
+            customData = toJson(new CustomData("reservation", reservation.getId(), null, user.getId()));
+
+            return new PaymentApiRequest(
+                    storeId,
+                    orderName,
+                    total,
+                    currency,
+                    customData,
+                    reservation,
+                    null
+            );
+
         } else {
+
             Order order = orderRepository.findByIdWithItems(request.orderId())
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "주문이 존재하지 않습니다."));
-            int total = order.getTotalPrice();
-            String orderName = "Order-" + order.getId() + "-User-" + user.getId();
-            String customData = toJson(new CustomData("order", null, order.getId(), user.getId()));
-            return new DomainAndParams(orderName, total, currency, customData, null, order);
+            total = order.getTotalPrice();
+            orderName = "Order-" + order.getId() + "-User-" + user.getId();
+            customData = toJson(new CustomData("order", null, order.getId(), user.getId()));
+
+            return new PaymentApiRequest(
+                    storeId,
+                    orderName,
+                    total,
+                    currency,
+                    customData,
+                    null,
+                    order
+            );
         }
     }
 

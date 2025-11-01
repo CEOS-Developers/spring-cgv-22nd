@@ -10,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientResponseException;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
@@ -33,13 +32,12 @@ public class PaymentApiService {
     public PaymentResponse createPaymentAPI(String paymentId, PaymentApiRequest request) {
 
         try{
-
             ResponseEntity<PaymentResponse> response = restClient
                     .post()
                     .uri(BASE_URL + "/payments/{paymentId}/instant", paymentId)
                     .contentType(MediaType.APPLICATION_JSON)
                     .header("Authorization", "Bearer " + SECRET_KEY)
-                    .body(request)
+                    .body(request.toParameter())
                     .retrieve()
                     .toEntity(PaymentResponse.class);
 

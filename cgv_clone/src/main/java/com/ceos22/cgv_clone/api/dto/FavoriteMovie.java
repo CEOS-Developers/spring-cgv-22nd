@@ -1,6 +1,6 @@
 package com.ceos22.cgv_clone.api.dto;
 
-import com.ceos22.cgv_clone.domain.dibsOn.FavoriteMovieEntity;
+import com.ceos22.cgv_clone.domains.dibsOn.domain.FavoriteMovieEntity;
 
 public record FavoriteMovie(
         Long id,

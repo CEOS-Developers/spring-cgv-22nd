@@ -1,8 +1,8 @@
 package com.ceos22.cgv_clone.usecase;
 
 import com.ceos22.cgv_clone.UseCase;
-import com.ceos22.cgv_clone.service.cinema.FavoriteCinemaService;
-import com.ceos22.cgv_clone.service.member.MemberService;
+import com.ceos22.cgv_clone.domains.dibsOn.service.FavoriteCinemaService;
+import com.ceos22.cgv_clone.domains.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor

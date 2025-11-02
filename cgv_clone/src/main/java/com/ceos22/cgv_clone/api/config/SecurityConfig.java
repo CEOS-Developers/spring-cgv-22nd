@@ -46,7 +46,10 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST,"/api/auth/**").permitAll() // 로그인/회원가입
                         .requestMatchers("/api/reservation/**",
                                 "/api/favorites/movies/*/*/toggle",
-                                "/api/favorites/cinemas/*/*/toggle").permitAll()
+                                "/api/favorites/cinemas/*/*/toggle",
+                                "/api/movies/**",
+                                "/api/cinemas/**,",
+                                "/api/payments/**").permitAll()
                         .anyRequest().authenticated() // 나머지 인증
                 )
 

@@ -33,9 +33,6 @@ public class OrderEntity {
     @Column(nullable = false)
     private String paymentId;
 
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private String orderNo;
-
     private String orderName;
 
     private String currency; // 한국 화폐로만 제한할게요

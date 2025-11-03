@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/cgv_clone.main.iml" filepath="$PROJECT_DIR$/.idea/modules/cgv_clone.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/com.ceos22.cgv_clone.main.iml" filepath="$PROJECT_DIR$/.idea/modules/com.ceos22.cgv_clone.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/spring-cgv-22nd.iml" filepath="$PROJECT_DIR$/.idea/spring-cgv-22nd.iml" />
     </modules>
   </component>

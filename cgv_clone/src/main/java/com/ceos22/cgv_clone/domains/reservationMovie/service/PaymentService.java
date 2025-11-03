@@ -1,7 +1,7 @@
 package com.ceos22.cgv_clone.domains.reservationMovie.service;
 
 import com.ceos22.cgv_clone.api.dto.CancelPaymentResponse;
-import com.ceos22.cgv_clone.api.dto.InstantPaymentRequest;
+import com.ceos22.cgv_clone.domains.orderFood.dto.InstantPaymentRequest;
 import com.ceos22.cgv_clone.api.dto.PaymentResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;

@@ -1,7 +1,7 @@
 package com.ceos22.cgv_clone.api.controller;
 
 import com.ceos22.cgv_clone.api.dto.CancelPaymentResponse;
-import com.ceos22.cgv_clone.api.dto.InstantPaymentRequest;
+import com.ceos22.cgv_clone.domains.orderFood.dto.InstantPaymentRequest;
 import com.ceos22.cgv_clone.api.dto.PaymentResponse;
 import com.ceos22.cgv_clone.domains.reservationMovie.service.PaymentService;
 import lombok.RequiredArgsConstructor;

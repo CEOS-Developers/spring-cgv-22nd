@@ -19,4 +19,5 @@ spring:
 
   payment:
     base-url: ${payment.base-url}
-    api-secret: ${payment.api-secret}
+    github-id: ${payment.github-id}
+    timeout-seconds: ${payment.timeout-seconds}

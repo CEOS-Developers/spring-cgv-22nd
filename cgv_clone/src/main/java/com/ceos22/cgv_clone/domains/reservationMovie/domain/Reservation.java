@@ -30,6 +30,14 @@ public class Reservation {
     @Enumerated(EnumType.STRING)
     private ReservationStatus status = ReservationStatus.CREATED; // 예매 상태
 
+    // 주문 정보
+    @Column(nullable = false)
+    private String paymentId;
+
+    private String orderName;
+
+    private String currency; // 한국 화폐로만 제한할게요
+
     @Column(nullable=false)
     private int totalAmount; // 스냅샷 합계
 
@@ -45,6 +53,14 @@ public class Reservation {
         tickets.add(t);
         t.setReservation(this);
         totalAmount += t.getUnitPrice();
+    }
+
+    //==비지니스 로직==//
+    /** 결제 확정 및 결제 정보 세팅 **/
+    public void confirmReservationPayment(String paymentId, String orderName, String currency){
+        this.paymentId = paymentId;
+        this.orderName = orderName;
+        this.currency = currency;
     }
 
     public void markPaid(){ this.status = ReservationStatus.PAID; }

@@ -1,7 +1,7 @@
 package com.ceos22.cgv_clone.domains.orderFood.service;
 
 import com.ceos22.cgv_clone.api.dto.PaymentResponse;
-import com.ceos22.cgv_clone.domains.orderFood.adaptor.CinemaReader;
+import com.ceos22.cgv_clone.domains.orderFood.adaptor.CinemaNameReader;
 import com.ceos22.cgv_clone.domains.orderFood.adaptor.FoodReader;
 import com.ceos22.cgv_clone.domains.orderFood.domain.OrderStatus;
 import com.ceos22.cgv_clone.domains.orderFood.dto.InstantPaymentRequest;
@@ -27,7 +27,7 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
     private final FoodReader foodReader;
-    private final CinemaReader cinemaReader;
+    private final CinemaNameReader cinemaReader;
     private final PaymentService paymentService;
     private final RedissonClient redissonClient;
 

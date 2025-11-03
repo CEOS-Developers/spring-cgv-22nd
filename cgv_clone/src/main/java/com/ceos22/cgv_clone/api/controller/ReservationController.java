@@ -35,9 +35,10 @@ public class ReservationController {
         return reservationService.createReservation(cmd);
     }
 
-    @PostMapping("/{id}/confirm")
-    public ReservationSummaryDto confirm(@PathVariable Long id) {
-        return reservationService.confirmPayment(id);
+    /** 결제 시도: 성공 시 예약이 PAID로 전환됨 */
+    @PostMapping("/{id}/pay")
+    public ReservationSummaryDto pay(@PathVariable Long id) {
+        return reservationService.payReservation(id);
     }
 
     @PostMapping("/{id}/cancel")

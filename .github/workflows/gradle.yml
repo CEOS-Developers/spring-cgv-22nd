@@ -37,19 +37,9 @@ jobs:
 
     # 5) 도커 허브 로그인
     - name: Log in to Docker Hub
-      uses: docker/login-action@v3
-      with:
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
-
-    # 6) Docker 이미지 빌드 (Spring Boot 앱)
-    - name: Build Docker image for CGV Clone app
       run: |
-        docker build -t immmii/cgv-clone:latest .
-
-    # 7) DockerHub로 푸시
-    - name: Push image to Docker Hub
-      run: |
+        docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+        docker build -t cgv_clone/to/immmii/cgv-clone:latest .
         docker push immmii/cgv-clone:latest
           
     # 8)원격 서버(EC2)에 SSH로 접속해 배포를 수행합니다.

@@ -60,9 +60,7 @@ jobs:
             
           sudo chmod 666 /var/run/docker.sock   
             
-          sudo docker rm -f $(docker ps -qa)
-            
-          sudo docker pull my-repo/my-web-image
+          sudo docker pull immmii/cgv-clone:latest
             
           docker-compose -f docker-compose.yaml --env-file ./.env up -d
             

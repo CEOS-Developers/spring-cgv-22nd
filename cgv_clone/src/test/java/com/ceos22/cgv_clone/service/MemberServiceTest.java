@@ -1,17 +1,10 @@
 package com.ceos22.cgv_clone.service;
 
-import com.ceos22.cgv_clone.domain.dto.Member;
-import com.ceos22.cgv_clone.domain.member.Gender;
-import com.ceos22.cgv_clone.domain.member.MemberEntity;
-import com.ceos22.cgv_clone.repository.MemberRepository;
-import com.ceos22.cgv_clone.service.member.MemberService;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import com.ceos22.cgv_clone.domains.member.repository.MemberRepository;
+import com.ceos22.cgv_clone.domains.member.service.MemberService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Transactional

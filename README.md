@@ -382,4 +382,201 @@ public class AuthService {
 }
 ```    
 
-Controller가 참조하는 Service의 Repository 의존성을 없앨 수 있다!
+Controller가 참조하는 Service의 Repository 의존성을 없앨 수 있다!    
+
+
+
+## [동시성 문제]
+
+### 레이스 컨디션(Race Condition)    
+여러 스레드가 공유 데이터에 동시에 접근하고 변경하려 할 때 발생하는 문제      
+-> 한 개의 스레드만 접근 가능하도록 하자!   
+
+```
+@Test
+public void 동시에_100개_요청() throws InterruptedException {
+    int threadCount = 100;
+    ExecutorService executorService = Executors.newFixedThreadPool(32);
+    CountDownLatch latch = new CountDownLatch(threadCount);
+    
+    for (int i = 0; i < threadCount; i++){
+        executorService.submit(() -> {
+            try {
+                stockService.decrease(1l,  1L);
+            } finally {
+                latch.countDown();
+            }
+        });
+    }
+
+}
+
+```
+
+### 해결 방법 
+#### 1. synchronized
+Spring에서 제공하는 기능. 메서드에 붙여주면, 해당 메서드에 한 개의 스레드만 접근 가능하다.   
+
+```
+@Service
+@RequiredArgsConstructor
+public class StockService {
+
+    private final StockRepository stockRepository;
+    
+    @Transactional
+    public synchrnoized void decrease (Long id, Long quantity){
+        Stock stock = stockRepository.findById(id).orElseThrow();
+        stock.decrease(quantity);
+        
+        stockRepository.save(stock);
+    }
+ 
+}
+```  
+
+그러나... @Transactional의 특성 때문에 동시성 문제가 여전히 해결되지 않는다...    
+Transaction의 동작 과정을 들여다보자!    
+```
+@Service
+@RequiredArgsConstructor
+public class TransactionStockService {
+
+    private final StockService stockService;
+    
+    public void decrease (Long id, Long quantity){
+        startTransaction(); // Transaction 시작
+        
+        stockService.decrease(quantity); // stockService->decrease 메소드 실행
+        
+        endTransaction(); // Transaction 종료 -> stockRepository에 stock commit
+    }
+    
+}
+```  
+stock.decrease 메서드에 'synchronized'를 붙여주었으므로, 해당 코드에 접근가능한 스레드는 '한 개'이댜.     
+Transaction 자체에 접근한 A 스레드, B 스레드가 있다고 해보자.    
+A 스레드가 endTransaction()을 호출하여 감소한 재고가 stockRepository에 반영되기 전,    
+B 스레드가 stockService.decrease()를 호출할 수도 있다.    
+이 경우 B 스레드는 갱신되기 전의 값을 가져가므로 이전과 동일한 문제가 발생한다.    
+
+=> @Transactional 어노테이션을 제거하면 해결된다..    
+
+서버를 여러 대 돌릴 때에도 synchronized로 해결이 될까?
+-> sychronized는 process 단위로 접근을 제어하는 것.
+다중 서버 환경에서는 결국 여러 스레드가 접근할 수 있게 된다.
+
+#### 2. Database Lock
+2-1. Pessimistic Lock (비관적 락) // row나 table 단위    
+실제로 데이터에 Lock을 걸어서 정합성을 맞추는 방법. exclusive lock을 걸게되면 다른 트렌젝션에서는 
+lock이 해제되기 전에 데이터를 가져갈 수 없게 된다. 충돌이 빈번하게 일어나는 경우에 좋다.
+(문제점)     
+-> 데드락이 걸릴 수 있다. 또한 별도의 락을 걸어주어야 하기 때문에 성능 이슈가 있다.       
+```
+public interface StockRepository extends JpaRepository<Stock, Long> {
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Quey("select s from Stock s where s.id = :id")
+    Stock fidnByIdWithPessimisticLock(Long id);
+    
+}
+
+@Service
+@RequiredArgsConstructor
+public class PessimisticLockStockService {
+
+    private final StockRepository stockRepository;
+    
+    @Transactional
+    public void decrease (Long id, Long quantity){
+        Stock stock = stockRepository.findByIdWithPessimisticLock(id);
+        
+        stock.decrease(quantity);
+        
+        stockRepository.save(stock);
+    }
+    
+}
+```  
+
+
+
+2-2. Optimistic Lock (낙관적 락)    
+실제로 Lock을 이용하지 않고 버전을 이용함으로써 정합성을 맞추는 방법. 먼저 데이터를 읽은 후에 update를 수행할 때   
+현재 내가 읽은 버전이 맞는지 확인하여 업데이트 한다. 내가 읽은 버전에서 수정사항이 생겼을 경우에는 application에서 다시 읽은 후에 작업을 수행해야 한다.    
+
+1. Server1 (version = 1) -> Mysql (version = 1) // success
+```  
+update set version = version + 1, quantitiy = 2,
+from stock
+where id = 1 and version = 1
+```  
+2. update ->  Mysql (version = 2)
+3. Server2 (version = 1) -> Mysql (version = 2) // fail
+```  
+update set version = version + 1, quantitiy = 2,
+from stock
+where id = 1 and version = 1
+```
+
+Entity에 version 컬럼 추가 (@Version 어노테이션)
+```
+public interface StockRepository extends JpaRepository<Stock, Long> {
+
+    @Lock(LockModeType.OPTIMISTIC)
+    @Quey("select s from Stock s where s.id = :id")
+    Stock fidnByIdWithOptimisticLock(Long id);
+    
+}
+
+@Service
+@RequiredArgsConstructor
+public class OptimisticLockStockService {
+
+    private final StockRepository stockRepository;
+    
+    @Transactional
+    public void decrease (Long id, Long quantity){
+        Stock stock = stockRepository.findByIdWithOptimisticLock(id);
+        
+        stock.decrease(quantity);
+        
+        stockRepository.save(stock);
+    }
+    
+}
+
+@Component
+public class OptimisticLockStockFacade {
+    private final OptimisticLockStockService optimisticLockStockService;
+    
+    public void decrease (Long id, Long quantity){
+        while (true) {
+            try {
+                optimisticLockStockService.decrease(id, quantity);
+                break;
+            } catch (Exception e) {
+                Thread.sleep(50);
+            }
+        }
+    }
+
+}
+```  
+
+
+2-3. Named Lock // metadata 단위    
+이름을 가진 metadata locking이다. 이름을 가진 lock을 획득한 후 해제할 때까지 다른 세션이 해당 lock을 획득할 수 없도록 한다.    
+(문제점)
+-> transaction이 종료될 때 lock이 자동으로 해제되지 않으므로, 별도의 명령어로 해제를 수행해주거나   
+선점시간이 끝나야 해제된다.
+
+
+#### 3. Redis
+3-1. Lettuce
+- setnx 명령어를 활용하여 분산락 구현
+- spin lock 방식
+
+3-2. Redisson
+- pub-sub 기반으로 Lock 구현 제공
+Thread 1 -- 락 해제 메세지 --> Channel -- 락 획득 시도 요청 메시지 --> Thread 2

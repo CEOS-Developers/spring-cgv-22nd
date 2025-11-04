@@ -1,7 +1,7 @@
 package com.ceos22.cgv_clone.api.dto;
 
-import com.ceos22.cgv_clone.domain.reservationMovie.Reservation;
-import com.ceos22.cgv_clone.domain.reservationMovie.ReservationStatus;
+import com.ceos22.cgv_clone.domains.reservationMovie.domain.Reservation;
+import com.ceos22.cgv_clone.domains.reservationMovie.domain.ReservationStatus;
 
 import java.util.List;
 

@@ -1,8 +1,8 @@
 package com.ceos22.cgv_clone.api.controller;
 
 
-import com.ceos22.cgv_clone.api.dto.Movie;
-import com.ceos22.cgv_clone.service.movie.FindMovieService;
+import com.ceos22.cgv_clone.domains.dibsOn.dto.Movie;
+import com.ceos22.cgv_clone.domains.dibsOn.service.FindMovieService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

@@ -1,8 +1,8 @@
 package com.ceos22.cgv_clone.api.controller;
 
 import com.ceos22.cgv_clone.api.dto.CreateMemberRequest;
-import com.ceos22.cgv_clone.service.member.CreateMemberCommand;
-import com.ceos22.cgv_clone.service.member.MemberService;
+import com.ceos22.cgv_clone.domains.member.service.CreateMemberCommand;
+import com.ceos22.cgv_clone.domains.member.service.MemberService;
 import jakarta.validation.Valid;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;

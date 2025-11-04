@@ -1,6 +1,6 @@
 package com.ceos22.cgv_clone.api.dto;
 
-import com.ceos22.cgv_clone.domain.member.Gender;
+import com.ceos22.cgv_clone.domains.member.domain.Gender;
 
 public record SignUpRequest(
         String name,

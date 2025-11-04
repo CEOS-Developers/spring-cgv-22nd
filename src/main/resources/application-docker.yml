@@ -44,3 +44,6 @@ payment:
     base-url: https://payment.loopz.co.kr
     api-secret: ${PAYMENT_API_SECRET:eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJnaWxiZXJ0MDkwMzEiLCJjYXRlZ29yeSI6ImFjY2VzcyIsImF1dGhvcml0aWVzIjoiUk9MRV9VU0VSIiwiaWF0IjoxNzYxMTMzNTcyLCJleHAiOjI1OTIwMDE3NjExMzM1NzJ9.QdE5KdJTNGZRJoq0uqPgtcNwfgYmflriW_kbx0Yir4ily_dI6z0re_7MA54GmIPLlI1tp2bBEfbfFFlc7hJzpQ}
     store-id: ${PAYMENT_STORE_ID:CEOS-22-3475832}
+
+
+

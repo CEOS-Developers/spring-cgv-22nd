@@ -101,3 +101,4 @@ jobs:
             echo "Waiting for application to start..."
             sleep 10
             docker logs cgv-app --tail 50
+            

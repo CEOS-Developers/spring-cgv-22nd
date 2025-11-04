@@ -27,3 +27,6 @@ ENV SPRING_PROFILES_ACTIVE=docker
 
 # 애플리케이션 실행
 ENTRYPOINT ["java", "-jar", "/app/app.jar"]
+
+
+

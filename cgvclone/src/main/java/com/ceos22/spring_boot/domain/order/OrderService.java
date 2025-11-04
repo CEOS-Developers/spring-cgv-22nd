@@ -83,7 +83,7 @@ public class OrderService {
         Payment pay = Payment.builder()
                 .reservation(null)
                 .userOrder(order)
-                .method(req.method() == null ? PaymentMethod.카드 : req.method())
+                .method(req.method() == null ? PaymentMethod.CARD : req.method())
                 .status(PaymentStatus.SUCCESS)
                 .build();
         payments.save(pay);

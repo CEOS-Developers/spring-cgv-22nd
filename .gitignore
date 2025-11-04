@@ -36,3 +36,7 @@ application.yml
 
 ### VS Code ###
 .vscode/
+
+.env
+*.env
+*/.env

@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/cinemas/{cinemaId}/likes")
+@RequestMapping("/api/cinemas/{cinemaId}/likes")
 public class CinemaLikeController {
 
     private final CinemaLikeService cinemaLikeService;

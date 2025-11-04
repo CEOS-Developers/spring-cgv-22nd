@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/movies/{movieId}/like")
+@RequestMapping("/api/movies/{movieId}/like")
 public class MovieLikeController {
 
     private final MovieLikeService movieLikeService;

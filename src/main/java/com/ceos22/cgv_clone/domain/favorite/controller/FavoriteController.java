@@ -1,6 +1,9 @@
 package com.ceos22.cgv_clone.domain.favorite.controller;
 
+import com.ceos22.cgv_clone.domain.favorite.dto.response.FavoriteResponse;
 import com.ceos22.cgv_clone.domain.favorite.service.FavoriteService;
+import com.ceos22.cgv_clone.global.code.SuccessCode;
+import com.ceos22.cgv_clone.global.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -19,40 +22,31 @@ public class FavoriteController {
 
     // 영화 찜
     @PostMapping("/favorites/movies/{movieId}")
-    public String addMovieFavorite(@PathVariable Long movieId, @AuthenticationPrincipal UserDetails userDetails) {
-        String username = userDetails.getUsername();
-        log.info("[POST] /favorites/movies/{} 요청 수신 - user={}", movieId, username);
-        favoriteService.addMovieFavorite(username, movieId);
-        return "영화 찜 완료";
+    public ApiResponse<FavoriteResponse> addMovieFavorite(@PathVariable Long movieId, @AuthenticationPrincipal UserDetails userDetails) {
+        var res = favoriteService.addMovieFavorite(userDetails.getUsername(), movieId);
+        return ApiResponse.of(res, SuccessCode.CREATE_SUCCESS);
     }
 
     // 영화 찜 취소
     @DeleteMapping("/favorites/movies/{movieId}")
-    public String removeMovieFavorite(@PathVariable Long movieId, @AuthenticationPrincipal UserDetails userDetails) {
+    public ApiResponse<Void> removeMovieFavorite(@PathVariable Long movieId, @AuthenticationPrincipal UserDetails userDetails) {
         String username = userDetails.getUsername();
-        log.info("[DELETE] /favorites/movies/{} 요청 수신 - user={}", movieId, username);
-
         favoriteService.removeMovieFavorite(username, movieId);
-        return "영화 찜 취소 완료";
+        return ApiResponse.of(SuccessCode.DELETE_SUCCESS);
     }
 
     // 영화관 찜
     @PostMapping("/favorites/theaters/{theaterId}")
-    public String addTheaterFavorite(@PathVariable Long theaterId, @AuthenticationPrincipal UserDetails userDetails) {
-        String username = userDetails.getUsername();
-        log.info("[POST] /favorites/theaters/{} 요청 수신 - user={}", theaterId, username);
-
-        favoriteService.addTheaterFavorite(username, theaterId);
-        return "영화관 찜 완료";
+    public ApiResponse<FavoriteResponse> addTheaterFavorite(@PathVariable Long theaterId, @AuthenticationPrincipal UserDetails userDetails) {
+        var res = favoriteService.addTheaterFavorite(userDetails.getUsername(), theaterId);
+        return ApiResponse.of(res, SuccessCode.CREATE_SUCCESS);
     }
 
     // 영화관 찜 취소
     @DeleteMapping("/favorites/theaters/{theaterId}")
-    public String removeTheaterFavorite(@PathVariable Long theaterId, @AuthenticationPrincipal UserDetails userDetails) {
+    public ApiResponse<Void> removeTheaterFavorite(@PathVariable Long theaterId, @AuthenticationPrincipal UserDetails userDetails) {
         String username = userDetails.getUsername();
-        log.info("[DELETE] /favorites/theaters/{} 요청 수신 - user={}", theaterId, username);
-
         favoriteService.removeTheaterFavorite(username, theaterId);
-        return "영화관 찜 취소 완료";
+        return ApiResponse.of(SuccessCode.DELETE_SUCCESS);
     }
 }

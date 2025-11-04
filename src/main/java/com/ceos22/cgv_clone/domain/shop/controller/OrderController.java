@@ -2,7 +2,10 @@ package com.ceos22.cgv_clone.domain.shop.controller;
 
 import com.ceos22.cgv_clone.domain.shop.dto.request.OrderRequestDto;
 import com.ceos22.cgv_clone.domain.shop.dto.response.OrderResponseDto;
+import com.ceos22.cgv_clone.domain.shop.dto.response.SimpleResponse;
 import com.ceos22.cgv_clone.domain.shop.service.OrderService;
+import com.ceos22.cgv_clone.global.code.SuccessCode;
+import com.ceos22.cgv_clone.global.response.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,14 +35,14 @@ public class OrderController {
     }
 
     @DeleteMapping("/orders/cancel/{orderId}")
-    public String cancelOrder(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long orderId) {
+    public ApiResponse<SimpleResponse> cancelOrder(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long orderId) {
         orderService.cancelOrder(userDetails.getUsername(), orderId);
-        return "주문이 취소되었습니다.";
+        return ApiResponse.of(new SimpleResponse("주문이 취소되었습니다."), SuccessCode.DELETE_SUCCESS);
     }
 
     @PostMapping("/orders/{orderId}/pay")
-    public String payOrder(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long orderId) {
+    public ApiResponse<SimpleResponse> payOrder(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long orderId) {
         orderService.payForOrder(userDetails.getUsername(), orderId);
-        return "주문 결제가 완료되었습니다.";
+        return ApiResponse.of(new SimpleResponse("주문이 완료되었습니다."), SuccessCode.CREATE_SUCCESS);
     }
 }

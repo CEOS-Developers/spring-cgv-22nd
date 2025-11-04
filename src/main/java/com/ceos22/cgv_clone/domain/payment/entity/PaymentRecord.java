@@ -1,7 +1,7 @@
 // src/main/java/com/ceos22/cgv_clone/external/payment/PaymentRecord.java
 package com.ceos22.cgv_clone.domain.payment.entity;
 
-import com.ceos22.cgv_clone.domain.common.entity.BaseEntity;
+import com.ceos22.cgv_clone.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -25,11 +25,23 @@ public class PaymentRecord extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private PaymentStatus status; // REQUESTED, PAID, CANCELLED
 
-    @Builder
-    public PaymentRecord(PaymentTarget type, Long refId, String paymentId, PaymentStatus status) {
-        this.type = type;
-        this.refId = refId;
-        this.paymentId = paymentId;
-        this.status = status;
+    public static PaymentRecord createOrder(Long orderId, String paymentId) {
+        PaymentRecord record = new PaymentRecord();
+        record.type = PaymentTarget.ORDER;
+        record.refId = orderId;
+        record.paymentId = paymentId;
+        record.status = PaymentStatus.REQUESTED;
+        return record;
     }
+
+    public static PaymentRecord createTicket(Long orderId, String paymentId) {
+        PaymentRecord record = new PaymentRecord();
+        record.type = PaymentTarget.TICKET;
+        record.refId = orderId;
+        record.paymentId = paymentId;
+        record.status = PaymentStatus.REQUESTED;
+        return record;
+    }
+
+
 }

@@ -5,9 +5,12 @@ import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.beans.factory.annotation.Value;
 
 @Configuration
 public class RedissonConfig {
+    @Value("${spring.data.redis.host}") private String host;
+    @Value("${spring.data.redis.port}") private int port;
 
     @Bean
     public RedissonClient redissonClient() {
@@ -15,7 +18,7 @@ public class RedissonConfig {
 
         // 단일 Redis 서버에 연결 (기본: localhost:6379)
         config.useSingleServer()
-                .setAddress("redis://127.0.0.1:6379")
+                .setAddress("redis://" + host + ":" + port)
                 .setConnectionMinimumIdleSize(5)
                 .setConnectionPoolSize(10);
 

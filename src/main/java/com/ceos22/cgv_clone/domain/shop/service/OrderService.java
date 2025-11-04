@@ -3,7 +3,6 @@ package com.ceos22.cgv_clone.domain.shop.service;
 import com.ceos22.cgv_clone.domain.payment.PaymentRecordRepository;
 import com.ceos22.cgv_clone.domain.shop.repository.OrderItemRepository;
 import com.ceos22.cgv_clone.domain.shop.repository.OrderRepository;
-import com.ceos22.cgv_clone.domain.shop.repository.ProductRepository;
 import com.ceos22.cgv_clone.domain.shop.repository.StockRepository;
 import com.ceos22.cgv_clone.domain.theater.repository.TheaterRepository;
 import com.ceos22.cgv_clone.domain.user.entity.User;
@@ -20,6 +19,8 @@ import com.ceos22.cgv_clone.domain.payment.entity.PaymentRecord;
 import com.ceos22.cgv_clone.domain.payment.entity.PaymentStatus;
 import com.ceos22.cgv_clone.domain.payment.entity.PaymentTarget;
 import com.ceos22.cgv_clone.domain.payment.service.PaymentService;
+import com.ceos22.cgv_clone.global.code.ErrorCode;
+import com.ceos22.cgv_clone.global.exception.BusinessException;
 import com.ceos22.cgv_clone.global.redis.RedissonLockHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,13 +40,15 @@ public class OrderService {
     private final UserRepository userRepository;
     private final TheaterRepository theaterRepository;
     private final StockRepository stockRepository;
-    private final ProductRepository productRepository;
 
     private final PaymentService paymentService;
     private final PaymentRecordRepository paymentRecordRepository;
 
     private final RedissonLockHelper lockHelper;
 
+
+    /* ------------util------------- */
+    // lock
     private String stockKey(Long theaterId, Long productId) {
         return "snack:%d:%d".formatted(theaterId, productId);
     }
@@ -55,144 +58,99 @@ public class OrderService {
         return "junilyy-ord-" + orderId;
     }
 
+
+    /* ----------------서비스 로직(주문 생성, 조회, 결제, 결제 취소 등)-----------------*/
+
     // 주문 생성
     @Transactional
     public OrderResponseDto createOrder(String username, OrderRequestDto request) {
 
-        int itemCount = request.getItems() == null ? 0 : request.getItems().size();
-        log.debug("[SVC] createOrder start - user={}, theaterId={}, items={}",
-                username, request.getTheaterId(), itemCount);
+        User user = getUser(username);
+        Theater theater = getTheater(request.getTheaterId());
 
-        try {
-            User user = userRepository.findByUsername(username)
-                    .orElseThrow(() -> new IllegalArgumentException("유저 없음"));
-            Theater theater = theaterRepository.findById(request.getTheaterId())
-                    .orElseThrow(() -> new IllegalArgumentException("매점 없음"));
+        // 이번 주문의 재고 키들을 수집
+        List<String> keys = request.getItems().stream()
+                .map(i -> stockKey(request.getTheaterId(), i.getProductId()))
+                .distinct()
+                .toList();
 
-            // 이번 주문의 재고 키들을 수집
-            List<String> keys = request.getItems().stream()
-                    .map(i -> stockKey(request.getTheaterId(), i.getProductId()))
-                    .distinct()
-                    .toList();
+        // 주문 저장
+        Order order = Order.create(user, theater);
+        ordersRepository.save(order);
 
+        int totalPrice = 0;
+        List<OrderItemResponseDto> itemDtos = new ArrayList<>();
 
-            Order order = Order.builder()
-                    .user(user)
-                    .theater(theater)
-                    .totalPrice(0)
-                    .build();
-            ordersRepository.save(order);
+        for (OrderItemRequestDto item : request.getItems()) {
+            Stock stock = getStock(item.getProductId(), request.getTheaterId());
 
-            int totalPrice = 0;
-            List<OrderItemResponseDto> itemDtos = new ArrayList<>();
+            // 주문 상품 생성/저장
+            OrderItem orderItem = OrderItem.create(order, stock.getProduct(), item.getQuantity());
+            orderItemRepository.save(orderItem);
 
-            for (OrderItemRequestDto item : request.getItems()) {
-                Stock stock = stockRepository
-                        .findByProduct_IdAndTheater_Id(item.getProductId(), request.getTheaterId())
-                        .orElseThrow(() -> new IllegalArgumentException("재고 없음"));
-
-                // 주문 상품 생성/저장
-                OrderItem orderItem = OrderItem.builder()
-                        .order(order)
-                        .product(stock.getProduct())
-                        .quantity(item.getQuantity())
-                        .price(stock.getProduct().getPrice() * item.getQuantity())
-                        .build();
-                orderItemRepository.save(orderItem);
-
-                totalPrice += orderItem.getPrice();
-                itemDtos.add(OrderItemResponseDto.fromEntity(orderItem));
-            }
-
-            order.setTotalPrice(totalPrice);
-
-            // 결제 대기 레코드(REQUESTED) 생성
-            String paymentId = paymentIdForOrder(order.getId());
-            paymentRecordRepository.save(
-                    PaymentRecord.builder()
-                            .type(PaymentTarget.ORDER)
-                            .refId(order.getId())
-                            .paymentId(paymentId)
-                            .status(PaymentStatus.REQUESTED)
-                            .build()
-            );
-
-            log.info("[SVC] 주문 생성 완료 - user={}, orderId={}, theaterId={}, items={}, totalPrice={}",
-                    username, order.getId(), request.getTheaterId(), itemDtos.size(), totalPrice);
-
-            return OrderResponseDto.fromEntity(order, itemDtos);
-
-        } catch (IllegalArgumentException e) {
-            log.warn("[SVC] 잘못된 요청(주문 생성) - user={}, theaterId={}, msg={}",
-                    username, request.getTheaterId(), e.getMessage());
-            throw e;
-        } catch (IllegalStateException e) {
-            log.warn("[SVC] 비정상 상태(주문 생성) - user={}, theaterId={}, msg={}",
-                    username, request.getTheaterId(), e.getMessage());
-            throw e;
-        } catch (Exception e) {
-            log.error("[SVC] 주문 생성 실패 - user={}, theaterId={}", username, request.getTheaterId(), e);
-            throw e;
+            // 총 가격 계산
+            totalPrice += orderItem.getPrice();
+            itemDtos.add(OrderItemResponseDto.fromEntity(orderItem));
         }
+
+        order.setTotalPrice(totalPrice);
+
+        // 결제 대기 레코드(REQUESTED) 생성
+        String paymentId = paymentIdForOrder(order.getId());
+        paymentRecordRepository.save(PaymentRecord.createOrder(order.getId(), paymentId));
+
+        return OrderResponseDto.fromEntity(order, itemDtos);
     }
 
     //주문 조회
     @Transactional(readOnly = true)
     public OrderResponseDto getOrder(String username, Long orderId) {
-        log.debug("[SVC] getOrder start - user={}, orderId={}", username, orderId);
-        try {
-            Order order = ordersRepository.findById(orderId)
-                    .orElseThrow(() -> new IllegalArgumentException("주문 없음"));
 
-            if (!order.getUser().getUsername().equals(username)) {
-                throw new SecurityException("본인의 주문만 조회할 수 있습니다.");
-            }
+        Order order = ordersRepository.findById(orderId)
+                .orElseThrow(() -> new IllegalArgumentException("주문 없음"));
 
-            List<OrderItemResponseDto> items = orderItemRepository.findByOrder_Id(orderId)
-                    .stream()
-                    .map(OrderItemResponseDto::fromEntity)
-                    .toList();
-
-            log.info("[SVC] 주문 조회 완료 - user={}, orderId={}, items={}, totalPrice={}",
-                    username, orderId, items.size(), order.getTotalPrice());
-
-            return OrderResponseDto.fromEntity(order, items);
-
-        } catch (IllegalArgumentException e) {
-            log.warn("[SVC] 잘못된 요청(주문 조회) - user={}, orderId={}, msg={}", username, orderId, e.getMessage());
-            throw e;
-        } catch (SecurityException e) {
-            log.warn("[SVC] 권한 오류(주문 조회) - user={}, orderId={}, msg={}", username, orderId, e.getMessage());
-            throw e;
-        } catch (Exception e) {
-            log.error("[SVC] 주문 조회 실패 - user={}, orderId={}", username, orderId, e);
-            throw e;
+        if (!order.getUser().getUsername().equals(username)) {
+            throw new SecurityException("본인의 주문만 조회할 수 있습니다.");
         }
+
+        List<OrderItemResponseDto> items = orderItemRepository.findByOrder_Id(orderId)
+                .stream()
+                .map(OrderItemResponseDto::fromEntity)
+                .toList();
+
+        return OrderResponseDto.fromEntity(order, items);
+
     }
 
     // 주문 결제
     @Transactional
     public void payForOrder(String username, Long orderId) {
-        Order order = ordersRepository.findById(orderId)
-                .orElseThrow(() -> new IllegalArgumentException("주문 없음"));
-
-        if (!order.getUser().getUsername().equals(username)) {
-            throw new SecurityException("본인 주문만 결제할 수 있습니다.");
-        }
+        Order order = getOrderOwned(username, orderId);
 
         String paymentId = paymentIdForOrder(orderId);
-        String orderName = "CGV-Order-" + orderId;
-        String custom = "{\"orderId\":\"" + orderId + "\"}";
-        int amount = order.getTotalPrice();
+        PaymentRecord record = paymentRecordRepository.findByPaymentId(paymentId)
+                .orElseThrow(() -> new BusinessException(
+                        ErrorCode.PAYMENT_REQUESTED,
+                        "paymentId=%s를 찾을 수 없습니다.".formatted(paymentId)
+                ));
+
+        // 중복 결제 방지
+        if (record.getStatus() == PaymentStatus.PAID) {
+            throw new BusinessException(
+                    ErrorCode.PAYMENT_ALREADY_PAID,
+                    "orderId=%d는 이미 결제가 완료되었습니다.".formatted(orderId));
+        }
 
         // 결제 호출
         try {
+            String orderName = "CGV-Order-" + orderId;
+            String custom = "{\"orderId\":\"" + orderId + "\"}";
+            int amount = order.getTotalPrice();
             paymentService.pay(paymentId, orderName, amount, custom);
-            paymentRecordRepository.findByPaymentId(paymentId)
-                    .ifPresent(r -> r.setStatus(PaymentStatus.PAID));
+            record.setStatus(PaymentStatus.PAID);
         } catch (Exception e) {
-            log.warn("[SVC] 주문 결제 실패 - orderId={}, msg={}", orderId, e.getMessage());
-            throw e;
+            throw new BusinessException(ErrorCode.PAYMENT_FAILED,
+                    "orderId=%d의 결제 오류가 발생하였습니다.".formatted(orderId));
         }
 
         // 결제 성공 -> 재고 차감
@@ -203,82 +161,91 @@ public class OrderService {
                 .map(oi -> stockKey(theaterId, oi.getProduct().getId()))
                 .distinct().toList();
 
-        try {
-            lockHelper.withLocks(keys, 2000, 5000, () -> {
-                // 재고 검증
-                for (var oi : items) {
-                    Stock stock = stockRepository
-                            .findByProduct_IdAndTheater_Id(oi.getProduct().getId(), theaterId)
-                            .orElseThrow(() -> new IllegalArgumentException("재고 없음"));
-                    if (stock.getStock() < oi.getQuantity()) {
-                        throw new IllegalStateException("재고 부족: " + oi.getProduct().getId());
-                    }
+        lockHelper.withLocks(keys, 2000, 5000, () -> {
+            // 재고 검증
+            for (var oi : items) {
+                Stock stock = getStock(oi.getProduct().getId(), theaterId);
+                if (stock.getStock() < oi.getQuantity()) {
+                    throw new BusinessException(
+                            ErrorCode.STOCK_SHORTAGE,
+                            "재고가 부족합니다.(productId=%d, need=%d, has=%d)".formatted(oi.getProduct().getId(), oi.getQuantity(), stock.getStock())
+                    );
                 }
-                // 차감
-                for (var oi : items) {
-                    Stock stock = stockRepository
-                            .findByProduct_IdAndTheater_Id(oi.getProduct().getId(), theaterId)
-                            .orElseThrow();
-                    stock.setStock(stock.getStock() - oi.getQuantity());
-                }
-                return null;
-            });
-
-            log.info("[SVC] 주문 결제/재고 차감 완료 - orderId={}, amount={}", orderId, amount);
-
-        } catch (Exception e) {
-            // 재고 차감 실패 시 결제 취소
-            try {
-                paymentService.cancel(paymentId);
-                paymentRecordRepository.findByPaymentId(paymentId)
-                        .ifPresent(r -> r.setStatus(PaymentStatus.CANCELLED));
-                log.warn("[SVC] 재고 부족으로 인한 결제 취소 완료 - orderId={}, paymentId={}", orderId, paymentId);
-            } catch (Exception cancelEx) {
-                log.error("[SVC] 결제 보상 취소 실패 - orderId={}, paymentId={}", orderId, paymentId, cancelEx);
             }
-            throw e;
-        }
+            // 차감
+            for (var oi : items) {
+                Stock stock = getStock(oi.getProduct().getId(), theaterId);
+                stock.setStock(stock.getStock() - oi.getQuantity());
+            }
+            return null;
+        });
+
     }
 
     @Transactional
     public void cancelOrder(String username, Long orderId) {
-        Order order = ordersRepository.findById(orderId)
-                .orElseThrow(() -> new IllegalArgumentException("주문 없음"));
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new IllegalArgumentException("유저 없음"));
-        if (!order.getUser().getId().equals(user.getId())) {
-            throw new SecurityException("본인 주문만 취소할 수 있습니다.");
-        }
+        Order order = getOrderOwned(username, orderId);
 
-        // 1) 결제 상태 조회
+        // 결제 상태 조회
         var recOpt = paymentRecordRepository.findTopByTypeAndRefIdOrderByIdDesc(PaymentTarget.ORDER, orderId);
 
-        // 2) 결제 상태별 처리
-        if (recOpt.isPresent()) {
-            var rec = recOpt.get();
+        var rec = recOpt.get();
 
-            if (rec.getStatus() == PaymentStatus.PAID) {
-                // 결제 완료된 경우 -> CANCELLED로 상태 변경
-                try {
-                    paymentService.cancel(rec.getPaymentId());
-                    rec.setStatus(PaymentStatus.CANCELLED);
-                } catch (Exception ex) {
-                    throw new RuntimeException("결제 취소 실패", ex);
-                }
-
-                // 재고 복구
-                restoreStocksAndDeleteOrder(order);
-
-            } else if (rec.getStatus() == PaymentStatus.REQUESTED) {
-                // 결제 전이므로 결제 레코드 및 주문 삭제(재고 복구 X)
-                paymentRecordRepository.delete(rec);
-                deleteOrderOnly(order);
+        if (rec.getStatus() == PaymentStatus.PAID) {
+            // 결제 취소
+            try {
+                paymentService.cancel(rec.getPaymentId());
+                rec.setStatus(PaymentStatus.CANCELLED);
+            } catch (Exception ex) {
+                throw new BusinessException(ErrorCode.PAYMENT_CANCEL_FAILED,
+                        "결제 취소 오류가 발생했습니다.(orderId=%d, paymentId=%s)".formatted(orderId, rec.getPaymentId()));
             }
+            // 재고 복구 후 주문 삭제
+            restoreStocksAndDeleteOrder(order);
+        }
+        else if (rec.getStatus() == PaymentStatus.REQUESTED) {
+            // 레코드 및 주문 삭제
+            paymentRecordRepository.delete(rec);
+            deleteOrderOnly(order);
+        } else {
+            deleteOrderOnly(order);
         }
 
-        log.info("[SVC] 주문 취소 완료 - user={}, orderId={}", username, orderId);
     }
 
+    /* ---------- 내부 공통 로직 --------- */
+
+    private User getUser(String username) {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new BusinessException(
+                        ErrorCode.USER_NOT_FOUND, "username=%s을 찾을 수 없습니다.".formatted(username)));
+    }
+
+    private Theater getTheater(Long theaterId) {
+        return theaterRepository.findById(theaterId)
+                .orElseThrow(() -> new BusinessException(
+                        ErrorCode.THEATER_NOT_FOUND, "theaterId=%d인 매점을 찾을 수 없습니다.".formatted(theaterId)));
+    }
+
+    private Stock getStock(Long productId, Long theaterId) {
+        return stockRepository.findByProduct_IdAndTheater_Id(productId, theaterId)
+                .orElseThrow(() -> new BusinessException(
+                        ErrorCode.STOCK_NOT_FOUND,
+                        "상품을 찾을 수 없습니다.(productId=%d, theaterId=%d)".formatted(productId, theaterId)));
+    }
+
+    private Order getOrderOwned(String username, Long orderId) {
+        Order order = ordersRepository.findById(orderId)
+                .orElseThrow(() -> new BusinessException(
+                        ErrorCode.ORDER_NOT_FOUND, "orderId=%d인 주문을 찾을 수 없습니다.".formatted(orderId)));
+        if (!order.getUser().getUsername().equals(username)) {
+            throw new BusinessException(
+                    ErrorCode.FORBIDDEN_ORDER_ACCESS,
+                    "본인의 주문이 아닙니다.(username=%s, owner=%s, orderId=%d)".formatted(username, order.getUser().getUsername(), orderId)
+            );
+        }
+        return order;
+    }
     // 재고 복구 후 주문 및 결제 레코드 삭제
     private void restoreStocksAndDeleteOrder(Order order) {
         var items = orderItemRepository.findByOrder_Id(order.getId());

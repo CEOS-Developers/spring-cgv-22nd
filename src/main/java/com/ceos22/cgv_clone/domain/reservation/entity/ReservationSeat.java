@@ -1,6 +1,6 @@
 package com.ceos22.cgv_clone.domain.reservation.entity;
 
-import com.ceos22.cgv_clone.domain.common.entity.BaseEntity;
+import com.ceos22.cgv_clone.global.entity.BaseEntity;
 import com.ceos22.cgv_clone.domain.theater.entity.Screen;
 import com.ceos22.cgv_clone.domain.theater.entity.Showtime;
 import jakarta.persistence.*;
@@ -39,7 +39,7 @@ public class ReservationSeat extends BaseEntity {
     private ReservationStatus status; // RESERVED / AVAILABLE
 
     @Builder
-    public ReservationSeat(Showtime showtime, Ticket ticket, Screen screen, String seatRow, String seatCol, ReservationStatus status) {
+    public ReservationSeat (Showtime showtime, Ticket ticket, Screen screen, String seatRow, String seatCol, ReservationStatus status) {
         this.showtime = showtime;
         this.ticket = ticket;
         this.screen = screen;

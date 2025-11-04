@@ -2,6 +2,8 @@ package com.ceos22.cgv_clone.domain.theater.controller;
 
 import com.ceos22.cgv_clone.domain.theater.dto.response.TheaterResponseDto;
 import com.ceos22.cgv_clone.domain.theater.service.TheaterService;
+import com.ceos22.cgv_clone.global.code.SuccessCode;
+import com.ceos22.cgv_clone.global.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -14,15 +16,17 @@ import java.util.List;
 public class TheaterController {
     private final TheaterService theaterService;
 
+    // 극장 전체 조회
     @GetMapping("/theaters")
-    public List<TheaterResponseDto> getAllTheaters(){
-        log.info("[GET] /theaters 요청 수신");
-        return theaterService.getAllTheaters();
+    public ApiResponse<List<TheaterResponseDto>> getAllTheaters(){
+        List<TheaterResponseDto> result = theaterService.getAllTheaters();
+        return ApiResponse.of(result, SuccessCode.GET_SUCCESS);
     }
 
+    // 극장 단건 조회
     @GetMapping("/theaters/{id}")
-    public TheaterResponseDto getTheaterById(@PathVariable Long id){
-        log.info("[GET] /theaters/{} 요청 수신", id);
-        return theaterService.getTheaterById(id);
+    public ApiResponse<TheaterResponseDto> getTheaterById(@PathVariable Long id){
+        TheaterResponseDto result = theaterService.getTheaterById(id);
+        return ApiResponse.of(result, SuccessCode.GET_SUCCESS);
     }
 }

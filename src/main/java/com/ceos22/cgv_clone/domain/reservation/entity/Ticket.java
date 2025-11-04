@@ -1,6 +1,6 @@
 package com.ceos22.cgv_clone.domain.reservation.entity;
 
-import com.ceos22.cgv_clone.domain.common.entity.BaseEntity;
+import com.ceos22.cgv_clone.global.entity.BaseEntity;
 import com.ceos22.cgv_clone.domain.user.entity.User;
 import com.ceos22.cgv_clone.domain.theater.entity.Showtime;
 import jakarta.persistence.*;
@@ -34,12 +34,15 @@ public class Ticket extends BaseEntity {
     private int finalPrice;
 
     @Builder
-    public Ticket(Showtime showtime, User user, int generalCnt, int youthCnt, int finalPrice) {
-        this.showtime = showtime;
-        this.user = user;
-        this.generalCnt = generalCnt;
-        this.youthCnt = youthCnt;
-        this.finalPrice = finalPrice;
+    public static Ticket of(Showtime showtime, User user, int generalCnt, int youthCnt, int finalPrice) {
+        return Ticket.builder()
+                .showtime(showtime)
+                .user(user)
+                .generalCnt(generalCnt)
+                .youthCnt(youthCnt)
+                .finalPrice(finalPrice)
+                .build();
     }
+
 }
 

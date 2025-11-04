@@ -51,6 +51,15 @@ dependencies {
 	//Redisson
 	implementation 'org.redisson:redisson-spring-boot-starter:3.27.2'
 
+	// Redis
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+	// AOP
+	implementation 'org.springframework.boot:spring-boot-starter-aop'
+
+	// health 체크용 actuator
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
 }
 
 tasks.named('test') {

@@ -1,6 +1,6 @@
 package com.ceos22.cgv_clone.domain.favorite.entity;
 
-import com.ceos22.cgv_clone.domain.common.entity.BaseEntity;
+import com.ceos22.cgv_clone.global.entity.BaseEntity;
 import com.ceos22.cgv_clone.domain.user.entity.User;
 import com.ceos22.cgv_clone.domain.theater.entity.Theater;
 import jakarta.persistence.*;
@@ -26,9 +26,10 @@ public class TheaterFavorite extends BaseEntity {
     @JoinColumn(name = "theater_id", nullable = false)
     private Theater theater;
 
-    @Builder
-    public TheaterFavorite(User user, Theater theater) {
-        this.user = user;
-        this.theater = theater;
+    public static TheaterFavorite create(User user, Theater theater) {
+        TheaterFavorite tf = new TheaterFavorite();
+        tf.user = user;
+        tf.theater = theater;
+        return tf;
     }
 }

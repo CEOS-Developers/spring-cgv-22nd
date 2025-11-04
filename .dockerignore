@@ -1,0 +1,10 @@
+.git
+.gradle
+**/*.iml
+build/*-plain.jar
+build/tmp
+build/reports
+.env
+.env.*
+*.log
+.DS_Store

@@ -1,4 +1,4 @@
-package com.ceos22.cgv_clone.domain.common.entity;
+package com.ceos22.cgv_clone.global.entity;
 
 
 import jakarta.persistence.*;

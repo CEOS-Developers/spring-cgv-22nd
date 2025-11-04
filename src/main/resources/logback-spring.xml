@@ -2,7 +2,7 @@
 <configuration>
 
     <!-- 로그 패턴 -->
-    <property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"/>
+    <property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - [%X{traceId}] %msg%n"/>
 
 
     <!-- 개발 환경 (dev) -->
@@ -15,8 +15,8 @@
             </encoder>
         </appender>
 
-        <!-- 루트 로그레벨 DEBUG -->
-        <root level="DEBUG">
+        <!-- 루트 로그레벨 INFO -->
+        <root level="INFO">
             <appender-ref ref="CONSOLE"/>
         </root>
 

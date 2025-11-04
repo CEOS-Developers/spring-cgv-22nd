@@ -1,6 +1,6 @@
 package com.ceos22.cgv_clone.domain.favorite.entity;
 
-import com.ceos22.cgv_clone.domain.common.entity.BaseEntity;
+import com.ceos22.cgv_clone.global.entity.BaseEntity;
 import com.ceos22.cgv_clone.domain.user.entity.User;
 import com.ceos22.cgv_clone.domain.movie.entity.Movie;
 import jakarta.persistence.*;
@@ -27,9 +27,10 @@ public class MovieFavorite extends BaseEntity {
     @JoinColumn(name = "movie_id", nullable = false)
     private Movie movie;
 
-    @Builder
-    public MovieFavorite(User user, Movie movie) {
-        this.user = user;
-        this.movie = movie;
+    public static MovieFavorite create(User user, Movie movie) {
+        MovieFavorite mf = new MovieFavorite();
+        mf.user = user;
+        mf.movie = movie;
+        return mf;
     }
 }

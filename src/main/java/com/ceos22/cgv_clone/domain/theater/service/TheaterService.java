@@ -3,9 +3,12 @@ package com.ceos22.cgv_clone.domain.theater.service;
 import com.ceos22.cgv_clone.domain.theater.entity.Theater;
 import com.ceos22.cgv_clone.domain.theater.dto.response.TheaterResponseDto;
 import com.ceos22.cgv_clone.domain.theater.repository.TheaterRepository;
+import com.ceos22.cgv_clone.global.code.ErrorCode;
+import com.ceos22.cgv_clone.global.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -16,43 +19,21 @@ public class TheaterService {
     private final TheaterRepository theaterRepository;
 
     // 전체 극장 조회
+    @Transactional(readOnly = true)
     public List<TheaterResponseDto> getAllTheaters() {
-        log.debug("[SVC] [SVC] getAllTheaters start");
-        try {
-            List<TheaterResponseDto> result = theaterRepository.findAll().stream()
-                    .map(TheaterResponseDto::fromEntity)
-                    .toList();
-
-            if (result.isEmpty()) {
-                log.warn("[SVC] 등록된 극장이 없습니다.");
-            }
-            else {
-                log.info("[SVC] 전체 극장 조회 완료 - {}개", result.size());
-            }
-            return result;
-        }
-        catch (Exception e) {
-            log.error("[SVC] 전체 극장 조회 실패", e);
-            throw e;
-        }
+        List<TheaterResponseDto> result = theaterRepository.findAll().stream()
+                .map(TheaterResponseDto::fromEntity)
+                .toList();
+        return result;
     }
 
     // 단건 극장 조회
+    @Transactional(readOnly = true)
     public TheaterResponseDto getTheaterById(Long theaterId) {
-        log.debug("[SVC] getTheaterById start - theaterId={}", theaterId);
-        try {
-            Theater theater = theaterRepository.findById(theaterId)
-                    .orElseThrow(() -> new IllegalArgumentException("영화관을 찾을 수 없음"));
-            log.info("[SVC] 극장 조회 성공 - id={}, name={}", theater.getId(), theater.getName());
-            return TheaterResponseDto.fromEntity(theater);
-        }
-        catch (IllegalArgumentException e) {
-            log.warn("[SVC] 존재하지 않는 극장 요청 - theaterId={}", theaterId);
-            throw e;
-        }
-        catch (Exception e) {
-            log.error("[SVC] 극장 조회 중 오류 - theaterId={}", theaterId, e);
-            throw e;
-        }
+        Theater theater = theaterRepository.findById(theaterId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.THEATER_NOT_FOUND, "theaterId=%d인 극장을 찾을 수 없습니다.".formatted(theaterId)));
+
+        return TheaterResponseDto.fromEntity(theater);
+
     }
 }

@@ -1,6 +1,6 @@
 package com.ceos22.cgv_clone.domain.shop.entity;
 
-import com.ceos22.cgv_clone.domain.common.entity.BaseEntity;
+import com.ceos22.cgv_clone.global.entity.BaseEntity;
 import com.ceos22.cgv_clone.domain.user.entity.User;
 import com.ceos22.cgv_clone.domain.theater.entity.Theater;
 import jakarta.persistence.*;
@@ -28,11 +28,12 @@ public class Order extends BaseEntity {
     @Column(name = "total_price")
     private int totalPrice;
 
-    @Builder
-    public Order(User user, Theater theater, int totalPrice) {
-        this.user = user;
-        this.theater = theater;
-        this.totalPrice = totalPrice;
+    public static Order create(User user, Theater theater) {
+        Order order = new Order();
+        order.user = user;
+        order.theater = theater;
+        order.totalPrice = 0;
+        return order;
     }
 }
 

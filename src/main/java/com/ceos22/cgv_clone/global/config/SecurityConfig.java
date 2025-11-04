@@ -30,6 +30,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**", "/movies/**", "/products/**", "/showtimes/**","/theaters/**").permitAll()   // 로그인 하지 않아도 접근 가능.
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/v3/api-docs.yaml").permitAll() // swagger 접근 허용
+                        .requestMatchers("/actuator/**").permitAll()
                         .anyRequest().authenticated()             // 그 외에는 인증 필요
                 )
                 // JWT 필터 추가(아이디/비번 검증 전에 JWT 필터가 수행)

@@ -1,6 +1,6 @@
 package com.ceos22.cgv_clone.domain.shop.entity;
 
-import com.ceos22.cgv_clone.domain.common.entity.BaseEntity;
+import com.ceos22.cgv_clone.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -28,11 +28,12 @@ public class OrderItem extends BaseEntity {
     @Column(name = "price")
     private int price;
 
-    @Builder
-    public OrderItem(Order order, Product product, int quantity, int price) {
-        this.order = order;
-        this.product = product;
-        this.quantity = quantity;
-        this.price = price;
+    public static OrderItem create(Order order, Product product, int quantity) {
+        OrderItem item = new OrderItem();
+        item.order = order;
+        item.product = product;
+        item.quantity = quantity;
+        item.price = product.getPrice() * quantity; // 가격 계산 포함
+        return item;
     }
 }

@@ -5,9 +5,12 @@ import com.ceos22.cgv_clone.domain.reservation.repository.ReservationSeatReposit
 import com.ceos22.cgv_clone.domain.theater.entity.Showtime;
 import com.ceos22.cgv_clone.domain.theater.repository.ShowtimeRepository;
 import com.ceos22.cgv_clone.domain.reservation.dto.response.SeatResponseDto;
+import com.ceos22.cgv_clone.global.code.ErrorCode;
+import com.ceos22.cgv_clone.global.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -20,36 +23,25 @@ public class SeatService {
     private final ShowtimeRepository showtimeRepository;
 
     // 특정 상영 시간표의 예약 좌석 조회
+    @Transactional(readOnly = true)
     public SeatResponseDto getSeatsByShowtime(Long showtimeId){
+        Showtime showtime = showtimeRepository.findById(showtimeId)
+                .orElseThrow(() -> new BusinessException(
+                        ErrorCode.SHOWTIME_NOT_FOUND,
+                        "showtimeId=%d를 찾을 수 없습니다.".formatted(showtimeId)));
 
-        log.debug("[SVC] getSeatsByShowtime start - showtimeId={}", showtimeId);
-        try {
-            Showtime showtime = showtimeRepository.findById(showtimeId)
-                    .orElseThrow(() -> new IllegalArgumentException("상영시간표 없음"));
+        int totalRow = showtime.getScreen().getTotalRow();
+        int totalCol = showtime.getScreen().getTotalCol();
 
-            int totalRow = showtime.getScreen().getTotalRow();
-            int totalCol = showtime.getScreen().getTotalCol();
+        // 예약 좌석만 조회
+        List<String> reservedSeats = reservationSeatRepository
+                .findByShowtime_IdAndStatus(showtimeId, ReservationStatus.RESERVED)
+                .stream()
+                .map(rs -> rs.getSeatRow() + rs.getSeatCol())
+                .toList();
 
-            List<String> reservedSeats = reservationSeatRepository
-                    .findByShowtime_IdAndStatus(showtimeId, ReservationStatus.RESERVED)
-                    .stream()
-                    .map(rs -> rs.getSeatRow() + rs.getSeatCol())
-                    .toList();
+        return SeatResponseDto.from(showtime, totalRow, totalCol, reservedSeats);
 
-            log.info("[SVC] 좌석 조회 완료 - showtimeId={}, reserved={}석, size={}x{}",
-                    showtimeId, reservedSeats.size(), totalRow, totalCol);
-
-            return SeatResponseDto.from(showtime, totalRow, totalCol, reservedSeats);
-
-        }
-        catch (IllegalArgumentException e) {
-            log.warn("[SVC] 잘못된 요청(좌석 조회) - showtimeId={}, msg={}", showtimeId, e.getMessage());
-            throw e;
-        }
-        catch (Exception e) {
-            log.error("[SVC] 좌석 조회 실패 - showtimeId={}", showtimeId, e);
-            throw e;
-        }
     }
 }
 

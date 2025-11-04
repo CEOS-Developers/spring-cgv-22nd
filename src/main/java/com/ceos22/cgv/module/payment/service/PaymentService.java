@@ -1,14 +1,12 @@
 package com.ceos22.cgv.module.payment.service;
 
 import com.ceos22.cgv.module.payment.domain.PaymentLog;
-import com.ceos22.cgv.module.payment.dto.DomainAndParams;
 import com.ceos22.cgv.module.payment.dto.PaymentApiRequest;
 import com.ceos22.cgv.module.payment.dto.PaymentRequest;
 import com.ceos22.cgv.module.payment.dto.PaymentResponse;
 import com.ceos22.cgv.module.payment.repository.PaymentRepository;
 import com.ceos22.cgv.module.user.domain.User;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -24,70 +22,70 @@ public class PaymentService {
     private final PaymentRepository paymentRepository;
     private final PaymentTransactionService paymentTransactionService;
 
-    @Value("${payment.store-id}")
-    private String STORE_ID;
-    private final String STORE_PREFIX = "CEOS-22-";
-
     // 외부 결제 후 내부 트랜잭션으로 확정/차감
     @Transactional
     public PaymentResponse createPayment(PaymentRequest request, User user) {
 
         boolean isReservation = request.reservationId() != null;
-        DomainAndParams params = paymentTransactionService.buildParams(request, isReservation, user);
-        String paymentId = paymentTransactionService.createPaymentId();
 
-        PaymentApiRequest paymentApiRequest = new PaymentApiRequest(
-                STORE_PREFIX + STORE_ID,
-                params.orderName(),
-                params.totalPayAmount(),
-                params.currency(),
-                params.customData()
-        );
+        // 결제 요청 파라미터 생성
+        String paymentId = paymentTransactionService.createPaymentId();
+        PaymentApiRequest parameters = paymentTransactionService.buildParams(request, isReservation, user);
 
         // 외부 결제 요청
-        PaymentResponse paymentResponse = paymentApiService.createPaymentAPI(paymentId, paymentApiRequest);
+        PaymentResponse paymentResponse = paymentApiService.createPaymentAPI(paymentId, parameters);
 
         // 예매 결제 확정
         if(isReservation){
             paymentTransactionService.confirmReservation(
-                    params.reservation(),
+                    parameters.reservation(),
                     paymentId,
-                    params,
+                    parameters,
                     paymentResponse.paidAt()
             );
         }
 
         // 매점 결제 확정 및 재고 차감
-        // 재고 부족 및 lock 획득 실패에 대한 예외처리
         if(!isReservation){
             try{
                 paymentTransactionService.confirmOrder(
-                        params.order(),
+                        parameters.order(),
                         paymentId,
-                        params,
+                        parameters,
                         paymentResponse.paidAt()
                 );
             } catch (IllegalStateException ex){
                 // 재고 부족
+
                 paymentApiService.cancelPaymentAPI(paymentId); // 외부 결제 취소
-                paymentTransactionService.saveCancelledPaymntLog( // 결제 취소 내역 저장
+                paymentTransactionService.saveCancelledPaymentLog( // 결제 취소 내역 저장
                         paymentId,
-                        params,
+                        parameters,
                         paymentResponse.paidAt()
                 );
-                paymentTransactionService.cancelOrder(params.order()); // 주문 cancel 상태 반영
+                paymentTransactionService.cancelOrder(parameters.order()); // 주문 cancel 상태 반영
 
                 throw new ResponseStatusException(HttpStatus.CONFLICT, "재고 부족으로 인한 결제 취소");
             } catch(PessimisticLockException | LockTimeoutException e){
                 // 락 타임아웃/경합
                 paymentApiService.cancelPaymentAPI(paymentId); // 외부 결제 취소
-                paymentTransactionService.saveCancelledPaymntLog( // 결제 취소 내역 저장
+                paymentTransactionService.saveCancelledPaymentLog( // 결제 취소 내역 저장
                         paymentId,
-                        params,
+                        parameters,
                         paymentResponse.paidAt()
                 );
-                paymentTransactionService.cancelOrder(params.order()); // 주문 cancel 상태 반영
+                paymentTransactionService.cancelOrder(parameters.order()); // 주문 cancel 상태 반영
                 throw new ResponseStatusException(HttpStatus.LOCKED, "재고 잠금 경합/타임아웃");
+            } catch(Exception e){
+                // 기타 예외
+                paymentApiService.cancelPaymentAPI(paymentId); // 외부 결제 취소
+                paymentTransactionService.saveCancelledPaymentLog( // 결제 취소 내역 저장
+                        paymentId,
+                        parameters,
+                        paymentResponse.paidAt()
+                );
+                paymentTransactionService.cancelOrder(parameters.order()); // 주문 cancel 상태 반영
+                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "결제 처리 중 알 수 없는 오류");
             }
         }
         return paymentResponse;

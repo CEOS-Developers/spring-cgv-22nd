@@ -38,11 +38,6 @@ public class MovieService {
     private final UserRepository userRepository;
 
     @Transactional(readOnly = true)
-    public MovieListResponse findMovies(MovieRequest request) {
-        return MovieListResponse.fromMovies(movieRepository.findAll());
-    }
-
-    @Transactional(readOnly = true)
     public MovieListResponse findMovieTitleList(String query) {
         if (query == null || query.isEmpty())  query = "";
         List<Movie> movies = movieRepository.findByQuery(query);
@@ -90,21 +85,18 @@ public class MovieService {
     @Transactional
     public MovieLikeResponse like(Long movieId, User authenticatedUser) {
 
-        User user = userRepository.findById(authenticatedUser.getId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "해당 유저가 존재하지 않습니다."));
-
         Movie movie = movieRepository.findById(movieId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "해당 영화가 존재하지 않습니다."));
 
-        if (!movieLikeRepository.existsByUser_IdAndMovie_Id(user.getId(), movieId)) {
+        if (!movieLikeRepository.existsByUser_IdAndMovie_Id(authenticatedUser.getId(), movieId)) {
             MovieLike like = MovieLike.builder()
-                    .user(user)
+                    .user(authenticatedUser)
                     .movie(movie)
                     .build();
             movieLikeRepository.save(like);
         }
 
-        return MovieLikeResponse.fromMovieAndUser(movie, user, true);
+        return MovieLikeResponse.fromMovieAndUser(movie, authenticatedUser, true);
     }
 
 

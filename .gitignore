@@ -3,8 +3,8 @@
 *.ipr
 *.iws
 *.jar
+!gradle-wrapper.jar
 *.sw?
-*.yml
 *~
 .#*
 .*.md.html
@@ -12,7 +12,6 @@
 .attach_pid*
 .classpath
 .factorypath
-.gradle
 .metadata
 .project
 .recommenders
@@ -33,11 +32,15 @@ dump.rdb
 interpolated*.xml
 lib/
 manifest.yml
+application.yml
+docker-compose.yml
 out
 overridedb.*
 target
 .flattened-pom.xml
 secrets.yml
 .gradletasknamecache
+.gradle
 .sts4-cache
 .idea
+.env

@@ -80,7 +80,7 @@ public class ReservationService {
         try {
             // 대기시간 2초, 자동해제 5초
             locked = multiLock.tryLock(2, 30, TimeUnit.SECONDS);
-
+            
             if (!locked) {
                 throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 예약된 좌석입니다. 다시 시도해주세요.");
             }

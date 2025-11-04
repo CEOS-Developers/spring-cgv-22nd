@@ -1,0 +1,77 @@
+name: devleop 서버 CD 실행
+
+on:
+  push:
+    branches: [ "develop" ]
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+
+      # repository checkout
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # JDK 환경 설치
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'corretto'
+
+      # 환경 변수 설정
+      - name: application.yml 파일 설정
+        run: |
+          mkdir -p src/main/resources
+          echo "${{ secrets.APPLICATION_YML }}" > ./src/main/resources/application.yml
+
+      # Gradle 환경 설치
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
+
+      # Gradle 권한 변경
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      # Build 진행
+      - name: Build with Gradle
+        run: ./gradlew clean build -x test --stacktrace
+        shell: bash
+
+      # docker build & push
+      - name: Docker build & push
+        run: |
+          docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/uble-main -f ./Dockerfile .
+          docker push ${{ secrets.DOCKER_USERNAME }}/uble-main:latest
+
+      # 배포
+      - name: EC2 Connect & Deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            # Spring 컨테이너 중지 및 제거 (컨테이너가 있는 경우)
+            sudo docker stop uble-main || true
+            sudo docker rm -fv uble-main || true
+
+            # 이전 이미지 삭제
+            sudo docker image rm ${{ secrets.DOCKER_USERNAME }}/uble-main:latest || true
+
+            # 최신 Docker 이미지 pull 받기
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/uble-main:latest
+
+            # Docker 컨테이너 실행
+            sudo docker run -d -p 8080:8080 \
+              --name uble-main \
+              -v /home/ubuntu/uble-logs:/logs \
+              ${{ secrets.DOCKER_USERNAME }}/uble-main:latest
+
+            # 불필요한 Docker 이미지 정리
+            sudo docker image prune -f

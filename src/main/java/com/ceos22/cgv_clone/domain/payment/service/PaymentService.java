@@ -37,4 +37,26 @@ public class PaymentService {
                 .bodyToMono(PaymentResponseDto.class)
                 .block();
     }
+
+    // 결제 취소 메서드 (결제 롤백)
+    public void canclePayment(String paymentId) {
+        log.warn("DB 저장 실패 시의 결제 취소 시도: {}", paymentId);
+
+        webClient.post()
+                .uri("/payments/{paymentId}/cancel", paymentId)
+                .retrieve()
+                .onStatus(HttpStatusCode::isError, response -> //
+                        response.bodyToMono(String.class).flatMap(errorBody -> {
+                            log.error("결제 취소까지 실패한 경우 paymentId: {}, body: {}",
+                                    paymentId, errorBody);
+                            return Mono.error(new CustomException(ErrorCode.PAYMENT_FAILED));
+                        })
+                )
+                .bodyToMono(Void.class)
+                .block();
+
+        log.info("결제 취소 성공 paymentId: {}", paymentId);
+
+
+    }
 }

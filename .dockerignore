@@ -1,0 +1,9 @@
+# IDE 설정 제거
+.idea
+*.iml
+*.ipr
+*.iws
+
+# 기타 불필요 파일
+*.log
+.DS_Store

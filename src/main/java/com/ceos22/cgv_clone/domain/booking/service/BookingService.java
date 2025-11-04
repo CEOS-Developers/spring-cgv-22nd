@@ -57,8 +57,9 @@ public class BookingService {
     // 락 소유
     private static final long LEASE_TIME = 30L;
 
-    /** 예매 생성 */
-    @Transactional
+    /** 예매 생성
+     * @Transaction을 제거하고 서비스단에서 수동으로 관리
+     * */
     public BookingResponseDto create(String email, BookingRequestDto request) {
 
          // 락 키: 상영회차 id + 좌석 id
@@ -71,11 +72,33 @@ public class BookingService {
 
         RLock multiLock = redissonClient.getMultiLock(locks.toArray(new RLock[0]));
 
+
+        int totalPrice = calculateTotalPrice(request.getAdultCount(), request.getTeenCount());
+        String bookingNum = UUID.randomUUID().toString();
+
+        Screening screening = screeningRepository.findById(request.getScreeningId())
+                .orElseThrow(() -> new CustomException(ErrorCode.SCREENING_NOT_FOUND));
+
+        String movieTitle = screening.getMovie().getTitle();
+        String orderName;
+        if (request.getSeatIds().size() > 1) {
+            orderName = movieTitle + " 외 " + (request.getSeatIds().size() - 1) + "건";
+        } else {
+            orderName = movieTitle;
+        }
+
+        PaymentRequestDto paymentRequest = PaymentRequestDto.builder()
+                .storeId(storeId)
+                .orderName(orderName)
+                .totalPayAmount(totalPrice)
+                .currency("KRW")
+                .build();
+
+
         log.debug("사용자 락 획득 시도: {}, screeningId: {}, seats: {}",
                 email, request.getScreeningId(), request.getSeatIds());
 
         try {
-
             boolean isLocked = multiLock.tryLock(LOCK_WAIT_TIME, LEASE_TIME, TimeUnit.SECONDS);
 
             if (!isLocked) {
@@ -100,8 +123,6 @@ public class BookingService {
 
             Member member = memberRepository.findByEmail(email)
                     .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
-            Screening screening = screeningRepository.findById(request.getScreeningId())
-                    .orElseThrow(() -> new CustomException(ErrorCode.SCREENING_NOT_FOUND));
 
 
             List<Seat> seats = seatRepository.findAllById(request.getSeatIds());
@@ -113,55 +134,52 @@ public class BookingService {
                     s.getAuditorium().getId(), screeningAuditoriumId));
             if (mismatch) throw new CustomException(ErrorCode.SEAT_IN_AUDITORIUM_NOT_FOUND);
 
-            int totalPrice = calculateTotalPrice(request.getAdultCount(), request.getTeenCount());
-
-            // 예매 번호 생성
-            String bookingNum = UUID.randomUUID().toString();
-            String orderName = screening.getMovie().getTitle() + " 외 " + (seats.size() - 1) + "건";
-
-            PaymentRequestDto paymentRequest = PaymentRequestDto.builder()
-                    .storeId(storeId)
-                    .orderName(orderName)
-                    .totalPayAmount(totalPrice)
-                    .currency("KRW")
-                    .build();
-
 
             // 결제 API 호출
             paymentService.approvePayment(bookingNum, paymentRequest);
             log.info("Payment 성공. bookingNum(paymentId): {}", bookingNum);
 
-            // 결제 성공 시 DB 저장
-            Booking booking = Booking.create(member, screening, bookingNum, request.getPaymentType(), // ⬅️ bookingNum 전달
-                    request.getAdultCount(), request.getTeenCount(), totalPrice);
-            bookingRepository.save(booking);
-
-            List<BookingSeat> lines = new ArrayList<>();
-            for (Seat seat : seats) {
-                lines.add(BookingSeat.of(booking, screening, seat));
-            }
-
             try {
+                // 결제 성공 시 DB 저장
+                // Booking, BookingSeat 저장을 하나의 트랜잭션 단위로 실행
+                Booking booking = Booking.create(member, screening, bookingNum, request.getPaymentType(),
+                        request.getAdultCount(), request.getTeenCount(), totalPrice);
+                bookingRepository.save(booking);
+
+                List<BookingSeat> lines = new ArrayList<>();
+                for (Seat seat : seats) {
+                    lines.add(BookingSeat.of(booking, screening, seat));
+                }
                 bookingSeatRepository.saveAll(lines);
-            } catch (DataIntegrityViolationException e) {
 
-                log.error("UNIQUE 제약조건 위반 (중복 예매 시도)", e);
-                throw new CustomException(ErrorCode.SEAT_ALREADY_BOOKED);
+                List<String> seatLabels = seats.stream()
+                        .map(s -> s.getRowNo() + "-" + s.getColumnNo())
+                        .toList();
+
+                log.info("Booking 생성. user: {}, bookingId: {}, screeningId: {}",
+                        email, booking.getId(), screening.getId());
+
+                return BookingResponseDto.of(booking, seatLabels);
+
+            } catch (Exception e) {
+                // 결제는 성공, DB 저장 실패 시
+                log.error("결제 성공 후 DB 저장 실패 ", e);
+
+                // 결제 취소 실행
+                paymentService.canclePayment(bookingNum);
+
+                // 이미 예약된 좌석 오류의 경우 (UNIQUE 제약)
+                if (e instanceof DataIntegrityViolationException) {
+                    throw new CustomException(ErrorCode.SEAT_ALREADY_BOOKED);
+                }
+                throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR_500);
             }
-
-            List<String> seatLabels = seats.stream()
-                    .map(s -> s.getRowNo() + "-" + s.getColumnNo())
-                    .toList();
-
-            log.info("Booking 생성. user: {}, bookingId: {}, screeningId: {}",
-                    email, booking.getId(), screening.getId());
-
-            return BookingResponseDto.of(booking, seatLabels);
 
         } catch (InterruptedException e) {
             log.error("Redisson 락 대기 중 인터럽트 발생", e);
             Thread.currentThread().interrupt(); // 스레드 인터럽트 상태 복원
             throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR_500);
+
         } finally {
 
             if (multiLock.isHeldByCurrentThread()) {
@@ -186,6 +204,8 @@ public class BookingService {
 
         // 상태 변경
         booking.cancel();
+
+        paymentService.canclePayment(booking.getBookingNum());
 
         log.info("Booking 취소. bookingId: {}, user: {}",
                 booking.getId(), booking.getMember().getEmail());

@@ -42,4 +42,14 @@ secrets.yml
 
 .idea
 *.yml
+!ci.yml
+!cd.yml
 *.properties
+
+*.pem
+.env
+
+!gradle/
+!gradle/wrapper/
+!gradle/wrapper/gradle-wrapper.jar
+!gradle/wrapper/gradle-wrapper.properties

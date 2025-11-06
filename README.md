@@ -64,3 +64,7 @@ JWT 인증방식은 사진과 같다.
 
 <img width="639" height="430" alt="Image" src="https://github.com/user-attachments/assets/ea5e67ab-743f-4562-b372-5017c330d634" />
 Oauth 인증 방식이다.
+
+
+### 아키텍처 구조도
+<img width="414" height="370" alt="Image" src="https://github.com/user-attachments/assets/0c3c9956-5b5d-47ff-acfc-f95461d592ce" />

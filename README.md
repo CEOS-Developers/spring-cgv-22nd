@@ -68,3 +68,38 @@ Oauth 인증 방식이다.
 
 ### 아키텍처 구조도
 <img width="414" height="370" alt="Image" src="https://github.com/user-attachments/assets/0c3c9956-5b5d-47ff-acfc-f95461d592ce" />
+
+### 부하테스트 결과
+<img width="802" height="351" alt="Image" src="https://github.com/user-attachments/assets/9367e673-d04f-4115-9665-c0305ee7dd60" />
+
+결과 분석
+
+총 요청 수: 200,670
+최대 VU(가상 유저): 1,000명
+평균 동시 접속자 (VU): 122명
+
+✅p90, p95는 지연이 큼 -> 일부 요청이 지연된 상태
+    p90: 전체 요청 중 90%가 해당 시간 내에 응답받는 시간
+    p95: 전체 요청 중 95%가 해당 시간 내에 응답받는 시간
+✅최댓값이 11초 -> 일부 요청이 매우 긴 시간동안 응답을 못했거나 기다림이 큰 상태
+
+<img width="1382" height="562" alt="Image" src="https://github.com/user-attachments/assets/b55cd4f8-03b8-4fc9-9641-5dd4ea790dff" />
+
+3시 15분부터 처리율이 400req/s 근처에서 증가하지 않음
+Request Duration(p95)(파란색 면)이 급격히 상승 → 응답 지연 증가
+-> 이 시점이 서버의 한계 처리량 (Throughput Ceiling)
+
+<img width="1406" height="1174" alt="Image" src="https://github.com/user-attachments/assets/31760db2-8f70-4add-9036-3f0593893828" />
+
+3시 15분부터 평균과 p90, p95, p99가 함께 급등함
+-> 대부분의 요청이 여전히 처리되지만, 일부 요청이 오래 기다리며 지연이 누적되고 있음.
+
+컨테이너들의 CPU 사용량 또한 확인해보고 싶었으나, 로컬에서 계속 뜨지않아서 해당 부분은 확인하지 못했습니다..
+
+병목 가능성
+1.	결제 생성 POST(쓰기 + 검증 + 좌석 확보 + 트랜잭션)
+→ VU가 증가 시 처음 포화될 구간??
+2.	DB 커넥션/트랜잭션/락 경쟁
+→ 동시 쓰기 많으면 풀 고갈되고 대기 늘어남
+3. 	조회 GET이 영향을 받는 구조(쓰기 직후 조회하면서 락/캐시 미스)
+→ POST가 성공 직후 조회 시 POST가 느릴 때 조회도 함께 지연되지 않을까..

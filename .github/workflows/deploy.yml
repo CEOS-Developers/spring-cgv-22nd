@@ -2,7 +2,7 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ Hoyoung027 ]  # develop 브랜치에 push가 일어날 때 실행
+    branches: [ Hoyoung027 ]  # Hoyoung 브랜치에 push가 일어날 때 실행
 
 permissions:
   contents: read

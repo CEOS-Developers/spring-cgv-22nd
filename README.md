@@ -718,3 +718,60 @@ public class OrderService {
 
 ---
 
+# 부하테스트
+![img.png](img.png)
+![img_2.png](img_2.png)
+![img_3.png](img_3.png)
+
+## 1) 테스트 시나리오
+결제 API: `POST` `/api/payments`
+- 사용자의 주문(order)이 존재하고 이에 대한 결제를 수행하는 API를 분석
+```javascript
+// k6 options
+export const options = {
+    stages: [
+        { duration: '2m', target: 100 },
+        { duration: '2m', target: 100 },
+        { duration: '2m', target: 0 },
+    ]
+};
+```
+- 초기 2분 : 100명의 사용자가 점진적으로 증가
+- 다음 2분 : 100명의 사용자가 유지
+- 마지막 2분 : 사용자가 점진적으로 감소
+
+# 2) 테스트 결과
+- 0 ~ 1분 30초 : 간은 결제 서버의 10% 확률로 결제 실패가 일어나는 비율이 유지되며 정상적인 동작을 보임
+- 1분 30초 ~ 2분 : 이후 사용자가 많아지게 되면서 처리되는 요청의 수가 급감 + 실패 요청 비율이 급증
+- 2분 ~ 6분 : 30초 간격으로 요청이 처리되고 또 모든 요청이 실패하는 상황이 발생함
+
+![img_5.png](img_5.png)
+- 지연 급등: 유지 구간에서 요청이 30초 단위로 지연/실패.
+- 처리량 감소: VU(동시 사용자)는 충분하지만 RPS(Request Per Second)가 오르지 않음.
+- 대다수의 실패 응답이 401 Unauthorized로 반환됨
+- 일부 실패는 500 Internal Server Error로 반환됨
+
+
+# 3) 원인 분석
+![img_4.png](img_4.png)
+1. 문제 원인을 찾기 위해 CPU 사용률을 우선 확인하였지만 큰 문제 없음
+
+2. 서버의 log를 확인한 결과 무수히 많은 401 에러가 발생하며, 로그 상에는 아래 내역이 자주 반복 등장
+```javascript
+HikariPool-1 - Connection is not available, request timed out after 30000ms
+(total=10, active=10, idle=0, waiting=26)
+org.springframework.transaction.CannotCreateTransactionException ...
+Caused by: org.hibernate.exception.JDBCConnectionException: Unable to acquire JDBC Connection
+```
+- `total=10`, `active=10`, `idle=0`, `waiting=26` : DB 커넥션 풀 10개가 전부 점유, 추가 요청은 대기 후 30초(Hikari connectionTimeout)에 타임아웃.
+- 모든 요청에서 Security 권한을 얻기 위해 인증/권한 조회가 필요하며, DB 조회에 의존함. 이때, DB 커넥션 풀 고갈로 사용자 컨텍스트 적재에 실패하며 → `401 Unauthorized` 발생
+
+
+# 4) 근본 원인
+1. DB 커넥션 풀 고갈
+- Hikari maximumPoolSize=10 수준에서 일부 트랜잭션이 길게 커넥션을 점유하여 대기열이 폭증하고 결국 모든 커넥션이 30초 후 타임아웃으로 귀결되는 문제 발생
+- request 처리를 시작할 때, spring security의 DB 접근을 필요로 하므로 인증 단계에서부터 커넥션 풀이 고갈됨
+
+2. Pessimistic Lock에 의한 경합
+- 커넥션 풀이 부족한 시작점은 order 결제 트랜잭션에서 Pessimistic Lock 사용함에 있다고 판단함
+- 다수 요청이 동일/연관 리소스에 대해 락을 대기하는 동안 커넥션을 붙잡은 채 대기 → 풀 고갈 가속으로 결국 401 Unauthorized까지 발생

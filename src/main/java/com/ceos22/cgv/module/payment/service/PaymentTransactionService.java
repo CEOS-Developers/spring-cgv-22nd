@@ -25,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -237,10 +238,11 @@ public class PaymentTransactionService {
         }
     }
 
-    public String createPaymentId(){
-        long count = paymentRepository.count();
-        long next = count + 1;
-        String seq = String.format("%04d", next);
-        return STORE_ID + "_" + seq;
+    public String createPaymentId() {
+
+        String timestamp = LocalDateTime.now()
+                .format(DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmssSSS"));
+
+        return STORE_ID + "_" + timestamp;
     }
 }

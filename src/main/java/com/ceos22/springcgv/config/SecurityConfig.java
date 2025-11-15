@@ -53,6 +53,7 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(auth -> auth
                                 .requestMatchers("/**").permitAll() // 개발용
+                                .requestMatchers("/actuator/**").permitAll()
 //                                .requestMatchers(
 //                                "/api/auth/signup",
 //                                "/api/auth/login",

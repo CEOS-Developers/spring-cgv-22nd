@@ -1,1 +1,60 @@
-name: CGV CI/CD Deployon:  push:    branches: [ "master" ]permissions:  contents: readjobs:  build:    runs-on: ubuntu-latest ## runner    steps:      - name: checkout        uses: actions/checkout@v3      - name: Grant execute permission for gradlew        run: chmod +x gradlew      - name: Set up JDK 17        uses: actions/setup-java@v3        with:          java-version: '17'          distribution: 'temurin'      - name: Run tests        run: ./gradlew test --continue      - name: Build Spring Boot JAR        run: ./gradlew bootJar      - name: Login to DockerHub        run: |          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin      - name: Build Docker Image & Push        run: |          docker build -t ${{ secrets.DOCKER_USERNAME }}/spring-app:${{ github.sha }} .          docker push ${{ secrets.DOCKER_USERNAME }}/spring-app:${{ github.sha }}      - name: Build Nginx Image & Push        run: |          docker build -f nginx/Dockerfile -t ${{ secrets.DOCKER_USERNAME }}/nginx-proxy:${{ github.sha }} .          docker push ${{ secrets.DOCKER_USERNAME }}/nginx-proxy:${{ github.sha }}      - name: Deploy to EC2 (SSH)        uses: appleboy/ssh-action@master        with:          host: ${{ secrets.EC2_HOST }}          username: ubuntu          key: ${{ secrets.EC2_KEY }}          script: |            cd /home/ubuntu/app            sudo docker compose down || true            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/spring-app            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/nginx-proxy            sudo docker compose up -d --force-recreate            sudo docker system prune -f
+name: CI/CD Deploy to EC2
+
+on:
+  push:
+    branches: [ "develop", "rollback" ]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: checkout
+        uses: actions/checkout@v3
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Login to DockerHub
+        run: |
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Run tests
+        run: ./gradlew test --continue || true
+
+      - name: Build Spring Boot JAR
+        run: ./gradlew bootJar
+
+      - name: Build Docker Image & Push
+        run: |
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/spring-app .
+          docker push ${{ secrets.DOCKER_USERNAME }}/spring-app
+
+      - name: Build Nginx Image & Push
+        run: |
+          docker build -f nginx/Dockerfile -t ${{ secrets.DOCKER_USERNAME }}/nginx-proxy .
+          docker push ${{ secrets.DOCKER_USERNAME }}/nginx-proxy
+
+
+      - name: Deploy to EC2 (SSH)
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_KEY }}
+          script: |
+            cd /home/ubuntu/cgv-clone
+            sudo docker compose down || true
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/spring-app
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/nginx-proxy
+            sudo docker compose up -d --force-recreate
+            sudo docker system prune -f

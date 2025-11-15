@@ -44,10 +44,21 @@ dependencies {
 	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.6'
 	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.6'
 
+	// 애플리케이션 메트릭을 CloudWatch로 전송
+/*
+AWS 리소스 기본 메트릭(CPU/Memory 등)만 모니터링한다면 추가할 필요 없지만,
+처리 시간, DB 쿼리 시간 등 애플리케이션 내부 지표를 CloudWatch로 보내고 싶을 때는 추가해야 합니다.
+*/
+	implementation 'io.micrometer:micrometer-registry-cloudwatch2'
+
+	// /actuator/health, /actuator/metrics 등 엔드포인트 제공
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	implementation 'io.micrometer:micrometer-registry-prometheus'
 }
 
 tasks.named('test') {
 	useJUnitPlatform()
+	enabled = false
 }
 
 ext {

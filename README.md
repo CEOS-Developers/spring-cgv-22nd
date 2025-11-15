@@ -2,7 +2,8 @@
 CEOS 22기 백엔드 스터디 - CGV 클론 코딩 프로젝트
 
 
-# DB 모델링
+# DB
+모델링
 ## 1. 요구사항 분석하기 & 엔티티 정의하기
 
 ---
@@ -1483,3 +1484,99 @@ Docker 캐시 정리
 
 결과
 <img width="1501" height="737" alt="github action 결과" src="https://github.com/user-attachments/assets/bc35d6e5-fd4b-4104-9e77-3880d3eccf72" />
+
+---
+
+# CGV 서비스 아키텍처 구조도
+![ceos-cgv.drawio.png](images/ceos-cgv.drawio.png)
+- Grafana, Prometheus 제외
+---
+# 부하테스트
+## Grafana & Prometheus 추가
+```gradle
+global:
+  scrape_interval: 5s  # 5초마다 데이터 수집
+
+scrape_configs:
+  - job_name: "node_exporter"
+    static_configs:
+      - targets: ["node_exporter:9100"]
+
+  - job_name: "spring"
+    metrics_path: "/actuator/prometheus"
+    static_configs:
+      - targets: ["spring:8080"]
+```
+- prometheus.yml 작성
+
+## 스크립트
+```javascript
+export const options = {
+  stages: [
+    { duration: "2m", target: 200 },
+    { duration: "2m", target: 400 },
+    { duration: "2m", target: 600 },
+    { duration: "2m", target: 800 },
+    { duration: "2m", target: 1000 },
+  ],
+};
+```
+- 총 6단계로 구성
+- 각 단계마다 2분씩 virtual users 를 점진적으로 늘려가면서 테스트
+
+### EC2 내부에서 K6 실행
+![inside ec2 graph.png](images/inside%20ec2%20graph.png)
+- 결과
+
+![inside ec2 vu graph .png](images/inside%20ec2%20vu%20graph%20.png)
+- VUS가 증가하는데 http_request가 감소하는 구간 발생
+- 서버 응답 처리 속도가 점차 느려지고 있음을 시사
+- 병목 구간 발생
+- VU가 300까지밖에 찍히지 않음
+- 그 후엔 응답 불능 상태
+
+![inside ec2 cpu.png](images/inside%20ec2%20cpu.png)
+- CPU
+
+![inside ec2 memory.png](images/inside%20ec2%20memory.png)
+- Memory
+- 예상 시나리오
+  - VU 상승 (요청 폭주)
+  - 스레드 풀 포화 -> 대기 큐에 요청 객체 쌓임 (메모리 점유)
+  - 힙 공간 부족 -> Garbage Collector로 CPU 사용
+  - Full GC 발생 -> CPU 100% 점유
+  - Stop-the-world (GC 동안 모든 스레드가 멈춤 -> 요청 처리 중단)
+  - 모든 요청 응답 불가
+
+### EC2와 Local 중 어디에서 script를 실행하는 것이 좋을까?
+- 처음에는 별 생각 없이 "당연히 EC2에 부하가 걸리니 EC2에서 script를 실행하는 것이 좋지"라고 생각했다.
+- 그런데 script를 실행하는 건 사용자이므로 Local에서 script를 실행하는 것이 더 실제와 가깝다.
+```
+[EC2 서버 내부]   (k6 실행)
+  k6 run → localhost:8080 → Nginx → Spring → DB
+```
+- End-to-End 사용자 경험 테스트에 적합
+```
+ [로컬 PC]         [EC2 서버]
+  k6 run → HTTP 요청 → Nginx → Spring → DB
+```
+- 서버 자체 성능 테스트에 적합
+
+### Local에서 K6 실행
+![local k6 summary.png](images/local%20k6%20summary.png)
+- http_req_duration
+  - max=15s
+- http_req_waiting
+  - max=15s
+
+![local graph.png](images/local%20graph.png)
+- 병목 현상 발생
+
+![ec2 CPU.png](images/ec2%20CPU.png)
+- 병목 현상이 발생하는 곳에 EC2 instance의 CPU 점유율이 90% 이상인 구간 발생
+- CPU에 부하가 일어났음을 알 수 있다.
+- Memory는 60%대로 안정적 
+
+- Prometheus에서 spring container에 대한 부하를 탐색하고 싶었지만 하지 못하였다...
+
+![prometheus.png](images/prometheus.png)

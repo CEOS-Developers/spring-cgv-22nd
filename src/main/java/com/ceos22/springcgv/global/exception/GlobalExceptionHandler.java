@@ -2,6 +2,7 @@ package com.ceos22.springcgv.global.exception;
 
 
 import com.ceos22.springcgv.global.response.ApiResponse;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +24,14 @@ public class GlobalExceptionHandler {
      * CustomException 처리
      */
     @ExceptionHandler
-    public ResponseEntity<ApiResponse<Void>> handleCustomException(CustomException e) {
+    public ResponseEntity<ApiResponse<Void>> handleCustomException(CustomException e, HttpServletRequest request) {
+        String uri = request.getRequestURI();
+
+        // Prometheus나 Actuator 요청은 그냥 통과시킴
+        if (uri.startsWith("/actuator")) {
+            throw e;  // Spring 내부에서 정상적으로 처리하게 둔다
+        }
+
         ErrorCode errorCode = e.getErrorCode();
         log.error("CustomException 발생: code={}, message={}", errorCode.getCode(), errorCode.getMessage());
 
@@ -107,7 +115,14 @@ public class GlobalExceptionHandler {
      * 기타 모든 예외 처리
      */
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiResponse<Void>> handleGlobalException(Exception e) {
+    public ResponseEntity<ApiResponse<Void>> handleGlobalException(Exception e, HttpServletRequest request) {
+        String uri = request.getRequestURI();
+
+        // Prometheus나 Actuator 요청은 그냥 통과시킴
+        if (uri.startsWith("/actuator")) {
+            throw new RuntimeException(e);
+        }
+
         log.error("예상치 못한 에러 발생: ", e);
 
         ApiResponse<Void> response = ApiResponse.failure(

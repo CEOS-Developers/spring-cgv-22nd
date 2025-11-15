@@ -1580,3 +1580,333 @@ export const options = {
 - Prometheus에서 spring container에 대한 부하를 탐색하고 싶었지만 하지 못하였다...
 
 ![prometheus.png](images/prometheus.png)
+
+---
+# 7주차
+
+## 트랜잭션 전파(Propagation)
+
+트랜잭션이 이미 진행 중일 때, 새로 호출된 메서드가 기존 트랜잭션에 참여할지, 새로운 트랜잭션을 생성할지를 결정하는 설정
+
+전파는 논리 트랜잭션과 물리 트랜잭션의 처리 방식에 영향을 줌
+
+- 물리 트랜잭션: 실제 DB Connection 단에서 커밋/롤백되는 트랜잭션
+- 논리 트랜잭션: 스프링 내부에서 메서드 단위로 관리하는 트랜잭션 경계
+
+### 원칙
+
+- 모든 논리 트랜잭션이 커밋되어야 물리 트랜잭션이 커밋됨
+- 하나라도 롤백하면 물리 트랜잭션은 롤백됨
+- 신규 트랜잭션만 물리 트랜잭션을 커밋 또는 롤백할 수 있음
+
+---
+
+### REQUIRED (기본값)
+
+- 트랜잭션이 있으면 기존 트랜잭션에 참여하고, 없으면 새로운 트랜잭션을 만듦
+
+- 서비스 간 호출 시 가장 일반적으로 사용되는 방식
+
+---
+
+### REQUIRES_NEW
+
+- 기존 트랜잭션이 있으면 일시 정지시키고, 항상 새로운 물리 트랜잭션을 시작함
+
+- 로그 기록처럼, 메인 로직이 실패해도 별도로 커밋되어야 하는 경우에 사용됨
+
+---
+
+### SUPPORTS
+
+- 트랜잭션이 있으면 참여하고, 없으면 트랜잭션 없이 실행함
+
+- 트랜잭션이 반드시 필요하지 않은 조회성 메서드에 적합함
+
+---
+
+### MANDATORY
+
+- 기존 트랜잭션이 반드시 존재해야 함
+
+- 트랜잭션 없이 호출하면 예외(IllegalTransactionStateException)가 발생함
+
+- 상위 트랜잭션 내부에서만 실행되어야 하는 경우에 사용함
+
+---
+
+### NOT_SUPPORTED
+
+- 트랜잭션을 사용하지 않음
+
+- 만약 기존 트랜잭션이 존재한다면 일시 정지시키고 non-transactional로 실행함
+
+- 트랜잭션에 묶이면 안 되는 로직(외부 호출, 로그 저장)에 사용됨
+
+---
+
+### NEVER
+
+- 트랜잭션이 존재하면 안 됨
+
+- 트랜잭션이 있으면 예외가 발생
+
+- 항상 트랜잭션 없이 실행되어야 하는 메서드에 사용됨
+
+---
+
+### NESTED
+
+- 상위 트랜잭션 내부에서 savepoint를 생성하여 부분 롤백이 가능한 중첩 트랜잭션을 만듦
+
+- 상위 트랜잭션은 하나의 물리 트랜잭션을 유지하지만, 내부적으로 savepoint 기반으로 논리적 분리 지점을 만듦
+
+- 상위 트랜잭션이 롤백되면 중첩 트랜잭션도 모두 롤백되지만, 중첩 트랜잭션만 실패하면 savepoint까지만 롤백함
+
+참고: REQUIRES_NEW는 새로운 물리 트랜잭션을 만들지만, NESTED는 같은 물리 트랜잭션 내에서 savepoint로 관리한다.
+
+---
+
+## Index
+
+데이터를 빠르게 조회하기 위해 특정 컬럼을 기준으로 미리 정렬해둔 자료구조
+
+- 일반적으로 B-Tree 기반으로 구성되며, 검색 성능을 크게 향상시킴
+
+---
+
+## Index 종류
+
+### 클러스터드 인덱스 (Clustered Index)
+
+- 테이블의 데이터 자체가 인덱스 순서대로 정렬되어 있는 구조
+
+- MySQL(InnoDB)에서는 PK가 자동으로 클러스터드 인덱스로 사용됨
+
+특징
+
+- 한 테이블에 하나만 존재
+- 기본 키 순서대로 실제 데이터가 저장됨
+- 범위 조회에 매우 빠름
+- PK 변경이 많으면 비효율적
+
+예시
+
+- PK(id)를 기준으로 레코드가 디스크에 물리적으로 정렬됨
+
+---
+
+### 보조 인덱스 (Secondary Index, Non-Clustered Index)
+
+- 클러스터드 인덱스를 제외한 나머지 인덱스
+
+- 실제 데이터가 아니라, 정렬된 인덱스 키와 PK 값을 저장한다.
+
+특징
+
+- 테이블에 여러 개 생성 가능
+- 인덱스를 통해 PK로 이동한 뒤 실데이터를 읽음 (두 번 접근: 인덱스 → 테이블)
+- 조회 속도는 빠르지만 쓰기 비용 증가
+
+---
+
+### 복합 인덱스 (Composite Index)
+: 여러 개의 컬럼을 묶어서 하나의 인덱스로 만드는 방식
+
+Ex) (title, director)
+
+특징
+
+- 왼쪽부터 사용해야 인덱스가 효율적으로 동작한다 (Leftmost Prefix Rule)
+- WHERE 절 조건 순서가 인덱스 구성과 다르면 인덱스가 사용되지 않을 수 있음
+- 데이터 중복도가 낮은 컬럼을 앞에 두는 것이 일반적으로 유리
+
+예시
+
+(title, director) 인덱스가 있을 경우
+
+- title 단독 조회 → 인덱스 사용 가능
+- director 단독 조회 → 사용 불가능
+- title + director 조합 조회 → 사용 가능
+
+---
+
+### 커버링 인덱스 (Covering Index)
+
+: 쿼리가 필요한 모든 컬럼이 인덱스에 포함되어 있어 테이블을 전혀 접근하지 않아도 되는 인덱스
+
+Ex)
+
+인덱스: (email, name)
+
+쿼리:
+
+```
+SELECT name FROM users WHERE email = 'test@test.com'
+
+```
+
+→ 인덱스만 조회하고 테이블을 읽지 않아도 된다.
+
+특징
+
+- 테이블 I/O를 제거하여 매우 빠름
+- 조회량 많은 대형 서비스에서 자주 활용됨
+
+---
+
+## 성능 최적화
+
+- 영화 조회 API 이용
+- 영화 307개 INSERT
+
+```jsx
+EXPLAIN
+SELECT * FROM movies
+ORDER BY booking_rate DESC
+LIMIT 10;
+```
+
+<img width="858" height="65" alt="1-1" src="https://github.com/user-attachments/assets/20a09f34-48a5-4ece-b76c-9a5434dee96f" />
+
+- type : ALL
+  - Full Table Scan 수행
+- possible_keys : NULL
+  - 사용할 수 있는 인덱스 없음
+- key : NULL
+  - 실제 사용된 인덱스 없음
+- filtered = 100
+  - 필터링 비율 100% 예측
+
+```jsx
+-> Limit: 10 row(s)  (cost=31.7 rows=10) (actual time=0.532..0.537 rows=10 loops=1)
+    -> Sort: movies.booking_rate DESC, limit input to 10 row(s) per chunk  (cost=31.7 rows=307) (actual time=0.531..0.536 rows=10 loops=1)
+        -> Table scan on movies  (cost=31.7 rows=307) (actual time=0.0286..0.359 rows=307 loops=1)
+
+```
+
+- actual time=0.532..0.537
+  - 걸린 시간 0.537ms
+- rows=10
+  - 조회 예측 행 수 10개
+
+```jsx
+CREATE INDEX idx_booking_rate ON movies(booking_rate);
+```
+
+- booking_rate 단일 인덱스 적용
+
+```jsx
+-> Limit: 10 row(s)  (cost=31.7 rows=10) (actual time=0.439..0.444 rows=10 loops=1)
+    -> Sort: movies.booking_rate DESC, limit input to 10 row(s) per chunk  (cost=31.7 rows=307) (actual time=0.438..0.443 rows=10 loops=1)
+        -> Table scan on movies  (cost=31.7 rows=307) (actual time=0.029..0.304 rows=307 loops=1)
+
+```
+
+- actual time=0.439..0.444
+  - 걸린 시간 0.444ms
+- rows=10
+  - 조회한 행 수 10개
+
+```jsx
+EXPLAIN 
+SELECT * FROM movies WHERE age_rating = 'AGE19';
+```
+
+<img width="860" height="58" alt="quert2-1" src="https://github.com/user-attachments/assets/97ac1dc7-6396-43eb-ad92-9c0f00be73db" />
+
+- type : ALL
+  - Full Table Scan 수행
+- filtered = 20
+  - 필터링 비율 20% 예측
+
+<img width="1505" height="57" alt="2-2" src="https://github.com/user-attachments/assets/ef6df10b-0fd9-4d5c-b3bc-3630ed590095" />
+
+- actual time=0.027 .. 0.311
+  - 걸린 시간 0.311ms
+- rows=307
+  - 조회한 행 수 307개 (ALL)
+
+### 쿼리 최적화
+
+```jsx
+CREATE INDEX idx_age_rating ON movies(age_rating);
+```
+
+- index age_rating에 생성
+
+### 결과
+
+<img width="1097" height="62" alt="2-3" src="https://github.com/user-attachments/assets/2811d29e-fa48-4257-9e37-41a58229464f" />
+
+- type: ref
+  - 동등 조건(=)을 인덱스로 조회할 때 나오는 타입
+- rows=47
+- filtered = 100
+  - 예상 필터링 비율 100% row
+
+<img width="1611" height="50" alt="2-4" src="https://github.com/user-attachments/assets/89c1704f-b0ad-4d36-ad53-1259a406bd88" />
+
+- actual time=0.0258..0.144
+  - 걸린 시간 0.144ms
+- rows=47
+  - 조회한 행 수 47개
+
+---
+
+```jsx
+EXPLAIN 
+SELECT * FROM movies 
+WHERE age_rating = 'ALL' AND runtime < 120;
+```
+
+<img width="847" height="57" alt="explain age" src="https://github.com/user-attachments/assets/fe13e18e-f762-4023-a192-363d5f71334c" />
+
+- type : ALL
+  - Full Table Scan 수행
+- possible_keys : NULL
+  - 사용할 수 있는 인덱스 없음
+- key : NULL
+  - 실제 사용된 인덱스 없음
+- rows=307
+  - 조회 예측 행 수 307개 (ALL)
+- filtered = 6.67
+  - 필터링 비율 예측: 약 6.67%
+- Extra = Using where
+  - 필터 조건(age_rating + runtime)을 통해 추가 필터링 적용
+
+<img width="1428" height="67" alt="explain analyze age" src="https://github.com/user-attachments/assets/dfd2c1de-1ec2-480c-b61f-54f5930edbda" />
+
+```jsx
+> Filter: ((movies.age_rating = 'ALL') and (movies.runtime < 120)) (cost=31.7 rows=20.5) (actual time=0.0348..0.323 rows=20 loops=1)
+-> Table scan on movies (cost=31.7 rows=307) (actual time=0.0268..0.274 rows=307 loops=1)
+```
+
+- actual time=0.0348..0.323
+- rows=307
+  - 조회 예측 행 수 307개 (ALL)
+
+```jsx
+CREATE INDEX idx_movies_age_runtime
+ON movies (age_rating, runtime);
+```
+
+- 복합 인덱스 적용
+- (age_rating, runtime)
+
+결과
+
+<img width="1497" height="58" alt="explain analyze age and runtime" src="https://github.com/user-attachments/assets/d7df01f0-72a1-4d07-88aa-6e56a3d248f1" />
+
+```jsx
+-> Index range scan on movies using idx_movies_age_runtime over (age_rating = 'ALL' AND runtime < 120),
+ with index condition: ((movies.age_rating = 'ALL') and (movies.runtime < 120))  (cost=9.26 rows=20) (actual time=0.0355..0.12 rows=20 loops=1)
+
+```
+
+
+- actual time=0.0355..0.12
+- rows=20
+
+---
+

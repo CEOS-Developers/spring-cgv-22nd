@@ -2,7 +2,7 @@ name: CI/CD Deploy to EC2
 
 on:
   push:
-    branches: [ "develop", "rollback" ]
+    branches: [ "develop" ]
 
 permissions:
   contents: read

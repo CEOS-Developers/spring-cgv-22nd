@@ -32,7 +32,6 @@ dump.rdb
 interpolated*.xml
 lib/
 manifest.yml
-application.yml
 docker-compose.yml
 out
 overridedb.*

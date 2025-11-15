@@ -33,15 +33,14 @@ public class Ticket extends BaseEntity {
     @Column(name = "final_price")
     private int finalPrice;
 
-    @Builder
-    public static Ticket of(Showtime showtime, User user, int generalCnt, int youthCnt, int finalPrice) {
-        return Ticket.builder()
-                .showtime(showtime)
-                .user(user)
-                .generalCnt(generalCnt)
-                .youthCnt(youthCnt)
-                .finalPrice(finalPrice)
-                .build();
+    public static Ticket of(Showtime showtime, User user, int generalCount, int youthCount, int finalPrice) {
+        Ticket ticket = new Ticket();
+        ticket.showtime = showtime;
+        ticket.user = user;
+        ticket.generalCnt = generalCount;
+        ticket.youthCnt = youthCount;
+        ticket.finalPrice = finalPrice;
+        return ticket;
     }
 
 }

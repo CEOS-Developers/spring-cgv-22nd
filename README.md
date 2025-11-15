@@ -810,3 +810,263 @@ ENTRYPOINT ["java", "-jar", "app.jar"]
 | **Rolling** | 거의 없음 | 보통 | 중간 | 순차적 교체 |
 | **Blue/Green** | 없음 | 높음 | 빠름 | 두 환경 간 완전 전환 |
 | **Canary** | 없음 | 보통 | 빠름 | 트래픽 비율로 점진 배포 |
+
+----
+## 6주차 내용 정리
+
+### CGV 서비스 아키텍쳐 구조도
+
+<img width="840" height="368" alt="Image" src="https://github.com/user-attachments/assets/117b6d1a-35a6-4913-9abf-1c34a2ef592c" />
+
+### 부하테스트(티켓 예매-결제 과정)
+
+- 문제 상황 해결
+    1. nginx connection
+  
+        <img width="985" height="361" alt="Image" src="https://github.com/user-attachments/assets/8bf9a888-29e6-48fc-aae5-14c4e9f91689" />
+        
+        Throughput이 0까지 떨어지는 문제 발생
+  
+        단순 병목(lock 등)으로 인한 문제는 아니라고 판단.
+       
+        -> 원인은 nginx connection 문제
+  
+        -> request 시 tcp 커넥션을 매번 새로 생성하는 과정에서 지연이 발생
+  
+        -> 이를 keepalive로 해결(tcp connection을 유지하고 재사용)
+
+    2. 정적 팩토리 메서드 내 builder 패턴 사용
+  
+       <img width="728" height="436" alt="Image" src="https://github.com/user-attachments/assets/33c205ac-aa5f-470c-a7e7-a48426ac4d12" />
+    
+       <img width="641" height="184" alt="Image" src="https://github.com/user-attachments/assets/6230e2ed-d582-4a47-9597-0dc46543fc55" />
+       
+       HTTP Request failed가 100%고 post 요청이 실패하는 문제 발생
+        
+        -> 원인은 리팩토링 과정에서 사용한 정적 팩토리 메서드 내의 builder..(멍청 이슈..)
+       
+        -> 정적 팩토리 메서드 호출 -> builder -> builder 내에서 다시 정적 팩토리 메소드 호출 -> builder처럼 재귀 발생..
+
+
+- 테스트 결과
+
+    <img width="1482" height="714" alt="Image" src="https://github.com/user-attachments/assets/a8dcfbd2-55b5-4b61-b392-36c82a01c12e" />
+    
+    <img width="981" height="436" alt="Image" src="https://github.com/user-attachments/assets/35f676f5-e980-4a6c-a443-b1eddf44752f" />
+    
+    Throughput이 떨어지는 원인:
+    
+    <img width="843" height="184" alt="Image" src="https://github.com/user-attachments/assets/c0675234-60c2-4c53-a2e6-f3a7f8cce2ab" />
+    
+    <img width="831" height="187" alt="Image" src="https://github.com/user-attachments/assets/29bcb9dc-229a-4526-85c9-6dd6e16d5854" />
+    
+    application과 DB 병목이 원인이다! (그래프 모양이 이쁘지 않아서 제가 테스트를 제대로 했는지 의문이 드네요ㅠ)
+
+    RedissonLockHelper로 인한 다중 락 경합, @Transactional 범위가 커서 락 + DB I/O가 오래 유지된다는 점 등이 원인이라고 추정됩니다.
+    
+* 로컬에서 시도하면 어떨까..??
+
+    <img width="1480" height="780" alt="Image" src="https://github.com/user-attachments/assets/120ada17-ee0c-4c59-891d-04ff3eae8cf2" />
+    
+    <img width="980" height="701" alt="Image" src="https://github.com/user-attachments/assets/cef6b08b-f83e-443d-8050-c5729efb05b1" />
+    
+    Throughput이 떨어지긴 하지만, 서버와 달리 급격하게 떨어지는 모습은 보이지 않는다.
+    
+    원인: 서버와 달리 local은 nginx를 통하지 않아서 그런 것으로 추정.
+    
+    (그 외 cpu 환경의 차이도 있겠지만 가장 큰 원인은 이거 아닐까요..? 의견 남겨주시면 감사하겠습니다!)
+
+
+구체적인 분석을 위해 예매 단계, 결제 단계의 부하를 각각 테스트 해보고 싶었으나, 결제를 위해서는 예매 단계에서의 payment record가 필요!
+
+로직 분리를 시도하기 힘들어서 따로 테스트는 못해봤습니다.
+
+----
+## 7주차 내용 정리
+
+### 트랜잭션 전파 속성
+
+##### 1. REQUIRED
+
+<img width="735" height="265" alt="Image" src="https://github.com/user-attachments/assets/4ff1d2ad-3ef6-4d20-9810-6e10ec6838c7" />
+
+- 스프링이 제공하는 DEFAULT 전파 속성
+- 기존 트랜잭션이 있으면 참가하고 없으면 새로운 트랜잭션 생성
+- 내부(논리) 트랜잭션의 커밋은 외부(물리) 트랜잭션이 최종적으로 커밋될 때 실제로 커밋 (롤백도 마찬가지로 작동)
+
+#### 2. REQUIRED_NEW
+
+<img width="734" height="230" alt="Image" src="https://github.com/user-attachments/assets/cf11498c-6ac8-4f29-aed5-ef6955392ab4" />
+
+- 항상 새로운 트랜잭션을 생성
+- 기존 트랜잭션이 있다면 일시 중단하고 별도로 독립적으로 실행
+- 부모 트랜잭션의 롤백 여부와 상관없이 이 트랜잭션은 따로 커밋/롤백됨
+- 서로 다른 물리 트랜잭션을 별도로 가진다는 것은 각각의 디비 커넥션을 가진다는 것. 커넥션 고갈 발생할 수 있으니 조심히 사용
+
+#### 3. SUPPORTS
+
+- 기존 트랜잭션이 있으면 참가
+- 없으면 트랜잭션 없이 실행
+- 트랜잭션이 필수는 아니지만, 트랜잭션이 있으면 따라가도 되는 경우에 사용
+
+#### 4. NOT_SUPPORTED
+
+- 트랜잭션이 있으면 그 트랜잭션을 중단시키고 해당 메서드를 트랜잭션 없이 실행
+- 읽기 전용 쿼리, 외부 API 호출 등 트랜잭션이 필요 없는 작업에 사용
+
+#### 5. MANDATORY
+
+- 반드시 기존 트랜잭션 안에서만 실행 가능
+- 트랜잭션이 없으면 예외 발생
+
+#### 6. NEVER
+
+- 트랜잭션이 있으면 예외 발생
+- 반드시 트랜잭션 없이 실행해야 할 경우 사용
+
+#### 7. NESTED
+
+- 기존 트랜잭션이 있으면 중첩 트랜잭션 생성
+- 기존 트랜잭션이 없으면 새로운 트랜잭션 생성
+- 중첩 트랜잭션은 부모 트랜잭션의 영향을 받지만, 중첩 트랜잭션이 외부에 영향을 주진 않음(중첩 트랜잭션이 롤백되어도 외부 트랜잭션은 커밋 가능)
+- DB에서 SAVEPOINT 지원해야 동작
+- 부분 롤백이 필요한 상황에서 사용
+
+### 인덱스 종류
+
+#### 1. B-Tree Index
+
+<img width="720" height="385" alt="Image" src="https://github.com/user-attachments/assets/c7d36a9e-940f-4413-9d10-47c85fb44032" />
+
+- 가장 일반적으로 사용되는 인덱스
+- 균형 트리 구조로 검색/삽입/삭제 성능이 안정적
+- 정렬된 상태를 유지하여 범위 조회에 강함(위 사진의 노란 화살표 확인)
+- 대부분의 일반 컬럼에 적용하는 기본 인덱스
+
+#### 2. Hash Index
+
+<img width="689" height="474" alt="Image" src="https://github.com/user-attachments/assets/6cb02ca1-c3b0-4dc9-b9a8-8d059f8d6f92" />
+
+- Hash 테이블 기반의 인덱스
+- 동등 비교(=) 성능 최고
+- 정렬/범위/LIKE 검색엔 불리함
+
+#### 3. Unique Index
+
+- 값의 중복을 허용하지 않는 인덱스
+- 데이터 무결성 보장
+- 검색 속도도 일반 인덱스보다 대체로 빠름(정렬된 상태 + 중복 없음)
+- ex/ 이메일, 주민번호, 사업자 번호 같은 유니크한 값
+
+#### 4. Composite Index
+
+- 두 개 이상의 컬럼으로 만든 인덱스(ex/ (A, B, C))
+- Leftmost Prefix Rule 적용(위 예시 컬럼에서 B만 검색하는 것은 불가, A 검색 혹은 A+B 검색)
+- 멀티 컬럼 조건에 유리
+
+#### 5. Full-Text Index
+
+- 텍스트 문서 검색용 인덱스
+- 문장의 단어 단위로 분리해 검색
+- 게시물 내용을 효율적으로 검색 but 저장 공간 및 업데이트 비용 문제
+
+#### 6. Clustered Index
+
+- 데이터베이스 테이블의 물리적인 순서를 인덱스의 키 값 순서대로 정렬(PK)
+- 테이블 당 하나만 존재(인덱스가 테이블의 일부로서 저장)
+- 데이터의 물리적인 순서와 인덱스의 순서가 같아 빠른 검색 가능
+
+#### 7. Non-Clustered Index
+
+- 데이터가 저장된 테이블과 별도의 공간에 위치(하나의 테이블에 여러 개의 non-clustered 인덱스 생성 가능)
+- 테이블의 데이터와 다른 순서로 정렬될 수 있음
+- 데이터는 원본 테이블 위치를 참조
+- Secondary Index라고도 부름
+
+#### 8. Bitmap Index
+
+- 컬럼의 각 값에 대해 비트 배열을 생성해 관리
+- 특정 값이 존재하는 row 위치를 비트로 표시
+- 여러 조건을 AND/OR 연산으로 비트 수준에서 빠르게 조합할 수 있음
+- ex/ 값이 존재하면 1, 없으면 0이라고 가정, 성별 컬럼의 데이터가 [남, 여, 여, 남, 여]라고 할 때 "남"의 비트맵은 1 0 0 1 0. 비트맵 인덱스를 보고 1번,4번이 남자구나 알 수 있음
+
+### 성능 최적화
+
+#### 1. 중복 좌석 조회
+
+```sql
+EXPLAIN ANALYZE
+SELECT *
+FROM reservation_seat
+WHERE showtime_id = 1
+  AND seat_row = 'T'
+  AND seat_col = '31'
+  AND status = 'RESERVED';
+```
+
+- showtime_id를 인덱스로 사용
+
+    <img width="930" height="85" alt="Image" src="https://github.com/user-attachments/assets/646f75a0-8e53-49cd-9a71-8da34caad958" />
+    
+    테스트 데이터의 수인 26000개의 row를 전부 다 읽음.(비효율)
+
+- (showtime_id, row, col, status)를 인덱스로 사용
+
+    <img width="930" height="77" alt="Image" src="https://github.com/user-attachments/assets/d9979329-2665-4f3b-be25-aece1bac72f3" />
+
+    조건에 맞는 row를 하나만 읽음, 실행 시간도 0.0582ms로 매우 작음
+
+#### 2. 결제 레코드 조회
+
+결제 완료, 취소, 요청의 내역을 조회한다. (test 데이터 수: 25000)
+
+```sql
+EXPLAIN ANALYZE
+SELECT *
+FROM payment_record
+WHERE type = 'TICKET'
+  AND status = 'PAID'
+ORDER BY created_at DESC
+    LIMIT 50;
+```
+
+- 별도의 인덱스 설정 X
+
+    <img width="932" height="84" alt="Image" src="https://github.com/user-attachments/assets/6a9199c2-2c9a-4340-8835-9407886a1447" />
+
+    TICKET 조건으로 12,261행을 읽고 그 중에 PAID인 데이터 3047행을 읽음. 이후 3047행을 다시 정렬
+
+- (type, status)를 인덱스로 사용
+
+    <img width="927" height="80" alt="Image" src="https://github.com/user-attachments/assets/5bde5df8-e19b-41ea-acc6-f06f4dd4e7fb" />
+    
+    type, status에 해당하는 3037개의 행을 가져오고 created_at DESC 기준으로 정렬 수행, 최종적으로 6.6ms
+
+- (type, status, created_at)을 인덱스로 사용
+
+    <img width="929" height="76" alt="Image" src="https://github.com/user-attachments/assets/f34f5adc-c785-4736-9ba4-6f5e76ae63de" />
+  
+   총 실행 시간 0.75ms로 제일 빠름
+
+#### 3. 영화관 조회
+
+특정 지역의 영화관 조회 (test 데이터 수: 약 10000개)
+
+```sql
+EXPLAIN ANALYZE
+SELECT *
+FROM theater
+WHERE region = 'SEOUL'
+```
+
+- 별도의 인덱스 설정 X
+
+    <img width="687" height="83" alt="Image" src="https://github.com/user-attachments/assets/645fa598-8466-458f-b85f-1249e0b23ce2" />
+
+    테이블 전체를 스캔 후 그 중 지역이 SEOUL에 해당하는 1113개의 행을 읽어옴(11.1ms)
+
+- region을 인덱스로 사용
+
+    <img width="717" height="55" alt="Image" src="https://github.com/user-attachments/assets/a41180d9-3400-45a6-9365-979e055bf819" />
+
+  지역이 SEOUL에 해당하는 1133개의 행을 6.9ms의 실행 시간을 통해 가져옴

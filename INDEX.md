@@ -121,4 +121,5 @@ ON schedule (movie_id, theater_id, start_time);
 
 ![image.png](attachment:f9bb6e9a-7421-4716-a6c5-d5ce0ede626a:image.png)
 
-duration은 0.0020 → 0.0012, fetch는 0.000016 → 0.000012로 줄어든 걸 확인할 수 있다
+duration은 0.0020 → 0.0012, fetch는 0.000016 → 0.000012로 줄어든 걸 확인할 수 있다!
+

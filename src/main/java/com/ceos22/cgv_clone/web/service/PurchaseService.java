@@ -17,6 +17,7 @@ import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +34,7 @@ public class PurchaseService {
     private final ProductService productService;
     private final RedissonClient redissonClient;
     private final RedisService redisService;
-    private final List<RLock> heldLocks;
+    //private final List<RLock> heldLocks;
     private final PaymentService paymentService;
 
     @Transactional
@@ -95,11 +96,13 @@ public class PurchaseService {
 
     //각 상품 ID에 대해 락 획득 시도 및 성공 시 heldLocks에 저장
     public void lockAll(List<Long> productIds) {
+        List<RLock> heldLocks = new ArrayList<>();
+
         productIds.forEach(id -> {
             String key = "productLock: " + id;
             RLock lock = redissonClient.getLock(key);
             try {
-                if (!lock.tryLock(0, 5, TimeUnit.SECONDS)) {
+                if (!lock.tryLock(1, 10, TimeUnit.SECONDS)) {
                     throw new GeneralException(ErrorStatus.PRODUCT_LOCK_FAILED);
                 }
                 heldLocks.add(lock);
@@ -147,6 +150,8 @@ public class PurchaseService {
 
     // 획득된 락 중 현재 스레드가 가지고 있는 락을 모두 해제하고 리스트 초기화
     public void unlockAll() {
+        List<RLock> heldLocks = new ArrayList<>();
+
         heldLocks.stream()
                 .filter(RLock::isHeldByCurrentThread)
                 .forEach(RLock::unlock);

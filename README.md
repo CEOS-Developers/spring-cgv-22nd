@@ -260,7 +260,7 @@ CEOS 22기 백엔드 스터디 - CGV 클론 코딩 프로젝트
 ### 서비스 아키텍쳐
 <img width="799" height="663" alt="Group 427320323" src="https://github.com/user-attachments/assets/0d3e7017-e7b4-406c-98d7-8ebb8b3eb923" />
 
-
+---
 ## 7주차 미션
 ### 1. 트랜잭션 전파 속성 조사해보기
 1) REQUIRED
@@ -410,3 +410,5 @@ CREATE INDEX idx_name ON users(name);
 [After]
 
 <img width="881" height="109" alt="image" src="https://github.com/user-attachments/assets/df355b37-8562-4bf9-be64-a20759466ffc" />
+
+---

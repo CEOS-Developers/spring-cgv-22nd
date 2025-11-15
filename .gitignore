@@ -167,5 +167,4 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
-/src/main/resources/application.yml
 # End of https://www.toptal.com/developers/gitignore/api/windows,java,intellij

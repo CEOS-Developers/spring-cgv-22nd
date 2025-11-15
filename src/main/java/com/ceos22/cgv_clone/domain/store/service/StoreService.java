@@ -2,6 +2,7 @@ package com.ceos22.cgv_clone.domain.store.service;
 
 import com.ceos22.cgv_clone.common.error.CustomException;
 import com.ceos22.cgv_clone.common.error.ErrorCode;
+import com.ceos22.cgv_clone.common.redisson.annotation.ConcurrencyControl;
 import com.ceos22.cgv_clone.domain.store.dto.request.StoreCreateRequest;
 import com.ceos22.cgv_clone.domain.store.dto.request.StoreStockCreateRequest;
 import com.ceos22.cgv_clone.domain.store.dto.response.StoreProductResponse;
@@ -31,6 +32,7 @@ public class StoreService {
     private final StoreStockRepository storeStockRepository;
     private final ProductRepository productRepository;
     private final TheaterRepository theaterRepository;
+    private final com.ceos22.cgv_clone.common.metrics.PaymentMetrics paymentMetrics;
 
     public List<StoreResponse> findStoresByTheater(Long theaterId) {
 
@@ -85,7 +87,9 @@ public class StoreService {
         storeStockRepository.save(storeStock);
     }
 
-    @Transactional
+    //=================================================================================================================
+
+    @ConcurrencyControl(key = " 'STORE:' + #storeId + ':PRODUCT' + #productId")
     public void increaseStock(Long storeId, Long productId, Integer quantity) {
 
         Store store = storeRepository.findById(storeId)
@@ -100,6 +104,7 @@ public class StoreService {
         storeStock.increaseStock(quantity);
     }
 
+    @ConcurrencyControl(key = " 'STORE:' + #storeId + 'PRODUCT' + #productId")
     @Transactional
     public void decreaseStock(Long storeId, Long productId, Integer quantity) {
 
@@ -113,6 +118,8 @@ public class StoreService {
                 .orElseThrow(() -> new CustomException(ErrorCode.STOCK_NOT_FOUND));
 
         storeStock.decreaseStock(quantity);
+
+        paymentMetrics.recordStockDecrease(quantity);
     }
 
 }

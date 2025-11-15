@@ -106,18 +106,18 @@ public class Order extends BaseEntity {
         calculateTotalPrice();
     }
 
-    public void pendPayment() {
+    public void pendOrder() {
         validateCartStatus();
         validateCartNotEmpty();
         this.status = OrderStatus.PENDING;
     }
 
-    public void completePayment() {
+    public void confirmOrder() {
         validatePendingStatus();
         this.status = OrderStatus.CONFIRMED;
     }
 
-    public void cancelPayment() {
+    public void cancelOrder() {
         validatePendingOrConfirmedStatus();
         this.status = OrderStatus.CANCELLED;
     }

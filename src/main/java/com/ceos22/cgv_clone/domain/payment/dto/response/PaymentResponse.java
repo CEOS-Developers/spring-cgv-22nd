@@ -25,7 +25,7 @@ public record PaymentResponse(
                 payment.getOrderName(),
                 payment.getTotalPayAmount(),
                 payment.getCurrency(),
-                payment.getCustomData(),
+                payment.getItemDetails(),
                 payment.getStatus(),
                 payment.getFailReason(),
                 payment.getCreatedAt()

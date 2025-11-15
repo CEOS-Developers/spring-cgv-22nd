@@ -3,7 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/cgv_clone.main.iml" filepath="$PROJECT_DIR$/.idea/modules/cgv_clone.main.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/cgv_clone.test.iml" filepath="$PROJECT_DIR$/.idea/modules/cgv_clone.test.iml" />
     </modules>
   </component>
 </project>

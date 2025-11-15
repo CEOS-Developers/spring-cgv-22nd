@@ -1,32 +1,21 @@
-FROM gradle:8.5-jdk17 AS build
+# 애플리케이션 빌드
+FROM eclipse-temurin:17 AS build
 
 WORKDIR /app
 
-# Gradle 캐시 활용을 위한 의존성 먼저 다운로드
-COPY build.gradle settings.gradle ./
-COPY gradle ./gradle
-RUN gradle dependencies --no-daemon || true
+COPY build.gradle settings.gradle gradlew /app/
+COPY gradle /app/gradle
+COPY src /app/src
 
-# 소스 코드 복사 및 빌드
-COPY . .
-RUN gradle clean build --no-daemon -x test
+RUN chmod +x ./gradlew
 
-# 실행 스테이지
-FROM openjdk:17-jdk-slim
+RUN ./gradlew build
+
+# 최종 실행 이미지 생성
+FROM eclipse-temurin:21-jre-alpine
 
 WORKDIR /app
 
-# 빌드된 JAR 파일 복사
-COPY --from=build /app/build/libs/*.jar app.jar
+COPY --from=build /app/build/libs/*.jar /app/app.jar
 
-# 포트 노출
-EXPOSE 8080
-
-# 환경 변수로 프로파일 설정 (기본값: docker)
-ENV SPRING_PROFILES_ACTIVE=docker
-
-# 애플리케이션 실행
 ENTRYPOINT ["java", "-jar", "/app/app.jar"]
-
-
-

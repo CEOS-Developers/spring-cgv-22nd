@@ -7,8 +7,8 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -18,7 +18,6 @@ import org.springframework.web.servlet.HandlerExceptionResolver;
 import java.io.IOException;
 
 @Component
-@RequiredArgsConstructor
 @Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
@@ -26,6 +25,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     // Filter에서 발생하는 Error를 GlobalExceptionHandler으로 위임
     private final HandlerExceptionResolver handlerExceptionResolver;
     private final RedisService redisService;
+
+    public JwtAuthenticationFilter(
+            JwtTokenProvider jwtTokenProvider,
+            @Qualifier("handlerExceptionResolver") HandlerExceptionResolver resolver,
+            RedisService redisService) {
+        this.jwtTokenProvider = jwtTokenProvider;
+        this.handlerExceptionResolver = resolver;
+        this.redisService = redisService;
+    }
 
     private static final String BlACKLIST_PREFIX = "BL:";
 

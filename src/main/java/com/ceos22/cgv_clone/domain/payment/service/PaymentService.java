@@ -19,6 +19,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,6 +37,7 @@ public class PaymentService {
     private final PaymentClient paymentClient;
     private final ObjectMapper objectMapper;
     private final OrderService orderService;
+    private final com.ceos22.cgv_clone.common.metrics.PaymentMetrics paymentMetrics;
 
     @Value("${payment.mock.store-id}")
     private String mockStoreId;
@@ -44,7 +46,7 @@ public class PaymentService {
     private String currency;
 
     @Transactional
-    public PaymentResponse createPayment(Member member, PaymentCreateRequest request) {
+    public PaymentResponse executePayment(Member member, PaymentCreateRequest request) {
 
         Order order = findOrderById(request.orderId());
 
@@ -52,42 +54,10 @@ public class PaymentService {
         validateOrderPending(order);
         validateDuplicatePayment(order);
 
-        String paymentId = generatePaymentId(mockStoreId);
-        String customData = createCustomData(order);
+        Payment payment = createAndSavePaymentWithRetry(order);
+        externalPayment(payment);
 
-        Payment payment = Payment.of(
-                order,
-                paymentId,
-                mockStoreId,
-                createOrderName(order),
-                order.getTotalPrice(),
-                currency,
-                customData
-        );
-        paymentRepository.save(payment);
-
-        try {
-            InstantPaymentRequest instantRequest = new InstantPaymentRequest(
-                    mockStoreId,
-                    payment.getOrderName(),
-                    payment.getTotalPayAmount(),
-                    payment.getCurrency(),
-                    payment.getCustomData()
-            );
-
-            InstantPaymentResponse response = paymentClient.instantPayment(paymentId, instantRequest);
-
-            payment.complete();
-            orderService.confirmOrderAfterPayment(order.getOrderId());
-
-            log.info("결제 승인 완료 - paymentId: {}, orderId: {}", response.paymentId(), order.getOrderId());
-
-        } catch (Exception e) {
-            payment.fail(e.getMessage());
-            paymentRepository.save(payment);
-            log.error("결제 실패 - paymentId: {}, error: {}", paymentId, e.getMessage());
-            throw new CustomException(ErrorCode.PAYMENT_FAILED);
-        }
+        paymentMetrics.incrementPaymentSuccess();
 
         return PaymentResponse.from(payment);
     }
@@ -102,15 +72,12 @@ public class PaymentService {
 
         try {
             paymentClient.cancelPayment(paymentId);
-            log.info("Mock 서버 결제 취소 성공 - paymentId: {}", paymentId);
+            log.info("[결제 취소 성공] - paymentId: {}", paymentId);
+            payment.cancel();
+            orderService.cancelOrderAfterPaymentCancel(order.getOrderId());
         } catch (Exception e) {
-            log.error("Mock 서버 결제 취소 실패 - paymentId: {}, error: {}", paymentId, e.getMessage());
+            log.error("[결제 취소 실패] - paymentId: {}, error: {}", paymentId, e.getMessage());
         }
-
-        payment.cancel("사용자 요청");
-        orderService.cancelOrderAfterPaymentCancel(order.getOrderId());
-
-        log.info("결제 및 주문 취소 완료 - paymentId: {}, orderId: {}", paymentId, order.getOrderId());
 
         return PaymentResponse.from(payment);
     }
@@ -127,6 +94,69 @@ public class PaymentService {
         validateOrderOwner(order, member);
         Payment payment = findPaymentByOrder(order);
         return PaymentResponse.from(payment);
+    }
+
+    //=================================================================================================================
+
+
+    //=================================================================================================================
+
+    private Payment createAndSavePaymentWithRetry(Order order) {
+
+        int attempt = 0;
+        while (true) {
+            attempt++;
+            try {
+                String paymentId = generatePaymentId(mockStoreId);
+                String itemDetails = createItemDetails(order);
+
+                Payment payment = Payment.of(
+                        order,
+                        paymentId,
+                        mockStoreId,
+                        createOrderName(order),
+                        order.getTotalPrice(),
+                        currency,
+                        itemDetails
+                );
+                paymentRepository.save(payment);
+                return payment;
+
+            } catch (DataIntegrityViolationException e) {
+                if(attempt >= 3) {
+                    log.error("[주문 생성 실패] 3회 재시도 이후 종료");
+                    throw new CustomException(ErrorCode.PAYMENT_FAILED);
+                }
+                log.warn("[주문 생성 실패] Payment ID 중복으로 주문 생성 재시도 ({}/3)", attempt);
+            }
+        }
+    }
+
+    private void externalPayment(Payment payment) {
+        try {
+            InstantPaymentRequest instantRequest = new InstantPaymentRequest(
+                    mockStoreId,
+                    payment.getOrderName(),
+                    payment.getTotalPayAmount(),
+                    payment.getCurrency(),
+                    payment.getItemDetails()
+            );
+
+            InstantPaymentResponse response = paymentClient.instantPayment(payment.getPaymentId(), instantRequest);
+
+            orderService.confirmOrderAfterPayment(payment.getOrder().getOrderId());
+            payment.complete();
+
+            log.info("[결제 승인 완료] - paymentId: {}, orderId: {}", response.paymentId(), payment.getOrder().getOrderId());
+
+        } catch (Exception e) {
+            payment.fail(e.getMessage());
+            paymentRepository.save(payment);
+            log.error("[결제 실패] - paymentId: {}, error: {}", payment.getPaymentId(), e.getMessage());
+
+            paymentMetrics.incrementPaymentSuccess();
+            throw new CustomException(ErrorCode.PAYMENT_FAILED);
+        }
     }
 
     //=================================================================================================================
@@ -168,14 +198,10 @@ public class PaymentService {
     }
 
     //=================================================================================================================
-
-    // 임시로 해두었습니다... 나중에 다른 방식으로 해결할게요ㅜ
     private String generatePaymentId(String storeId) {
-        String dateTimePrefix = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS"));
-        long countToday = paymentRepository.countByStoreIdAndPaymentIdStartingWith(
-                storeId,
-                dateTimePrefix.substring(0, 8)
-        );
+        String dateTimePrefix = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+        long countToday = paymentRepository.countByStoreIdAndPaymentIdStartingWith(storeId, dateTimePrefix);
+
         return String.format("%s_%04d", dateTimePrefix, countToday + 1);
     }
 
@@ -192,7 +218,7 @@ public class PaymentService {
         return String.format("%s 외 %d건", firstItemName, itemCount - 1);
     }
 
-    private String createCustomData(Order order) {
+    private String createItemDetails(Order order) {
         try {
             return objectMapper.writeValueAsString(
                     order.getOrderDetails().stream()

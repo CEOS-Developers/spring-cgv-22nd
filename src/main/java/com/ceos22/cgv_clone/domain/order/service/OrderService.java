@@ -42,7 +42,7 @@ public class OrderService {
 
         validateCartNotEmpty(cart);
 
-        cart.pendPayment();
+        cart.pendOrder();
 
         return OrderResponse.from(cart);
     }
@@ -53,7 +53,7 @@ public class OrderService {
 
         decreaseStockForOrder(order);
 
-        order.completePayment();
+        order.confirmOrder();
     }
 
     @Transactional
@@ -64,7 +64,9 @@ public class OrderService {
             increaseStockForOrder(order);
         }
 
-        order.cancelPayment();
+        order.cancelOrder();
+
+        log.info("[주문 취소]: 재고 복구 및 상태 변경 완료 | 주문번호 :{}", orderId);
     }
 
     public List<OrderResponse> getMyOrders(Long memberId) {
@@ -145,7 +147,7 @@ public class OrderService {
                         detail.getQuantity()
                 );
             } catch (CustomException e) {
-                log.error("재고 차감 실패: orderId={}, productId={}, quantity={}, error={}",
+                log.error("[재고 차감 실패]: orderId={}, productId={}, quantity={}, error={}",
                         order.getOrderId(), detail.getProduct().getProductId(), detail.getQuantity(), e.getMessage());
                 throw e;
             } catch (Exception e) {

@@ -42,6 +42,9 @@ dependencies {
 	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	testRuntimeOnly 'com.h2database:h2' // H2 인메모리 DB 추가
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	implementation 'org.redisson:redisson-spring-boot-starter:3.52.0'
+	implementation 'io.micrometer:micrometer-registry-prometheus'
 }
 
 tasks.named('test') {

@@ -36,7 +36,7 @@ public class Payment extends BaseEntity {
     private String currency;
 
     @Column(columnDefinition = "TEXT")
-    private String customData;
+    private String ItemDetails;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -45,22 +45,22 @@ public class Payment extends BaseEntity {
     private String failReason;
 
     private Payment(Order order, String paymentId, String storeId, String orderName,
-                    Integer totalPayAmount, String currency, String customData) {
+                    Integer totalPayAmount, String currency, String ItemDetails) {
         this.order = order;
         this.paymentId = paymentId;
         this.storeId = storeId;
         this.orderName = orderName;
         this.totalPayAmount = totalPayAmount;
         this.currency = currency;
-        this.customData = customData;
+        this.ItemDetails = ItemDetails;
         this.status = PaymentStatus.PENDING;
     }
 
     public static Payment of(Order order, String paymentId, String storeId,
                              String orderName, Integer totalPayAmount,
-                             String currency, String customData) {
+                             String currency, String ItemDetails) {
         return new Payment(order, paymentId, storeId, orderName,
-                totalPayAmount, currency, customData);
+                totalPayAmount, currency, ItemDetails);
     }
 
     public void complete() {
@@ -82,13 +82,7 @@ public class Payment extends BaseEntity {
         }
     }
 
-    public void cancel(String cancelReason) {
-        if (this.status == PaymentStatus.COMPLETED || this.status == PaymentStatus.PENDING) {
-            this.status = PaymentStatus.CANCELLED;
-            this.failReason = cancelReason;
-            log.info("Payment ID '{}' 상태 변경: {} -> CANCELLED, 사유: {}", this.paymentId, this.status, cancelReason);
-        } else {
-            log.warn("Payment ID '{}' 상태 변경 시도(CANCELLED): 현재 상태 {}, 변경하지 않음", this.paymentId, this.status);
-        }
+    public void cancel() {
+        this.status = PaymentStatus.CANCELLED;
     }
 }

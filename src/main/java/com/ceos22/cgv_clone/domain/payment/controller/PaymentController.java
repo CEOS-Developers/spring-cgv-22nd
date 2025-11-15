@@ -24,7 +24,7 @@ public class PaymentController {
             @Valid @RequestBody PaymentCreateRequest request,
             @AuthenticationPrincipal Member member
     ) {
-        PaymentResponse payment = paymentService.createPayment(member, request);
+        PaymentResponse payment = paymentService.executePayment(member, request);
         return ApiResponse.success(SuccessCode.CREATE_SUCCESS, payment);
     }
 

@@ -1,5 +1,7 @@
 package com.ceos22.cgv_clone.domain.store.entity;
 
+import com.ceos22.cgv_clone.common.error.CustomException;
+import com.ceos22.cgv_clone.common.error.ErrorCode;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -37,9 +39,7 @@ public class StoreStock {
             throw new IllegalArgumentException("재고 감소량은 0보다 커야 합니다.");
         }
         if (this.stock < quantity) {
-            throw new IllegalStateException(
-                    String.format("재고가 부족합니다. 현재 재고: %d, 요청량: %d", this.stock, quantity)
-            );
+            throw new CustomException(ErrorCode.INSUFFICIENT_STOCK);
         }
         this.stock -= quantity;
     }

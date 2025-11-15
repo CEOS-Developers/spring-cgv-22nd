@@ -1070,3 +1070,4 @@ WHERE region = 'SEOUL'
     <img width="717" height="55" alt="Image" src="https://github.com/user-attachments/assets/a41180d9-3400-45a6-9365-979e055bf819" />
 
   지역이 SEOUL에 해당하는 1133개의 행을 6.9ms의 실행 시간을 통해 가져옴
+----

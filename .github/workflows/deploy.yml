@@ -96,12 +96,11 @@ jobs:
           script: |
             set -euo pipefail
             set -x
-              
+
             APP_DIR="/home/${{ secrets.SSH_USER }}/cgvclone" 
             sudo mkdir -p "$APP_DIR"
             cd "$APP_DIR"
-            
-            
+
             echo "${{ secrets.DOCKERHUB_TOKEN }}" | sudo docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
 
             set +x
@@ -115,22 +114,25 @@ jobs:
               echo "MYSQL_USER=${{ secrets.MYSQL_USER }}"
               echo "MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}"
 
-              echo "DB_URL=jdbc:mysql://db:3306/${{ secrets.MYSQL_DATABASE }}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&characterEncoding=UTF-8"
-              echo "DB_USERNAME=${{ secrets.MYSQL_USER }}"
-              echo "DB_PASSWORD=${{ secrets.MYSQL_PASSWORD }}"
+              echo "SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/${{ secrets.MYSQL_DATABASE }}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&characterEncoding=UTF-8"
+              echo "SPRING_DATASOURCE_USERNAME=${{ secrets.MYSQL_USER }}"
+              echo "SPRING_DATASOURCE_PASSWORD=${{ secrets.MYSQL_PASSWORD }}"
+
+              echo "SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=org.hibernate.dialect.MySQLDialect"
 
               echo "JWT_SECRET=${{ secrets.JWT_SECRET }}"
               echo "JWT_EXPIRATION_MS=${{ secrets.JWT_EXPIRATION_MS }}"
               echo "JWT_REFRESH_EXPIRATION_MS=${{ secrets.JWT_REFRESH_EXPIRATION_MS }}"
 
-              # echo "PAYMENT_API_SECRET=${{ secrets.PAYMENT_API_SECRET }}"
-              # echo "PAYMENT_STORE_ID=${{ secrets.PAYMENT_STORE_ID }}"
+              echo "TZ=Asia/Seoul"
             } > .env
             set -x
 
             sudo docker compose -f docker-compose.yml --env-file .env pull
-            sudo docker compose -f docker-compose.yml --env-file .env up -d
+
+            sudo docker compose -f docker-compose.yml --env-file .env up -d --force-recreate
             sudo docker compose -f docker-compose.yml ps
             sudo docker compose -f docker-compose.yml logs -n 100 web || true
 
             command -v shred >/dev/null 2>&1 && sudo shred -u .env || sudo rm -f .env
+

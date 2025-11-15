@@ -775,3 +775,184 @@ Caused by: org.hibernate.exception.JDBCConnectionException: Unable to acquire JD
 2. Pessimistic Lock에 의한 경합
 - 커넥션 풀이 부족한 시작점은 order 결제 트랜잭션에서 Pessimistic Lock 사용함에 있다고 판단함
 - 다수 요청이 동일/연관 리소스에 대해 락을 대기하는 동안 커넥션을 붙잡은 채 대기 → 풀 고갈 가속으로 결국 401 Unauthorized까지 발생
+
+---
+
+### Transaction
+- 여러 작업을 하나로 묶어 모두 성공하거나 모두 실패하도록 처리하는 단위
+
+### Transaction의 전파
+```java
+@Service
+public class OrderService {
+
+    @Transactional
+    public void placeOrder() {
+        // 주문 저장
+        orderRepository.save(...);
+
+        // 결제 요청 
+        paymentService.pay(...);
+    }
+}
+
+@Service
+public class PaymentService {
+
+    @Transactional
+    public void pay(...) {
+        // 결제 내역 저장
+        paymentRepository.save(...);
+    }
+}
+
+```
+하나의 트렌젝션 내에 다른 트렌젝션이 시작되는 형태로 `pay()` 메서드가 어떤 트렌젝션 흐름을 만들어야 할지를 결정해야함
+- 기존 트렌젝션 유지
+- 새로운 트렌젝션 생성
+- 아예 트렌젝션 없이 수행
+
+## Propagation(전파) 속성
+
+## 1. `REQUIRED` 
+- 이미 트렌젝션이 있으면 합류, 없으면 새로운 트렌젝션 시작
+- 기존 트렌젝션과 같이 묶여서 한 덩어리로 커밋/롤백 수행
+- default 값으로 별도의 설정이 없을 경우 `REQUIRED`로 트렌젝션이 시작됨
+```java
+@Transactional(propagation = Propagation.REQUIRED)
+public void placeOrder() { ... }
+
+@Transactional
+public void pay() { ... }
+```
+- `placeOrder()`에서 시작된 트렌젝션에 `pay()`도 같이 들어감
+
+# 2. `REQUIRES_NEW`
+- 기존 트렌젝션은 잠깐 보류하고 새로운 트렌젝션을 시작함
+- 내부 트렌젝션이 롤백되더라도 바깥 트렌젝션에는 영향을 주지 않게 하고 싶을 때 사용
+```java
+@Transactional
+public void placeOrder() {
+    orderRepository.save(...); // 트랜잭션 A
+
+    paymentService.pay(...);   // 트랜잭션 B (새로 시작)
+}
+
+@Transactional(propagation = Propagation.REQUIRES_NEW)
+public void pay(...) {
+    paymentRepository.save(...);
+}
+```
+
+
+# 3. `SUPPORTS`
+- 기존 트렌젝션이 있으면 합류, 없다면 트렌젝션 없이 실행
+- 트렌젝션이 필수적이지 않은 로직에 사용하는 경우가 있음
+```java
+@Transactional(propagation = Propagation.SUPPORTS)
+public List<Order> getOrders() { ... }
+```
+- 위처럼 조회 등의 로직에서는 `transaction`이 필수적이지 않으므로 사용하기도 함
+
+
+# 4. `MANDATORY`
+- 반드시 기존 트렌젝션 내에서만 실행되어야 할 때 사용
+- 즉, 외부 transaction이 없는 상황에서는 `IllegalTransactionStateException`를 발생시킴
+```java
+@Transactional(propagation = Propagation.MANDATORY)
+public void pay(...) { ... }
+```
+
+# 5. `NOT_SUPPORTED`
+- 트렌젝션이 있으면 잠시 중단시키고 트렌젝션 없이 실행하도록 함
+```java
+@Transactional
+public void placeOrder() {
+    orderRepository.save(...); // 트랜잭션 O
+
+    logService.writeLog(...);  // 여기서는 트랜잭션 X
+}
+
+@Transactional(propagation = Propagation.NOT_SUPPORTED)
+public void writeLog(...) {
+    // 로그는 트랜잭션 밖에서 기록 (롤백 영향 안 받게)
+}
+```
+- 로그 기록처럼, 롤백과 상관없이 남기고 싶은 작업에 사용
+- 단, 실제로는 비동기 로그 시스템을 사용하는 경우가 많다고 함
+
+# 6. `NEVER`
+- 트렌젝션 내에서 실행되지 않도록 설정
+```java
+@Transactional(propagation = Propagation.NEVER)
+public void doSomething() { ... }
+```
+
+# 7. 'NESTED'
+- 부모 트랜잭션 안에서 부분 트랜잭션처럼 동작
+- 내부 트렌젝션이 수행되는 시점에 savepoint를 생성하고 내부 트렌젝션이 롤백되어도 부모 트렌젝션은 유지될 수 있도록 함
+```java
+@Transactional
+public void placeOrder() {
+    orderRepository.save(...); // 부모 트랜잭션
+
+    try {
+        couponService.applyCoupon(...); // nested
+    } catch (Exception e) {
+        // 쿠폰 적용만 롤백, 나머지 주문은 진행
+    }
+}
+
+@Transactional(propagation = Propagation.NESTED)
+public void applyCoupon(...) {
+    couponRepository.save(...); // 여기서 예외 → 이 부분만 롤백
+}
+```
+---
+
+# 인덱스
+테이블의 특정 컬럼을 기준으로 만들어진 검색용 자료구조
+- 검색, 정렬, 조인 속도를 향상 시킬 수 있음
+- 인덱스 자체도 하나의 데이터이므로 추가적인 저장공간이 사용되고 인덱스 갱신 비용도 발생함
+
+# Clustered Index
+
+테이블 속 물리적 데이터 저장 순서가 인덱스 키 값 순서와 동일하게 정렬되어 있는 인덱스
+- 테이블당 하나만 존재 가능 (실제 데이터 순서와 일치해야하므로)
+- 실제 데이터 페이지가 인덱스 구조와 연관되므로 추가 인덱스 데이터를 보관하지 않아도 되어 공간 낭비가 적음
+
+# Non-Clustered Index
+실제 테이블 데이터와는 별도 공간에 저장되는 인덱스 (데이터를 가리키는 포인터가 별도로 저장)
+- 인덱스에는 키 값과 실제 데이터를 가리키느 포인터가 저장
+- 인덱스와 테이블 데이터의 순서를 독립적으로 유지 가능
+- 하나의 테이블에 여러개의 Non-Clustered Index 생성 가능
+- 인덱스가 테이블과 별도로 저자오디므로 추가 저장 공간이 필요
+- PK 이외의 Unique 제약이 걸린 column들에 대해서는 Non-Clustered Index가 생성됨
+
+# B-Tree Index (B-트리 인덱스)
+데이터베이스에서 가장 일반적으로 사용하는 트리 기반 인덱스 구조
+모든 리프 노드가 같은 레벨에 있는 균형 트리(Balanced Tree)
+
+- 검색, 삽입, 삭제 등의 연산이 항상 일정한 시간 복잡도(로그 시간) 안에 수행되도록 설계
+- 키 값들이 정렬된 상태로 유지되기 때문에 범위 검색, 정렬에 매우 유리
+- 데이터 삽입/삭제 시 트리의 균형을 자동으로 맞춤 → 동적인 데이터에도 잘 대응
+- 대부분의 Clustered / Non-Clustered 인덱스의 기본 구조가 B-Tree
+
+# Hash Index
+해시 테이블 기반으로 특정 키 값을 해시 함수로 하여 해시 코드로 변환하여 저장하는 인덱스
+- 등호 기반 조건에 매우 빠르게 응답 가능
+- 해시함수의 특성상 값이 조금만 달라도 완전히 다른 해시 값이 생성되어 부등호 및 범위 검색에는 부적합
+
+# Bitmap Index
+인덱스 키 값마다 비트맵(0과 1로 이루어진 배열)을 생성하여 각 비트가 해당 키 값이 존재하는지 여부를 나타내는 인덱스
+- 매우 적은 저장 공간으로 다수의 키 값을 표현 가능
+- 주로 낮은 카디널리티(중복 값이 많은 컬럼)에 적합
+- AND, OR 등의 비트 연산을 통해 복잡한 조건의 빠른 검색 가능
+- 삽입/삭제 시 비트맵 전체를 갱신해야 하므로 동적인 데이터에는 부적합
+
+# Composite Index
+여러 컬럼을 조합하여 만든 인덱스
+- 인덱스 내부에서는 정의된 column 순서대로 정렬
+- 여러 column을 동시에 검색하거나 조건으로 사용할 때 유용함
+- 인덱스 커버링 가능 (쿼리가 사용하는 column이 모두 compostie index에 포함될 경우 테이블 데이터를 보지 않고 인덱스 차원에서 결과 반환 가능)
+- 인덱스 크기가 커질 수 있고, 순서에 따라 활용도가 달라질 수 있음

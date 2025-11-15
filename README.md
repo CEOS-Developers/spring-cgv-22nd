@@ -256,3 +256,157 @@ CEOS 22기 백엔드 스터디 - CGV 클론 코딩 프로젝트
   - WARN: 비정상 동작 (복구 가능)
   - INFO: 비즈니스 흐름
   - DEBUG: 상세 내부 동작 (개발 전용)
+
+### 서비스 아키텍쳐
+<img width="799" height="663" alt="Group 427320323" src="https://github.com/user-attachments/assets/0d3e7017-e7b4-406c-98d7-8ebb8b3eb923" />
+
+
+## 7주차 미션
+### 1. 트랜잭션 전파 속성 조사해보기
+1) REQUIRED
+- 의미 : 트랜잭션 필요
+- 기존 트랜잭션 X : 새로 트랜잭션 생성
+- 기존 트랜잭션 O : 기존 트랜잭션 참여
+
+2) SUPPORTS
+- 의미 : 트랜잭션 있으면 지원
+- 기존 트랜잭션 X : 트랜잭션 없이 진행
+- 기존 트랜잭션 O : 기존 트랜잭션 참여
+
+3) MANDATORY
+- 의미 : 트랜잭션 의무
+- 기존 트랜잭션 X : IllegalTransactionStateException 예외 발생
+- 기존 트랜잭션 O : 기존 트랜잭션 참여
+
+4) REQUIRES_NEW
+- 의미 : 항상 새로운 트랜잭션 필요
+- 기존 트랜잭션 X : 새로운 트랜잭션 생성
+- 기존 트랜잭션 O : 기존 트랜잭션 보류시키고 새로운 트랜잭션 생성
+
+5) NOT_SUPPORTED
+- 의미 : 트랜잭션 지원하지 않음
+- 기존 트랜잭션 X : 트랜잭션 없이 진행
+- 기존 트랜잭션 O : 기존 트랜잭션 보류시키고 트랜잭션 없이 진행
+
+6) NEVER
+- 의미 : 트랜잭션 사용하지 않음
+- 기존 트랜잭션 X : 트랜잭션 없이 진행
+- 기존 트랜잭션 O : IllegalTransactionStateException 예외 발생
+
+7) NESTED
+- 의미 : 중첩 트랜잭션 생성
+- 기존 트랜잭션 X : 새로운 트랜잭션 생성
+- 기존 트랜잭션 O : 중첩 트랜잭션 생성
+
+### 2. 인덱스 자료구조
+
+### 1) B+Tree (Balanced Plus Tree)
+대부분의 관계형 데이터베이스(RDBMS)에서 사용하는 대표적인 인덱스 구조이다.
+- 데이터를 **정렬된 상태**로 유지하며, **검색, 삽입, 삭제가 빠르게 수행**된다.
+- 리프 노드(Leaf Node)들끼리 **Linked List 형태**로 연결되어 있어 범위 검색(`BETWEEN`, `ORDER BY`)에 유리하다.
+- 이진 탐색(Binary Search) 방식으로 동작하며, 평균 탐색 시간은 **O(log N)**이다.
+
+```sql
+CREATE INDEX idx_user_name ON users(name);
+```
+위 코드는 users 테이블의 name 컬럼에 인덱스를 생성하여 검색 성능을 향상시킨다.
+
+### 2) Hash Index (해시 인덱스)
+
+Hash Index는 **Key-Value 형태**로 저장되며, 특정 키에 대해 빠르게 값을 찾을 수 있는 인덱스 구조이다.
+
+- `=` 연산(정확한 값 일치 검색)에 최적화되어 있으며, 빠른 검색 속도를 제공한다.
+- 그러나 데이터가 **정렬되지 않기 때문에**, 부등호(`<`, `>`, `BETWEEN`) 연산이 불가능하다.
+
+<br><br>
+
+### 3. 인덱스 종류 :  클러스터드 인덱스 vs. 비클러스터드 인덱스
+
+- 인덱스 유형 비교
+
+| 인덱스 유형 | 설명 |
+|------------|--------------------------------------------------|
+| **클러스터드 인덱스 (Clustered Index)** | 데이터를 정렬된 상태로 저장하며, 테이블 자체가 인덱스 역할을 한다. |
+| **비클러스터드 인덱스 (Non-Clustered Index)** | 실제 데이터와 별도로 인덱스 테이블을 유지하며, 물리적 데이터 주소를 저장한다. |
+
+---
+
+**클러스터드 인덱스 특징**
+- 한 **테이블당 하나만 생성 가능**하다.
+- 테이블의 **데이터 자체가 정렬된 상태**로 저장된다.
+- **검색 속도가 빠르지만**, 삽입(INSERT)·삭제(DELETE) 시 **데이터 재정렬이 필요**하여 성능이 저하될 수 있다.
+
+---
+
+**비클러스터드 인덱스 특징**
+- 한 **테이블에 여러 개 생성 가능**하다.
+- 실제 데이터와 **별도로 인덱스 테이블을 유지**하며, **물리적 데이터 주소를 저장**한다.
+- 데이터 저장 순서와 무관하며, **검색 시 한 단계를 더 거쳐야 하므로 속도가 다소 느릴 수 있다.**
+
+---
+
+**클러스터드 인덱스 vs. 비클러스터드 인덱스 예제**
+
+```sql
+-- 클러스터드 인덱스 (기본키에 자동 생성됨)
+CREATE TABLE users (
+    id INT PRIMARY KEY,  -- 자동으로 클러스터드 인덱스 적용
+    name VARCHAR(50)
+);
+```
+
+```sql
+-- 비클러스터드 인덱스 생성
+CREATE INDEX idx_name ON users(name);
+```
+위 코드에서
+- id 컬럼은 PRIMARY KEY로 설정되어 자동으로 클러스터드 인덱스가 생성된다.
+- name 컬럼에는 비클러스터드 인덱스가 별도로 생성되어, 검색 성능을 향상시킬 수 있다.
+
+
+<br><br>
+
+### 4. 성능 최적화해보기
+1) 인덱스 추가로 성능 최적화
+   
+[Before]
+
+<img width="905" height="71" alt="image" src="https://github.com/user-attachments/assets/41fc1ffa-e129-4c62-9bd2-7b34b4342b59" />
+
+[Optimization]
+
+<img width="905" height="43" alt="image" src="https://github.com/user-attachments/assets/b01b8884-5065-4c03-8c0f-15bf84273ad0" />
+
+[After]
+
+<img width="905" height="69" alt="image" src="https://github.com/user-attachments/assets/63debba4-ac14-43ee-b38d-0fa1ae6692ce" />
+
+
+<br><br>
+
+
+2) INNER JOIN vs EXIST
+
+[Before]
+
+<img width="905" height="130" alt="image" src="https://github.com/user-attachments/assets/98967977-4bba-4352-99d7-b4c648990407" />
+
+
+[After]
+
+<img width="905" height="114" alt="image" src="https://github.com/user-attachments/assets/ad80f217-1e00-4b17-9df8-12e200a88e93" />
+
+
+<br><br>
+
+
+3) JOIN 순서 최적화
+   
+[Before]
+
+<img width="881" height="114" alt="image" src="https://github.com/user-attachments/assets/c2941cee-4128-491c-b369-c7c40b01693c" />
+
+
+[After]
+
+<img width="881" height="109" alt="image" src="https://github.com/user-attachments/assets/df355b37-8562-4bf9-be64-a20759466ffc" />

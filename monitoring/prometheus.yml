@@ -1,0 +1,8 @@
+global:
+  scrape_interval: 15s  # 15초마다 메트릭 수집
+
+scrape_configs:
+  - job_name: 'spring-boot-app'    # 모니터링할 작업 이름
+    metrics_path: '/actuator/prometheus' # 메트릭 수집 경로
+    static_configs:
+      - targets: ['server:9091']  # 수집 대상

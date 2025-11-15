@@ -1,5 +1,5 @@
 # Stage 1: jar 빌드하기
-FROM gradle:8.3-jdk17 AS builder
+FROM docker.io/gradle:8.3-jdk17 AS builder
 
 WORKDIR /app
 
@@ -13,7 +13,8 @@ RUN echo "Checking whether *.jar created..."
 RUN ls -l build/libs
 
 # Stage 2: app 실행
-FROM openjdk:17-jdk-slim
+FROM eclipse-temurin:17-jdk-jammy
+
 WORKDIR /app
 
 EXPOSE 8080

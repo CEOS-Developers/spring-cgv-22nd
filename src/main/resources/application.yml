@@ -35,3 +35,14 @@ api:
     token: ${PORTONE_TOKEN}
     storeId: ${PORTONE_STORE_ID}
     host: ${PORTONE_HOST}
+
+server:
+  port: 8080
+
+management:
+  server:
+    port: 9091  # Prometheus, Health Check 등 관리용 포트
+  endpoints:
+    web:
+      exposure:
+        include: "prometheus,health"

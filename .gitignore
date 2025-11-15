@@ -47,3 +47,4 @@ secrets.yml
 # application.yml
 *.log
 .env
+*.override.yml

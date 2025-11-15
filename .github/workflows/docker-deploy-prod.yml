@@ -34,10 +34,10 @@ jobs:
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1.2.0
         with:
-          host: ${{ secrets.AWS_EC2_HOST }}
+          host: ${{ secrets.ORACLE_INSTANCE_HOST }}
           username: ubuntu
-          key: ${{ secrets.AWS_EC2_SSH_PRIVATE_KEY }}
-          port: ${{ secrets.AWS_EC2_SSH_PORT }}
+          key: ${{ secrets.ORACLE_INSTANCE_SSH_PRIVATE_KEY }}
+          port: ${{ secrets.ORACLE_INSTANCE_SSH_PORT }}
           script: |
             cd ~
             
@@ -46,6 +46,7 @@ jobs:
             
             echo "Exporting new image tag..."
             export IMAGE_TAG=${{ needs.build.outputs.image_tag }}
+            echo $IMAGE_TAG
             
             # 환경변수 주입
             export JWT_SECRET=${{ secrets.JWT_SECRET }}
@@ -55,9 +56,34 @@ jobs:
             export PORTONE_STORE_ID=${{ secrets.PORTONE_STORE_ID }}
             export PORTONE_HOST=${{ secrets.PORTONE_HOST }}
             export HIBERNATE_DDL_AUTO=${{ secrets.HIBERNATE_DDL_AUTO }}
+            export DOCKER_REGISTRY_URL=${{ secrets.DOCKER_REGISTRY_URL }}
+            export DOCKER_IMAGE_NAME=${{ secrets.DOCKER_IMAGE_NAME }}
+            export DB_URL=${{ secrets.DB_URL }}
+            export DB_USERNAME=${{ secrets.DB_USERNAME }}
+            export DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+            
+            echo "Cloning into 'ba2slk/spring-cgv-22nd' ..."
+            git clone https://github.com/ba2slk/spring-cgv-22nd.git
+            
+            cd ./spring-cgv-22nd
+            pwd
+            
+            echo "Checkout to 'prod'"
+            git switch prod
+            git branch
+            
+            echo "Show docker-compose.yml"
+            ls -al | grep 'docker-compose.yml'
+            
+            echo "Terminating running containers..."
+            docker compose down
             
             echo "Running containers..."
             docker compose up -d
+            
+            echo "Removing cloned repository..."
+            cd ~
+            rm -rf ./spring-cgv-22nd
             
             echo "Pruning old images..."
             docker image prune -f

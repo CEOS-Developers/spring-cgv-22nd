@@ -759,73 +759,97 @@ services:
 ## Github Actions
 - 프로젝트 루트에 .github/workflows/NAME.yml 생성
 ```yml
-# docker-deploy-prod.yml
+name: CI/CD Pipeline with Docker - Push based
+on:
+  push:
+    branches:
+      - prod
 
-name: CI/CD Pipeline with Docker - Push based  
-on:  
-  push:  
-    branches:  
-      - prod  
-  
-jobs:  
-  build:  
-    name: Build and Push Docker Image  
-    runs-on: ubuntu-latest  
-    outputs:  
-      image_tag: ${{ github.sha }}  
-  
-    steps:  
-      - name: Checkout Source Code  
-        # uses: 기존 marketplace 상에 등록된 action 사용하기  
-        uses: actions/checkout@v4  
-  
-      - name: Authenticate with Docker Registry  
-        # run: 직접 shell 명령어 실행하기  
-        run: echo "${{ secrets.DOCKER_REGISTRY_PASSWORD }}" | docker login ${{ secrets.DOCKER_REGISTRY_URL }} --username ${{ secrets.DOCKER_REGISTRY_USER_NAME }} --password-stdin  
-      - name: Build Docker Image  
-        run: docker build -t ${{ secrets.DOCKER_REGISTRY_URL }}/${{ secrets.DOCKER_IMAGE_NAME }}:${{ github.sha }} .  
-  
-      - name: Push Docker Image  
-        run: docker push ${{ secrets.DOCKER_REGISTRY_URL }}/${{ secrets.DOCKER_IMAGE_NAME}}:${{ github.sha }}  
-  
-  deploy:  
-    name: Deploy to EC2 Server  
-    runs-on: ubuntu-latest  
-    needs: build  
-  
-    steps:  
-      - name: Deploy to EC2  
-        uses: appleboy/ssh-action@v1.2.0  
-        with:  
-          host: ${{ secrets.AWS_EC2_HOST }}  
-          username: ubuntu  
-          key: ${{ secrets.AWS_EC2_SSH_PRIVATE_KEY }}  
-          port: ${{ secrets.AWS_EC2_SSH_PORT }}  
-          script: |  
-            cd ~  
-              
-            echo "Pulling new image..."  
-            docker pull ${{ secrets.DOCKER_REGISTRY_URL }}/${{ secrets.DOCKER_IMAGE_NAME }}:${{ needs.build.outputs.image_tag }}  
-              
-            echo "Exporting new image tag..."  
-            export IMAGE_TAG=${{ needs.build.outputs.image_tag }}  
-              
-            # 환경변수 주입  
-            export JWT_SECRET=${{ secrets.JWT_SECRET }}  
-            export JWT_ACCESS_EXPIRATION=${{ secrets.JWT_ACCESS_EXPIRATION }}  
-            export JWT_REFRESH_EXPIRATION=${{ secrets.JWT_REFRESH_EXPIRATION }}  
-            export PORTONE_TOKEN=${{ secrets.PORTONE_TOKEN }}  
-            export PORTONE_STORE_ID=${{ secrets.PORTONE_STORE_ID }}  
-            export PORTONE_HOST=${{ secrets.PORTONE_HOST }}  
-            export HIBERNATE_DDL_AUTO=${{ secrets.HIBERNATE_DDL_AUTO }}  
-              
-            echo "Running containers..."  
-            docker compose up -d  
-              
-            echo "Pruning old images..."  
-            docker image prune -f  
-              
-            echo "Done. Check container status below."  
+jobs:
+  build:
+    name: Build and Push Docker Image
+    runs-on: ubuntu-latest
+    outputs:
+      image_tag: ${{ github.sha }}
+
+    steps:
+      - name: Checkout Source Code
+        # uses: 기존 marketplace 상에 등록된 action 사용하기
+        uses: actions/checkout@v4
+
+      - name: Authenticate with Docker Registry
+        # run: 직접 shell 명령어 실행하기
+        run: echo "${{ secrets.DOCKER_REGISTRY_PASSWORD }}" | docker login ${{ secrets.DOCKER_REGISTRY_URL }} --username ${{ secrets.DOCKER_REGISTRY_USER_NAME }} --password-stdin
+      - name: Build Docker Image
+        run: docker build -t ${{ secrets.DOCKER_REGISTRY_URL }}/${{ secrets.DOCKER_IMAGE_NAME }}:${{ github.sha }} .
+
+      - name: Push Docker Image
+        run: docker push ${{ secrets.DOCKER_REGISTRY_URL }}/${{ secrets.DOCKER_IMAGE_NAME}}:${{ github.sha }}
+
+  deploy:
+    name: Deploy to EC2 Server
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.ORACLE_INSTANCE_HOST }}
+          username: ubuntu
+          key: ${{ secrets.ORACLE_INSTANCE_SSH_PRIVATE_KEY }}
+          port: ${{ secrets.ORACLE_INSTANCE_SSH_PORT }}
+          script: |
+            cd ~
+            
+            echo "Pulling new image..."
+            docker pull ${{ secrets.DOCKER_REGISTRY_URL }}/${{ secrets.DOCKER_IMAGE_NAME }}:${{ needs.build.outputs.image_tag }}
+            
+            echo "Exporting new image tag..."
+            export IMAGE_TAG=${{ needs.build.outputs.image_tag }}
+            echo $IMAGE_TAG
+            
+            # 환경변수 주입
+            export JWT_SECRET=${{ secrets.JWT_SECRET }}
+            export JWT_ACCESS_EXPIRATION=${{ secrets.JWT_ACCESS_EXPIRATION }}
+            export JWT_REFRESH_EXPIRATION=${{ secrets.JWT_REFRESH_EXPIRATION }}
+            export PORTONE_TOKEN=${{ secrets.PORTONE_TOKEN }}
+            export PORTONE_STORE_ID=${{ secrets.PORTONE_STORE_ID }}
+            export PORTONE_HOST=${{ secrets.PORTONE_HOST }}
+            export HIBERNATE_DDL_AUTO=${{ secrets.HIBERNATE_DDL_AUTO }}
+            export DOCKER_REGISTRY_URL=${{ secrets.DOCKER_REGISTRY_URL }}
+            export DOCKER_IMAGE_NAME=${{ secrets.DOCKER_IMAGE_NAME }}
+            export DB_URL=${{ secrets.DB_URL }}
+            export DB_USERNAME=${{ secrets.DB_USERNAME }}
+            export DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+            
+            echo "Cloning into 'ba2slk/spring-cgv-22nd' ..."
+            git clone https://github.com/ba2slk/spring-cgv-22nd.git
+            
+            cd ./spring-cgv-22nd
+            pwd
+            
+            echo "Checkout to 'prod'"
+            git switch prod
+            git branch
+            
+            echo "Show docker-compose.yml"
+            ls -al | grep 'docker-compose.yml'
+            
+            echo "Terminating running containers..."
+            docker compose down
+            
+            echo "Running containers..."
+            docker compose up -d
+            
+            echo "Removing cloned repository..."
+            cd ~
+            rm -rf ./spring-cgv-22nd
+            
+            echo "Pruning old images..."
+            docker image prune -f
+            
+            echo "Done. Check container status below."
             docker ps
 ```
 - secret → Settings > secrets and variables → actions
@@ -850,3 +874,370 @@ jobs:
 ## 배포 흐름 도식화
 <img width="1668" height="444" alt="image" src="https://github.com/user-attachments/assets/78d5cf6c-b2a9-4ecb-bd38-9db47edbe296" />
 
+## 부하 테스트
+### 부하 제공 환경
+- 로컬 머신에서 `k6 run` 수행
+- 리모트 서버(`144.24.71.208:7777/api/movies`) 대상
+### 부하 테스트 시나리오
+- 총 테스트 시간: 5m
+- vus: 100
+- 세 개의 스테이지로 나누어 각 단계에서의 성능 확인 시도
+```javascript
+import http from "k6/http";  
+import { sleep } from "k6";  
+  
+export const options = {  
+    stages: [
+	    // (!) 1분 간 100명에 도달하도록 사용자를 서서히 증가  
+        { duration: "1m", target: 100 },
+          
+		// (2) 3분 동안 100 명의 사용자 유지
+        { duration: "3m", target: 100 },  
+  
+		// (3) 1분 동안 사용자를 서서히 감소
+        { duration: "1m", target: 0 },  
+    ],  
+};  
+  
+export default function () {  
+    http.get("http://144.24.71.208:7777/api/movies");  
+    sleep(1);  
+}
+```
+
+### 결과
+1. HTTP Performance overview
+<img width="2779" height="653" alt="image" src="https://github.com/user-attachments/assets/c979be35-2c11-44f6-950c-8e0431f831ad" />
+- 초반 19:57:30 ~ 19:58:10
+    - 요청 수가 증가함에 따라 응답 시간도 비례해서 증가
+- 중반 19:58:15 ~ 19:58:45
+    - Request Duration이 갑자기 크게 튀어오름
+    - 하지만 Request Rate는 계속 증가하기 때문에 서버가 요청을 즉시 처리하지 못하고 대기 큐가 쌓이는 상황으로 병목 지점으로 판단 가능
+- 후반 (19:59:00 이후)
+    - Request Duration이 다시 떨어지고 안정되는 모습
+
+1. VUs
+<img width="1375" height="644" alt="image" src="https://github.com/user-attachments/assets/f3928090-d88f-4ce0-80c0-392fc969d601" />
+- 19:58:10 ~ 19:58:30 사이에서 VU가 증가하지만 Request rate가 증가하지 않기 때문에 해당 지점에서 병목이 발생했다고 볼 수 있음.
+
+# 모니터링
+하지만 병목 원인이 애플리케이션인지 확실히 모르기 때문에 모니터링 지표를 함께 보기 위해 컨테이너를 추가로 구성함.
+## Grafana + Loki
+### docker-compose.yml
+```yml
+services:  
+  server:  
+    ports:  
+    - "7777:8080"  
+    image: "${DOCKER_REGISTRY_URL}/${DOCKER_IMAGE_NAME}:${IMAGE_TAG}"  
+    environment:  
+      - DB_URL=${DB_URL}  
+      - DB_USERNAME=${DB_USERNAME}  
+      - DB_PASSWORD=${DB_PASSWORD}  
+      - HIBERNATE_DDL_AUTO=${HIBERNATE_DDL_AUTO}  
+  
+      - JWT_SECRET=${JWT_SECRET}  
+      - JWT_ACCESS_EXPIRATION=${JWT_ACCESS_EXPIRATION}  
+      - JWT_REFRESH_EXPIRATION=${JWT_REFRESH_EXPIRATION}  
+  
+      - PORTONE_TOKEN=${PORTONE_TOKEN}  
+      - PORTONE_STORE_ID=${PORTONE_STORE_ID}  
+      - PORTONE_HOST=${PORTONE_HOST}  
+    networks:  
+      - monitoring-net  
+  
+  prometheus:  
+    image: prom/prometheus:latest  
+    container_name: prometheus-container  
+    ports:  
+      - "9090:9090"  
+    volumes:  
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml  
+    networks:  
+      - monitoring-net  
+  
+  grafana:  
+    image: grafana/grafana:latest  
+    container_name: grafana-container  
+    ports:  
+      - "3000:3000"  
+    volumes:  
+      - grafana-storage:/var/lib/grafana  
+    networks:  
+      - monitoring-net  
+    depends_on:  
+      - prometheus  
+  
+networks:  
+  monitoring-net:  
+    driver: bridge  
+  
+volumes:  
+  grafana-storage:
+```
+### 통신 흐름 도식화
+<img width="1401" height="983" alt="image" src="https://github.com/user-attachments/assets/308776e8-e5b9-4632-b192-086c96cebca9" />
+→ grafana 서버는 추후 ingress 설정을 통해 public에서 접근 불가능하도록 변경할 예정
+
+### 모니터링 지표: JVM
+
+1. CPU 사용량
+<img width="672" height="401" alt="image" src="https://github.com/user-attachments/assets/b6a10d1c-392f-4b6a-9667-f35b269cf9f8" />
+
+- CPU 사용량 **100 퍼센트** 달성
+
+2. Load
+<img width="682" height="401" alt="image" src="https://github.com/user-attachments/assets/ce292732-cd40-4998-bcf1-166f276605b3" />
+
+- 초록색: Load Average (=1분 평균 시스템 로드)
+- 노란색: CPU 코어 개수
+- 정상 기준: Load Average ≤ CPU 코어 수
+→ 하지만 위에서 병목 지점이라고 판단했던 시간 대에 **CPU가 감당할 수 있는 처리량의 약 6배 만큼의 작업이 동시에 실행되고 있음**을 알 수 있음.
+
+3. Memory
+<img width="682" height="430" alt="image" src="https://github.com/user-attachments/assets/d699cd12-2eb4-4ccb-b0db-871d806fcced" />
+
+- 메모리는 기본 1GB + 2GB 스왑 메모리 = 총 3GB 수준임을 고려하면 무리가 가지 않은 것 같음.
+
+
+### 결론
+OCI 인스턴스에서 병목이 발생하고 있다는 것을 성능 지표를 통해 한 번 더 확인할 수 있었다.
+
+---
+
+# 트랜잭션 전파 속성
+## 트랜잭션 전파란?
+하나의 트랜잭션이 *이미 진행 중*일 때, *새로 호출되는 메서드*가 **그 트랜잭션에 참여할지** 혹은 **새로운 트랜잭션을 시작할지** 결정하는 방식
+
+## 물리 vs 논리 트랜잭션
+### 물리 트랜잭션
+- 실제 DB 수준에서 발생하는 트랜잭션
+- Connection 객체를 통해 DB에 BEGIN, COMMIT, ROOLBACK이 수행되는 실제 트랜잭션 단위
+### 논리 트랜잭션
+- 스프링 내부에서 관리되는 논리적 트랜잭션 경계
+- 여러 서비스 메서들이 호출될 때, **하나의 물리 트랜잭션을 공유하더라도 각각의 논리 트랜잭션**으로 인식될 수 있음
+<img width="1280" height="449" alt="image" src="https://github.com/user-attachments/assets/55dc7ed6-f55c-4dcd-8fcc-03969d5ecc48" />
+### 원칙
+1. 모든 논리 트랜잭션 커밋 후 물리 트랜잭션 커밋 가능
+	- 논리 트랜잭션이 하나라도 롤백되면 물리 트랜잭션도 롤백
+2. 신규 트랜잭션만 물리 트랜잭션을 종료(커밋 or 롤백) 가능
+
+## 전파 속성
+- `@Transactional`에서 `propagation` 속성의 `Propagation.#####`
+- 총 7가지의 전파 속성이 존재함.
+- 어떤 메서드가 실행될 때 적용되는 규칙이라고 이해하면 쉬움
+### REQUIRED (기본)
+: 이미 트랜잭션이 **있으면 기존 트랜잭션**을 그대로 사용하고, **없으면 새로운 트랜잭션** 생성
+
+### REQUIRES_NEW
+: 현재 트랜잭션이 존재하더라도 **무조건 새로운 물리 트랜잭션**을 시작하고, 기존 트랜잭션은 **일시정지**
+- 외부 트랜잭션과 내부 트랜잭션을 완전히 분리하는 전파 속성
+- 기존 트랜잭션이 없음 → 새로운 트랜잭션 생성
+- 기존 트랜잭션이 있음 → 기존 트랜잭션을 대기시키고 새로운 물리 트랜잭션을 생성함.
+- 서로 다른 물리 트랜잭션을 가진다는 것은 *각각의 DB 커넥션이 사용된다*는 뜻
+	- 1개의 HTTP 요청에 대해 두 개의 커넥션 사용
+	- 외부 트랜잭션 (호출자)는 내부 트랜잭션이 끝날 때까지 대기하기 때문에 **커넥션 풀 고갈 가능성**이 있으므로 조심해서 사용해야 함.
+
+<img width="1280" height="387" alt="image" src="https://github.com/user-attachments/assets/cad207f6-b1d6-4ad3-9a24-3adaa0f31689" />
+### SUPPORTS
+- 트랜잭션이 있으면 지원함 (트랜잭션이 없어도 됨)
+- 기존 트랜잭션 없음 → 트랜잭션 없이 진행
+- 기존 트랜잭션 있음 → 해당 트랜잭션에 참여
+### MANDADORY
+- 트랜잭션이 의무임 = 반드시 필요함
+- 기존 트랜잭션 없음 → `IllegalTransactionStateException` 예외 발생
+- 기존 트랜잭션이있음 → 기존 트랜잭션에 참여함
+### NOT_SUPPORTED
+- 트랜잭션을 지원하지 않음 = 트랜잭션 없이 진행
+- 기존 트랜잭션 없음 → 트랜잭션 없이 진행
+- 기존 트랜잭션 있음 → 기존 트랜잭션을 대기시키고 트랜잭션 없이 진행
+### NEVER
+- 트랜잭션을 사용하지 않음 = 기존 트랜잭션도 허용 X
+- 기존 트랜잭션 없음 → 트랜잭션 없이 진행
+- 기존 트랜잭션 있음 → `IllegalTransactionStateException` 예외 발생
+### NESTED
+- 이미 진행 중인 트랜잭션에 중첨(자식) 트랜잭션 생성 ≠ `REQUIRES_NEW`
+- 기존 트랜잭션 없음 → 새로운 트랜잭션 새엇ㅇ
+- 기존 트랜잭션 있음 → 중첩 트랜잭션을 만듦.
+→ `NESTED`에 의한 중첩 트랜잭션은 부모 트랜잭션의 커밋과 롤백 영향을 받지만, 중첩 트랜잭션이 외부 트랜잭션에 영향을 주지는 않음. 즉, 중첩 트랜잭션이 롤백 되어도 외부 트랜잭션은 커밋이 가능하고, 외부 트랜잭션이 롤백되면 중첩 트랜잭션도 함께 롤백됨. NESTED는 JDBC의 savepoint 기능을 사용하는데, JPA에서 사용이 불가능하다.
+
+## 속성 요약
+<img width="1280" height="673" alt="image" src="https://github.com/user-attachments/assets/08a5f431-0615-42b7-b245-4141c1770f6f" />
+
+참고: https://mangkyu.tistory.com/269
+
+---
+
+# 인덱스 종류
+## 인덱스란?
+- 데이터 검색 속도 향상을 위해 테이블에 저장된 행을 식별가능하도록 저장한 DB 객체
+- 컬럼의 데이터를 정렬해서 별도의 공간에 데이터의 ROWID와 함께 저장
+- 인덱스가 없으면 DB 전체를 Full-Scan 해야 함.
+
+## B+ 트리
+삽입, 삭제, 탐색 모두 O(lg N)에 달성 가능하다.
+<img width="1280" height="657" alt="image" src="https://github.com/user-attachments/assets/2c62ecd8-913a-47c2-878c-407394b7323f" />
+
+## 인덱스 종류
+### 데이터 저장 방식 기준
+#### 클러스터형 인덱스
+테이블의 데이터 행 자체를 인덱스 키(index key) 순서대로 물리적 정렬 → 사전과 유사
+- *테이블당 1개만* 생성 가능 → 데이터를 물리적으로 한 가지 순서로만 정렬할 수 있기 때문
+- 대부분의 RDBMS에서 PK를 지정하면 해당 컬럼이 자동으로 클러스터형 인덱스가 됨
+- 데이터 자체가 인덱스이므로 키 값으로 조회 시 매우 빠름
+- 범위 검색 (`BETWEEN`, `<`, `>`)이 빠름
+- INSERT 시 데이터의 물리적 순서를 맞춰야 하기 때문에 순차적이지 않은 키 값이 들어오면 페이지 분할이 발생해서 성능 저하 가능성 → PK를 `AUTO_INCREMENT`로 정하는 것이 유리한 이유
+#### 비클러스터형 인덱스
+데이터 생의 물리적 순서는 그대로 두고, 별도의 공간에 인덱스 페이지 생성 → Appendix와 유사
+- *테이블당 여러 개* 생성 가능
+- 인덱스 페이지에는 index key와 데이터가 실제 저장된 위치를 가리키는 포인터가 들어 있음
+- 데이터 조회 시 인덱스를 검색해서 주소값을 얻고 즈 주소값으로 실제 데이터 테이블에 접근하므로 **총 2번의 I/O** 발생 가능
+- `INSERT`, `UPDATE` 시 데이터 전체를 재정렬할 필요 X → 별도의 인덱스 페이지만 수정하면 됨.
+
+### 알고리즘 기준
+
+#### B-Tree 인덱스 (Balanced Tree)
+데이터가 항상 정렬된 상태를 유지하며, *삽입, 삭제, 탐색에서 O(log N)*
+#### Hashing 인덱스
+키 값을 해시 함수에 넣어 나온 해시 값 (=주소)를 통해 데이터에 O(1)에 접근
+- B-Tree와 같이 정렬되어 있지 않으므로 범위 검색 또는 정렬에는 사용 불가
+#### Bitmap 인덱스
+각 값에 대해 비트로 매핑된 리스트를 가지며, 컬럼의 데이터 종류가 매우 적을 때 사용
+- 여러 개의 비트맵 인덱스를 조합할 때, 비트 연산 (AND, OR)를 통해 빠르게 결과 도출
+#### Full-Text 인덱스
+자연어 처리 방식을 사용해서 문서를 단어(Token) 단위로 쪼개어 인덱싱
+
+### 컬럼 구성 및 기능 기준
+#### 고유 인덱스
+인덱스 키 값 중복 허용 X
+- 데이터 무결성 보장
+- `UNIQUE` 제약 조건을 걸면 내부적으로 고유 인덱스 생성
+#### 복합 인덱스
+두 개 이상의 컬럼을 묶어서 하나의 인덱스로 만드는 것
+- *순서가 매우 중요*
+- `WHERE` 절에서 자주 함께 사용되는 컬럼들을 묶어 생성
+#### 커버링 인덱스
+쿼리를 실행할 때, 실제 데이터 테이블에 접근할 필요 없이 인덱스 정보만으로 쿼리의 모든 결과를 반환할 수 있는 상태
+
+----
+# 성능 최적화
+## 더미 데이터 생성
+MySQL Procedure를 활용해서 movie, inventory, item, theater에 대한 더미 데이터를 생성.
+<img width="689" height="760" alt="image" src="https://github.com/user-attachments/assets/449b521d-75a7-4228-aeba-bb969a3e0dd9" />
+
+### 프로시저 예시
+
+```sql
+CREATE PROCEDURE `generate_movies`(IN p_count INT)
+BEGIN
+    DECLARE i INT DEFAULT 1;
+
+    WHILE i <= p_count DO
+        INSERT INTO movie(
+            close_date, director, duration, image, rating,
+            release_date, star, status, title, total_view
+        ) VALUES (
+            DATE_ADD(CURDATE(), INTERVAL FLOOR(RAND()*200) DAY),
+            CONCAT('Director ', i),
+            FLOOR(RAND()*60)+80,
+            CONCAT('http://image.com/movie', i),
+            ELT(FLOOR(1 + RAND()*5),'ALL','FIFTEEN','NINETEEN','TWELVE','UNAVAILABLE'),
+            DATE_SUB(CURDATE(), INTERVAL FLOOR(RAND()*200) DAY),
+            ROUND(RAND()*5,1),
+            ELT(FLOOR(1 + RAND()*3),'COMING','END','ONSCREEN'),
+            CONCAT('Movie Title ', i),
+            FLOOR(RAND()*1000000)
+        );
+
+        SET i = i + 1;
+    END WHILE;
+END
+```
+
+## 시나리오 1. findByStatus
+
+<img width="955" height="156" alt="image" src="https://github.com/user-attachments/assets/2d7eaf28-46e5-4d4b-b58c-49d3046e0abb" />
+
+상영 중인 영화들 가운데 총 관람객 수가 많은 순으로 상위 10개를 요청하는 Pagination 요청을 가정
+
+### Before
+<img width="339" height="173" alt="image" src="https://github.com/user-attachments/assets/28af944b-3df2-4ff3-8799-4561649f778b" />
+```bash
+-> Limit: 10 row(s)  (cost=6069 rows=10) (actual time=0.139..0.142 rows=10 loops=1)
+    -> Filter: (movie.`status` = 'ONSCREEN')  (cost=6069 rows=54686) (actual time=0.138..0.141 rows=10 loops=1)
+        -> Index lookup on movie using idx_status_totalview (status='ONSCREEN') (reverse)  (cost=6069 rows=54686) (actual time=0.136..0.138 rows=10 loops=1)
+```
+- 11만 row에 대한 full scan
+	- 그 중 36085 건 필터링
+- 전체를 정렬한 뒤 상위 10개만 반환
+- actualtime = 23.9ms → 정렬에 거의 대부분의 시간 할애
+  
+### After
+
+<img width="846" height="48" alt="image" src="https://github.com/user-attachments/assets/a4a07192-68e7-488c-87cb-8ef1ce36bae5" />
+
+```bash
+-> Limit: 10 row(s)  (cost=6069 rows=10) (actual time=0.139..0.142 rows=10 loops=1)
+    -> Filter: (movie.`status` = 'ONSCREEN')  (cost=6069 rows=54686) (actual time=0.138..0.141 rows=10 loops=1)
+        -> Index lookup on movie using idx_status_totalview (status='ONSCREEN') (reverse)  (cost=6069 rows=54686) (actual time=0.136..0.138 rows=10 loops=1)
+```
+- (status, totalview)
+- status='ONSCREEN' 범위를 인덱스에서 먼저 필터링 → 54686개 중 상위 10개만 읽음
+- 약 0.3ms의 실행속도로 약 80배의 성능 향상
+  
+## 시나리오 2. 커버링 인덱스 (I/O) 최적화
+<img width="276" height="146" alt="image" src="https://github.com/user-attachments/assets/55b58112-30bc-4c41-b229-6c085e99b537" />
+특정 관람 등급을 기준으로 영화의 제목과 별점을 가져오는 쿼리가 빈번하게 발생하는 상황이라고 가정.
+
+### Before
+
+<img width="564" height="59" alt="image" src="https://github.com/user-attachments/assets/a1e4b366-13c0-4877-81db-67a8be46245e" />
+
+```bash
+-> Index lookup on movie using idx_rating (rating='ALL'), with index condition: (movie.rating = 'ALL')  (cost=4977 rows=43760) (actual time=0.113..33.5 rows=21997 loops=1)
+```
+rating에 대한 인덱스만 생성할 경우 `SELECT`가 요구하는 title, star는 없기 때문에 movie_id를 들고 직접 DB에 접근해서 해당 데이터를 가져와야 하는 상황
+
+### After
+
+```bash
+-> Filter: (movie.rating = 'ALL')  (cost=10474 rows=46548) (actual time=0.0337..8.87 rows=21997 loops=1)
+    -> Covering index lookup on movie using idx_rating_title_star (rating='ALL')  (cost=10474 rows=46548) (actual time=0.0322..7.48 rows=21997 loops=1)
+```
+이때 title, star와 함께 인덱싱 해주면 인덱스만 보고도 결과를 가져올 수 있기 때문에 rows 수는 같더라도 actual time이 0.11ms → 0.03으로 약 3배 줄어든 모습
+
+## 시나리오 3. 인덱스 순서를 따르지 않는 WHERE 절
+
+### Before
+
+<img width="753" height="187" alt="image" src="https://github.com/user-attachments/assets/f8cdd2d3-bd78-4725-9c19-4aba4a22510a" />
+
+theater_id, item_id에 대한 UNIQUE 제약 조건으로 인해 이미 최적화되어 있는 모습
+```bash
+-> Nested loop left join  (cost=21 rows=30) (actual time=0.121..0.151 rows=30 loops=1)
+    -> Index lookup on i using UKro47c36lcrcr7kt8iu0o6vkhy (theater_id=1)  (cost=10.5 rows=30) (actual time=0.101..0.105 rows=30 loops=1)
+    -> Single-row index lookup on item using PRIMARY (id=i.item_id)  (cost=0.253 rows=1) (actual time=0.00129..0.00131 rows=1 loops=30)
+```
+
+하지만, inventory에서 특정 item_id를 파는 모든 극장과 재고 수량을 조회하고자 한다면 UNIQUE 인덱스는 무용지물이 됨.
+
+<img width="747" height="166" alt="image" src="https://github.com/user-attachments/assets/66d2d1a0-1b51-4d41-8d72-3f810a9350db" />
+
+```bash
+-> Nested loop inner join  (cost=187 rows=267) (actual time=0.606..1.37 rows=267 loops=1)
+    -> Index lookup on i using FKrflym5lxj6xhmu4ok3ohmun5a (item_id=15)  (cost=93.5 rows=267) (actual time=0.581..1.1 rows=267 loops=1)
+    -> Single-row index lookup on t using PRIMARY (id=i.theater_id)  (cost=0.25 rows=1) (actual time=891e-6..910e-6 rows=1 loops=267)
+```
+
+### After
+
+<img width="916" height="60" alt="image" src="https://github.com/user-attachments/assets/7c54c8a0-7350-4a54-8c1f-0dbbad92c1f5" />
+
+```bash
+-> Nested loop inner join  (cost=187 rows=267) (actual time=0.432..0.801 rows=267 loops=1)
+    -> Index lookup on i using idx_inv_item_theater (item_id=15)  (cost=93.5 rows=267) (actual time=0.425..0.606 rows=267 loops=1)
+    -> Single-row index lookup on t using PRIMARY (id=i.theater_id)  (cost=0.25 rows=1) (actual time=617e-6..634e-6 rows=1 loops=267)
+```
+
+- 기존 (theater_id, item_id) 기준 인덱스 외에 추가로 (item_id, theater_id) 인덱스 생성
+- rows는 267로 동일한 반면 actual time은 0.6ms→ 0.2ms로 성능 3배 향상된 모습

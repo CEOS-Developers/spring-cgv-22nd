@@ -1,5 +1,6 @@
 package com.ceos22.cgv_clone.domain.theater.repository;
 
+import com.ceos22.cgv_clone.domain.theater.dto.SeatStatusDto;
 import com.ceos22.cgv_clone.domain.theater.entity.Seat;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -22,4 +23,22 @@ public interface SeatRepository extends JpaRepository<Seat, Long> {
 
     @Query("SELECT s FROM Seat s WHERE s.id IN :ids")
     List<Seat> findAllByIdWithLock(@Param("ids") List<Long> ids);
+
+    @Query("""
+        SELECT new com.ceos22.cgv_clone.domain.theater.dto.SeatStatusDto(
+            s.id,
+            s.rowNo,
+            s.columnNo,
+            (bs.id IS NOT NULL) 
+        )
+        FROM Seat s
+        LEFT JOIN BookingSeat bs 
+            ON s.id = bs.seat.id AND bs.screening.id = :screeningId
+        WHERE s.auditorium.id = :auditoriumId
+        ORDER BY s.rowNo ASC, s.columnNo ASC
+    """)
+    List<SeatStatusDto> findSeatStatusByAuditoriumAndScreening(
+            @Param("auditoriumId") Long auditoriumId,
+            @Param("screeningId") Long screeningId
+    );
 }

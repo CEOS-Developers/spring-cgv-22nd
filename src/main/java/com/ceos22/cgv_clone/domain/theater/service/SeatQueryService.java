@@ -29,18 +29,21 @@ public class SeatQueryService {
                 .orElseThrow(() -> new CustomException(ErrorCode.SCREENING_NOT_FOUND));
 
         Long auditoriumId = screening.getAuditorium().getId();
-        List<Seat> seats = seatRepository.findAllByAuditoriumIdSorted(auditoriumId);
+//        List<Seat> seats = seatRepository.findAllByAuditoriumIdSorted(auditoriumId);
+//
+//        Set<Long> reservedSeatIds = new HashSet<>(
+//                bookingSeatRepository.findByScreeningId(screeningId)
+//                        .stream().map(bs -> bs.getSeat().getId()).toList()
+//        );
+//
+//        return seats.stream()
+//                .map(s -> new SeatStatusDto(
+//                        s.getId(), s.getRowNo(), s.getColumnNo(),
+//                        reservedSeatIds.contains(s.getId())
+//                ))
+//                .toList();
 
-        Set<Long> reservedSeatIds = new HashSet<>(
-                bookingSeatRepository.findByScreeningId(screeningId)
-                        .stream().map(bs -> bs.getSeat().getId()).toList()
-        );
-
-        return seats.stream()
-                .map(s -> new SeatStatusDto(
-                        s.getId(), s.getRowNo(), s.getColumnNo(),
-                        reservedSeatIds.contains(s.getId())
-                ))
-                .toList();
+        // 단일 쿼리 호출로 변경
+        return seatRepository.findSeatStatusByAuditoriumAndScreening(auditoriumId, screeningId);
     }
 }

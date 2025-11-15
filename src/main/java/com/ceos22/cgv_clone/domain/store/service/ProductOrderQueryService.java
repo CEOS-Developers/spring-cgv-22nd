@@ -137,7 +137,7 @@ public class ProductOrderQueryService {
         ProductOrder order = productOrderRepository.findDetailsById(orderId)
                 .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
 
-        List<ProductOrderItem> items = productOrderItemRepository.findByProductOrderId(orderId);
+        List<ProductOrderItem> items = productOrderItemRepository.findByProductOrderIdWithProduct(orderId);
 
         return new ProductOrderDetailDto(
                 order.getId(),

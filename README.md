@@ -580,3 +580,330 @@ public class OptimisticLockStockFacade {
 3-2. Redisson
 - pub-sub 기반으로 Lock 구현 제공
 Thread 1 -- 락 해제 메세지 --> Channel -- 락 획득 시도 요청 메시지 --> Thread 2
+
+
+
+
+## 7주차    
+
+### 트랜잭션 전파 속성    
+
+#### *- 스프링에서 트랜잭션을 관리하는 방법*
+
+Spring의 @Transactional 어노테이션은 여러 트랜잭션을 묶어 하나의 트랜젝션 경계를 만들 수 있게 해준다.
+이때 트랜잭션을 어떻게 처리할 지에 대해 스프링이 제공하는 속성이 전파 속성 (Propagation)이다.    
+
+<img width="1280" height="449" alt="Image" src="https://github.com/user-attachments/assets/303b7260-bd4e-49cf-acf8-643c6cf90b00" />    
+스프링에서는 트랜잭션을 '물리 트랜잭션'과 '논리 트랜잭션'으로 나누어 처리한다.       
+
+- 물리 트랜잭션    
+  실제 데이터베이스에 적용되는 트랜잭션으로 커넥션을 통해 커밋/롤백하는 단위
+- 논리 트랜잭션
+  스프링이 처리하는 트랜잭션 영역을 구분하기 위해 만들어진 개념    
+
+[트랜잭션 원칙]
+1. 모든 논리 트랜잭션이 커밋되어야 물리 트랜잭션이 커밋된다
+2. 하나의 논리 트랜잭션이라도 롤백되면 물리 트랜잭션은 롤백된다
+
+
+#### *-트랜잭션 전파 속성*
+<img width="1027" height="544" alt="Image" src="https://github.com/user-attachments/assets/b8aa4feb-2af1-417a-aed5-99f86041484d" />
+
+1. REQUIRED    
+   -> Default 속성. 미리 시작된 트랜잭션이 있으면 참여하고 없으면 트랜잭션을 생성한다.
+      부모 메서드와 자식 메서드가 하나의 트랜잭션으로 묶여 동작한다. 하나의 트랜잭션으로 묶이기 때문에 부모나
+      자식에서 예외가 발생하면 전체 트랜잭션이 롤백된다.      
+
+2. SUPPORTS    
+   -> 이미 시작된 트랜잭션이 있으면 참여하고 없으면 트랜잭션 없이 진행한다. 트랜잭션이 없긴 하지만 해당 경계 안에서
+      Connection이나 Hibernate Session 등을 공유할 수 있다.       
+
+3. MANDATORY     
+   -> REQURIED와 비슷하며, 이미 시작된 트랜잭션이 있으면 참여한다. 하지만 트랜잭션이 없다면 생성하는 것이 아니라
+      예외를 발생시킨다. 혼자서 독립적으로 트랜잭션을 실행하면 안되는 경우에 사용한다.       
+
+4. REQUIRES_NEW     
+   -> 항상 새로운 트랜잭션을 시작한다. 이미 진행 중인 트랜잭션이 있다면, 트랜잭션을 보류시킨다.
+      부모 트랜잭션과 자식 메서드의 트랜잭션이 완전히 분리되어 동작한다. 자식 메서드의 트랜잭션이 완료되면
+      부모 트랜잭션이 다시 활성화된다. 부모와 자식 트랜잭션이 서로 독립적이므로 하나가 실패하더라도 다른 하나는
+      영향을 받지 않는다.        
+
+5. NOT_SUPPORTED
+   -> 트랜잭션을 사용하지 않게 한다. 이미 진행 중인 트랜잭션이 있으면 보류시킨다.     
+
+6. NEVER
+   -> 트랜잭션을 사용하지 않도록 강제한다. 이미 진행 중인 트랜잭션도 존재하면 안되며, 트랜잭션이 있다면 예외를 발생시킨다.
+
+7. NESTED
+   -> 이미 진행중인 트랜잭션이 있으면 중첩 트랜잭션을 시작한다. 중첩된 트랜재션은 먼저 시작된 부모 트랜잭션의
+      커밋과 롤백에는 영향을 받지만, 자신의 커밋과 롤백은 부모 트랜잭션에게 영향을 주지 않는다. 
+
+*7-1. 부모 트랜잭션의 롤백이 NESTED 속성을 가진 자식에게 전파될 때*
+``` java
+// AService
+@Transactional
+public void saveWithNestedParentException(Member aMember, Member bMember) {
+    memberRepository.save(aMember);
+    bService.saveWithNestedParentException(bMember);
+    throw new RuntimeException();
+}
+ 
+ 
+// BService
+@Transactional(propagation = Propagation.NESTED)
+public void saveWithNestedParentException(Member bMember) {
+    memberRepository.save(bMember);
+}
+ 
+ 
+// Test Code
+@Test
+@DisplayName("[NESTED] 부모 트랜잭션의 롤백이 자식에게 전파")
+public void saveWithNestedParentExceptionTest() {
+    Member aMember = new Member(1L);
+    Member bMember = new Member(2L);
+ 
+    assertThatThrownBy(() -> aService.saveWithNestedParentException(aMember, bMember))
+        .isInstanceOf(RuntimeException.class);
+ 
+    assertThat(memberRepository.findAll()).size().isEqualTo(0);
+}
+
+```  
+부모 트랜잭션에서 예외가 터지면 자식 트랜잭션도 함께 롤백된다.
+
+*7-2. NESTED 속성을 가진 자식 트랜잭션이 롤백될 때*
+
+``` java
+// AService
+@Transactional
+public void saveWithNestedChildException(Member aMember, Member bMember) {
+    memberRepository.save(aMember);
+    try {
+        bService.saveWithNestedChildException(bMember); // 중첩 트랜잭션
+    } catch (RuntimeException e) {
+        System.out.println("중첩 트랜잭션 롤백 처리: " + e.getMessage());
+    }
+}
+ 
+ 
+// BService
+@Transactional(propagation = Propagation.NESTED)
+public void saveWithNestedChildException(Member bMember) {
+    memberRepository.save(bMember);
+    throw new RuntimeException();
+}
+ 
+ 
+// Test Code
+@Test
+@DisplayName("[NESTED] 자식 트랜잭션의 롤백이 부모에게 전파되지 않음")
+public void saveWithNestedChildExceptionTest() {
+    Member aMember = new Member(1L);
+    Member bMember = new Member(2L);
+ 
+    aService.saveWithNestedChildException(aMember, bMember);
+ 
+    assertThat(memberRepository.findAll()).size().isEqualTo(1);
+}
+```  
+자식의 트랜잭션과는 무관하게 부모 트랜잭션에서 저장한 aMemer가 커밋된다.
+
+### 인덱스 종류     
+
+인덱스 타입은 크게 **Primary(클러스터) 인덱스**와 **Secondary(보조) 인덱스**로 나뉘어 진다.    
+클러스터 인덱스는 '영어 사전'처럼 처음부터 정렬이 되어 있는 것이고, 보조 인덱스는 '책 뒤의 찾아보기'와 같은 것이다.
+
+| 구분 | 클러스터 인덱스 (Clustered Index) | 보조 인덱스 (Secondary / Non-Clustered Index) |
+|------|------------------------------------|-----------------------------------------------|
+| **속도** | 빠르다 | 느리다 |
+| **사용 메모리** | 적다 | 많다 |
+| **인덱스 구조** | 인덱스가 주요 데이터 | 인덱스가 데이터 사본(Copy) |
+| **개수 제한** | 테이블당 1개 | 여러 개 가능(최대 ~250개) |
+| **리프 노드** | 리프 노드 자체가 데이터 | 리프 노드는 데이터 위치(포인터) 저장 |
+| **저장값** | 데이터 자체가 저장됨 | 값 + 데이터의 위치 포인터 |
+| **정렬 방식** | 인덱스 순서 = 물리적 저장 순서 | 인덱스 순서 ≠ 물리적 저장 순서 |
+
+
+#### 1. 클러스터 인덱스
+- 한 개의 테이블에 한 개씩만 만들 수 있다.
+- 특정 나열된 데이터들을 일정 기준으로 정렬해주는 인덱스이며, 해당 인덱스가 생성될 때 데이터 페이지 전체가
+다시 정렬된다.
+- MySQL에서는 Primary Key가 있다면 Primary Key를 클러스터 인덱스로 지정한다.
+  - Primary Key를 지정하지 않은 경우 -> UNIQUE하면서 NOT NULL인 컬럼을 클러스터 인덱스로 지정한다.
+  - UNIQUE로 지정한 컬럼도 없는 경우 -> 자동으로 유니크한 값을 가지도록 증가되는 컬럼(GET_CLUST_INDEX)를
+    내부적으로 생성 후 클러스터 인덱스로 지정한다.
+
+#### 2. 세컨더리 인덱스
+- 세컨더리 인덱스는 데이터 테이블과 별개로 정렬된 인덱스 페이지를 생성하고 관리한다. 비클러스터형 인덱스나
+  보조 인덱스라고 불린다.    
+<img width="1280" height="720" alt="Image" src="https://github.com/user-attachments/assets/dd2f684b-a2cf-4e82-a8d4-1e3b59ca8b82" />
+
+세컨더리 인덱스는 데이터에 접근하려면 **인덱스 페이지에서 데이터 페이지로 이동하여 실제 데이터 레코드를 가져오는
+과정이 추가** 된다.
+
+#### 3. 커버링 인덱스
+- 원하는 데이터를 인덱스에서만 추출할 수 있는 인덱스
+- 쿼리를 만드는 SELECT / WHERE / GROUP BY / ORDER BY 등에 활용되는 모든 컬럼이 인덱스여야 한다.
+
+
+참고: https://jay-ya.tistory.com/166    
+ex) 상품 테이블의 데이터 레코드 수가 대략 1700만 건이 존재하며, 이 테이블을 대상으로 특정 조건에 맞게
+페이지네이션 하는 경우     
+<img width="1280" height="449" alt="Image" src="https://github.com/user-attachments/assets/793623d2-f89b-44dd-8377-9cc67bba7367" />
+
+product_id(Primary Key)와 delivery 컬럼에 인덱스가 걸려 있는 상태
+
+```  mysql
+select * 
+from product 
+where delivery like '초고속 배송%' 
+limit 5000000, 10
+```  
+실행결과: 10 rows in set (1 in 18.28 sec)    
+
+커버링 인덱스 적용 시 >
+
+```  mysql
+select product_id, delivery 
+from product 
+where delivery like '초고속%' 
+limit 5000000, 10;
+```  
+실행결과: 10 rows in set (3.60 sec)   
+
+커버링 인덱스를 적용할 경우, 실 데이터에 액세스하는 시간이 없어지기 때문에 조회 쿼리에
+낭비되는 시간 없이 데이터를 완성할 수 있다.
+
+
+### 성능 최적화    
+
+- 인덱스 대상 컬럼 선정    
+    카디널리티가 높은 컬럼, 즉 중복도가 나증 컬럼을 우선적으로 인덱싱하는 것이 좋다.    
+    ex-1) 남 - 여 2가지 값만 존재하는 성별 컬럼의 경우, 중복도가 높으므로 카디널리티가 낮다.    
+    ex-2) 주민번호 컬럼은 중복도가 낮기 때문에 카디널리티가 높다.    
+
+
+1. 회원 가입 시 중복 아이디를 확인하는 경우    
+
+```  java
+@Entity
+@Table(
+name = "member",
+uniqueConstraints = @UniqueConstraint(name = "uk_member_login_id", columnNames = "login_id")
+)
+@Getter @NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class MemberEntity {
+
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "member_id")
+    private Long id;
+
+    // ...
+
+    private String loginId;
+
+    // ...
+}
+```  
+
+@UniqueConstraint로 Table에서 unique를 걸어주거나, @Column에서 unqiue=true를 걸어주면
+DB에 unique index가 생긴다.
+
+```  sql
+create table member
+(
+age       int                     not null,
+member_id bigint auto_increment
+primary key,
+login_id  varchar(30)             not null,
+name      varchar(50)             not null,
+password  varchar(255)            not null,
+gender    enum ('FEMALE', 'MALE') null,
+constraint uk_member_login_id
+unique (login_id)
+);
+```  
+
+*기존 회원 아이디 중복 여부 조회하던 로직*
+```  java
+public boolean getByLoginId(String loginId) {
+    Optional<MemberEntity> member = memberRepository.findByLoginId(loginId);
+    // ..
+}
+```
+이 경우 스프링 JPA는 아래와 같은 쿼리를 날린다
+``` sql
+select * 
+from 
+    member 
+where 
+    login_id = ?
+```
+
+
+*리팩토링*
+``` java
+public interface MemberRepository extends JpaRepository<MemberEntity, Long> {
+
+    boolean existsByLoginId(String loginId);
+}
+```
+
+``` java
+/** 회원 아이디 중복 여부 조회 */
+public boolean isDuplicateLoginId(String loginId) {
+    return memberRepository.existsByLoginId(loginId);
+}
+```
+
+스프링 JPARepository exist() 메서드는 첫 row만 찾으면 즉시
+종료되며, login_id에 unique index가 걸려있으므로 효율적으로 조회가 가능하다.
+``` sql
+select
+    1 as col_0_0_
+from
+    member
+where
+    login_id = ?
+limit 1;
+```
+
+
+2. 예매 시 조회가 많은 상영관에 대해서도 unique 컬럼 추가
+
+``` java
+@Entity @Table(name = "auditorium",
+uniqueConstraints = @UniqueConstraint(name="uk_cinema_name", columnNames = {"cinema_id","name"}))
+@Getter @NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class Auditorium {
+    // ...
+}
+```
+
+3. 예매 내역 조회 시, 한 달 내 예매 내역을 우선 조회할 수 있도록 member_id, reserved_at 컬럼 인덱싱
+
+``` java
+@Entity
+@Table(
+name = "reservation",
+indexes = {
+@Index(name = "idx_member_reserved_at", columnList = "member_id, reserved_at")
+}
+)
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class Reservation {
+    // ...
+}
+```
+조회 쿼리 형태
+``` sql
+select *
+from 
+    reservation
+where 
+    member_id = ?
+        and reserved_at >= ?
+order by reserved_at desc;
+```

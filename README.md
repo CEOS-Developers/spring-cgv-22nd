@@ -22,5 +22,5 @@ CEOS 22기 백엔드 스터디 - CGV 클론 코딩 프로젝트
   - [✨ wk6: 부하테스트 ](https://github.com/yooniicode/spring-cgv-22nd/wiki/wk6-:-%EB%B6%80%ED%95%98%ED%85%8C%EC%8A%A4%ED%8A%B8)
 
 - wk7
-  - [✨ wk7: 트랜잭션 전파 속성과 인덱스 종류 ](https://github.com/yooniicode/spring-cgv-22nd/wiki/wk7-:-%ED%8A%B8%EB%9E%9C%EC%9E%AD%EC%85%98-%EC%A0%84%ED%8C%8C-%EC%86%8D%EC%84%B1%EA%B3%BC-%EC%9D%B8%EB%8D%B1%EC%8A%A4-%EC%A2%85%EB%A5%98)
+  - [🧑‍🚀 wk7: 트랜잭션 전파 속성과 인덱스 종류 ](https://github.com/yooniicode/spring-cgv-22nd/wiki/wk7-:-%ED%8A%B8%EB%9E%9C%EC%9E%AD%EC%85%98-%EC%A0%84%ED%8C%8C-%EC%86%8D%EC%84%B1%EA%B3%BC-%EC%9D%B8%EB%8D%B1%EC%8A%A4-%EC%A2%85%EB%A5%98)
   - [🚀 wk7: 쿼리 성능 최적화 ](https://github.com/yooniicode/spring-cgv-22nd/wiki/wk7-:-%EC%84%B1%EB%8A%A5-%EC%B5%9C%EC%A0%81%ED%99%94)

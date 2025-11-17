@@ -345,7 +345,5 @@ WHERE status = 1 AND genre = 3;
 ```java
 -> Covering index lookup on movie using covering_idx (status=1, genre=3)  (cost=182 rows=811) (actual time=0.0362..0.214 rows=811 loops=1)\n'
 ```
-   
-6. Deploy to Production (프로덕션 배포)
-   
-7. Monitor (모니터링)
+---
+

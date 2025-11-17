@@ -12,7 +12,7 @@
 - NEVER
 - NESTED
 
-![image.png](attachment:c2f0b822-2c0e-4b20-857a-1324e67944ff:image.png)
+<img width="1141" height="593" alt="image" src="https://github.com/user-attachments/assets/3513a857-73bc-4d2d-b099-c49596ccd2c9" />
 
 개인적으로 둘의 차이를 정리해보고 싶어 표로 정리했다.
 

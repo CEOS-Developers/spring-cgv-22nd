@@ -63,7 +63,7 @@ ON movie (age_rating, movie_id, genre);
 
 인덱스 사용 전 후 비교
 
-![image.png](attachment:f2fe2ebd-d508-4d26-ad10-6028d71b67b6:image.png)
+<img width="951" height="79" alt="스크린샷 2025-11-15 오전 2 42 53" src="https://github.com/user-attachments/assets/fec669c8-50e8-4622-9a90-479d907e786a" />
 
 실행 전에는 Durationn이 0.00079sec, fetch가 0.000016 sec이었다.
 
@@ -75,7 +75,7 @@ ON movie (age_rating, movie_id, genre);
 
 그렇다면 인덱스는 데이터가 수천~수만 건일 때 효율적이라는 걸 확인
 
-![image.png](attachment:be16d42e-4a69-48aa-8e92-e66f7cfda108:image.png)
+<img width="1115" height="602" alt="스크린샷 2025-11-15 오전 2 39 56" src="https://github.com/user-attachments/assets/ef92d258-759d-474c-8f39-85dc2b87c30e" />
 
 실제로 데이터를 1200건 넣었고, 데이터가 많을 때는 인덱스가 효과적이라는 사실을 알 수 있었다
 
@@ -85,11 +85,11 @@ ON movie (age_rating, movie_id, genre);
 select movie_id, genre from movie where age_rating = 'ALL' GROUP BY movie_id, genre;
 ```
 
-![image.png](attachment:df54f3b9-8185-425c-ad84-4e21b488e8aa:image.png)
+<img width="802" height="242" alt="image" src="https://github.com/user-attachments/assets/a800c507-2fb9-4da5-b36f-53f48a00bb5c" />
 
 explain으로 확인한 결과 커버링 인덱스 사용하는 거 확인
 
-![image.png](attachment:96ebb339-c0da-4e71-bde9-c85f322879cf:image.png)
+<img width="642" height="58" alt="image" src="https://github.com/user-attachments/assets/19f88adc-6fae-4dd5-8807-b48991061eed" />
 
 duration이 0.0010 → 0.00089, fetch가 0.000015 → 0.000014로 줄어든 걸 확인할 수 있었다.
 
@@ -119,6 +119,10 @@ CREATE INDEX idx_schedule_movie_theater_start
 ON schedule (movie_id, theater_id, start_time);
 ```
 
-![image.png](attachment:f9bb6e9a-7421-4716-a6c5-d5ce0ede626a:image.png)
+<img width="998" height="99" alt="image" src="https://github.com/user-attachments/assets/f35fb97b-3cbf-476d-bc3d-121e5ead547e" />
 
-duration은 0.0020 → 0.0012, fetch는 0.000016 → 0.000012로 줄어든 걸 확인할 수 있다
+
+<img width="1023" height="72" alt="image" src="https://github.com/user-attachments/assets/b8d7ac6f-7bed-4215-9a55-860258446fee" />
+
+duration은 0.0020 → 0.0012, fetch는 0.000016 → 0.000012로 줄어든 걸 확인할 수 있다!
+
